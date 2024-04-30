@@ -14,13 +14,13 @@ cm = 1/2.54  # centimeters in inches
 
 # read data
 #-------------------------------------------------------------------
-data = np.load("/home/ole/Desktop/Mooring_Analysis/energy_levels/data/Thorpe_result.npz", allow_pickle=True)
+data = np.load("../interim_results/interim_data/Thorpe/Thorpe_result.npz", allow_pickle=True)
 mab = data["mab"]
 
-energy_levels = pd.read_csv("/home/ole/Desktop/Mooring_Analysis/energy_levels/wave_energy_result.csv")
+energy_levels = pd.read_csv("../interim_results/interim_data/IDEMIX/wave_energy_result.csv")
 
-eps_df = pd.read_pickle("/home/ole/Desktop/Mooring_Analysis/energy_levels/data/Thorpe_eps_df.pkl")
-T_df = pd.read_pickle("/home/ole/Desktop/Mooring_Analysis/energy_levels/data/Thorpe_T_df.pkl")
+eps_df = pd.read_pickle("../interim_results/interim_data/Thorpe/Thorpe_eps_df.pkl")
+T_df = pd.read_pickle("../interim_results/interim_data/Thorpe/Thorpe_T_df.pkl")
 
 #TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TODO#
 eps_df = eps_df*2.694 #Correction from Rw =3 to Rw = 7 of the strain-only parametrization
@@ -111,6 +111,7 @@ ax.contour(
     linewidths = 3,
 )
 
+"""
 ax.scatter(
     energy_levels["lon"],
     energy_levels["mab"]+5,
@@ -122,7 +123,7 @@ ax.scatter(
     s = 300,
     zorder = 10
 )
-
+"""
 
 ax.scatter(
     energy_levels["lon"],
@@ -131,7 +132,7 @@ ax.scatter(
     cmap = cmap,
     norm = mcolors.LogNorm(vmin=1e-10, vmax=1e-6), #TODO
     edgecolor="black",
-    marker=MarkerStyle("o", fillstyle="right"),
+    marker=MarkerStyle("o"),
     s = 300,
     zorder = 10
 )
@@ -141,7 +142,7 @@ ax.set_ylabel("Meters above bottom")
 ax.set_xlabel("Longitude (°)")
 #ax[0].set_title(r"Dissipation rate $\varepsilon$ across the slope")
 
-
+"""
 ax.scatter(
     energy_levels["lon"],
     energy_levels["mab"]+5,
@@ -153,6 +154,7 @@ ax.scatter(
     zorder = -10,
     label = "$\\varepsilon_{\\mathrm{IGW}}$",
 )
+"""
 
 ax.scatter(
     energy_levels["lon"],
@@ -160,10 +162,10 @@ ax.scatter(
     #c=energy_levels["eps"],
     color = "tab:gray",
     edgecolor="black",
-    marker=MarkerStyle("o", fillstyle="right"),
+    marker=MarkerStyle("o"),
     s = 200,
     zorder = -10,    
-    label = "$\\varepsilon_{\\mathrm{IGW + tides}}$",
+    label = "$\\varepsilon_{\\mathrm{IGW}}$",
 )
 
 ax.scatter(
@@ -184,8 +186,8 @@ ax.annotate('gravity current\nboundary', xy=(-48.8, 130), xytext=(-48.5, 270), #
 
             
 fig.tight_layout()
-fig.savefig("./eps_transect.svg", bbox_inches = "tight")
-fig.savefig("./eps_transect.png", dpi = 400, bbox_inches = "tight")
+#fig.savefig("./eps_transect.svg", bbox_inches = "tight")
+#fig.savefig("./eps_transect.png", dpi = 400, bbox_inches = "tight")
 plt.show()
 
 

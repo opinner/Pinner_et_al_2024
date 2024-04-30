@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+
+
 import numpy as np
 import scipy.io as sio
 import datetime
@@ -21,14 +23,15 @@ import warnings
 import pandas as pd
 import gsw
 #warnings.filterwarnings("ignore")  # suppress some warnings about future code changes
+import matplotlib.dates as mdates
 
-
+import locale
+locale.setlocale(locale.LC_ALL, 'en_US.utf8')
 
 ONE_COLUMN_WIDTH = 8.3
 TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1/2.54  # centimeters in inches
-
 
 # load all 7 moorings as dataframes
 list_of_moorings = helper.IO.load_pickle(name="../data/mooring/list_of_moorings.pkl")
@@ -38,193 +41,10 @@ N_table = pd.read_pickle("../data/CTD/N_values.pkl")
 data = np.load("../data/mooring/max_depth_dict.npz", allow_pickle = True)
 max_depth_dict = data["max_depth_dict"].item()
 
-# Get CTD Data
-columns = ['Event', 'Date/Time', 'Latitude', 'Longitude',
-       'Depth water [m]', 'Press [dbar]', 'Temp [°C]', 'Sal', 'Expedition']
-CTDs = pd.DataFrame(columns=columns)
-
-#definition of box around the transect 
-m = (63.21 - 64.22)/(53.8 - 47)
-b = 63.21 - m * 53.8
-shift = 0.12
-
-def get_PS129_CTD_data():
-    #get location of CTD files from the LADCP data files
-    LADCP_DIRECTORY = f"/media/sf_VM_Folder/PS129_Plots/ladcp_profiles/"
-
-    ladcp_paths = sorted(helper.IO.get_filepaths_from_directory(LADCP_DIRECTORY, inclusive = (".mat",)))
-
-    #all CTD cast can be identified by a number
-    ladcp_cast_numbers = [path.split('/')[-1][7:-4] for path in ladcp_paths]
-
-    #create list of all CTD cast locations
-    ctd_locations = []
-    ctd_timestamps = []
-    for path in ladcp_paths:
-        data_struct = sio.loadmat(path) 
-        data = data_struct["dr"][0][0]
-        lat = np.round(np.squeeze(data["lat"]),3)
-        lon = np.round(np.squeeze(data["lon"]),3)
-        ctd_locations.append(Location(lat = lat, lon = lon))
-        time_stamp = datetime.datetime(*map(int, np.squeeze(data["date"]))) #convert list of values to datetime object
-        ctd_timestamps.append(time_stamp)
-        
-    # Set up conversion from ID number to cast name    
-    def load_stations(path):
-        transect_names, transect_numbers = np.loadtxt(path, dtype = (str), delimiter = "\t", unpack = True)
-        translate = dict(zip(transect_names, transect_numbers))
-        #print(translate)
-        return translate
-    name_to_number_dict = load_stations("/media/sf_VM_Folder/PS129_Plots/conversion.txt")
-    number_to_name_dict = {int(v): k for k, v in name_to_number_dict.items()}    
-
-    #create as many CTDCast objects as casts itself
-    list_of_PS129_casts= [CTDCast() for _ in ladcp_cast_numbers]
-
-    # for every cast object set a location and a name
-    for i,cast in enumerate(list_of_PS129_casts):
-        cast_number = ladcp_cast_numbers[i]
-        cast_name = number_to_name_dict[int(cast_number)]
-        cast.name = cast_name
-        cast.location = ctd_locations[i]
-        cast.date = ctd_timestamps[i]
-
-    column_names = ['Event', "Latitude", "Longitude", "Press [dbar]", "Sal", "Temp [°C]", "Absolute Salinity", "Conservative Temperature", "Date/Time", "Depth water [m]", "Expedition"]
-    data_dict = {name:[] for name in column_names}
-
-    for cast in list_of_PS129_casts:
-        #load actual data to that Cast name
-        try:   
-            path = f"/media/sf_VM_Folder/PS129_Plots/ctd_profiles/dps129_{cast.name}.cnv"
-        
-            #SP = Practical Salinity [PSU]
-            #Temperature [ITS-90, °C]
-
-            #add the cast data to the data dictionary
-            pressure,in_situ_temperature,practical_salinity = np.genfromtxt(path, skip_header = 322, usecols = (0,1,5), unpack = True)
-            data_dict["Event"].extend([f"PS129_{cast.name}"] * len(pressure))
-            data_dict["Latitude"].extend([cast.location.lat] * len(pressure))
-            data_dict["Longitude"].extend([cast.location.lon] * len(pressure))
-            data_dict["Press [dbar]"].extend(pressure)
-            data_dict["Temp [°C]"].extend(in_situ_temperature)
-            data_dict["Sal"].extend(practical_salinity)
-            data_dict["Date/Time"].extend([cast.date] * len(pressure))
-            data_dict["Expedition"].extend(["PS129"] * len(pressure))
-            
-            #add new attributes
-            SA = gsw.SA_from_SP(SP = practical_salinity, p = pressure, lon = cast.location.lon, lat = cast.location.lat)
-            data_dict["Absolute Salinity"].extend(SA)
-            data_dict["Conservative Temperature"].extend(gsw.CT_from_t(SA = SA, t = in_situ_temperature, p = pressure))
-            data_dict["Depth water [m]"].extend(np.abs(gsw.z_from_p(p = pressure, lat = cast.location.lat)))
-        
-        except ValueError as e:
-            print("Error at ",cast.name, cast.location)
-            print(e)
-            continue
-        #print(cast.name)     
-    #print(data_dict)
-    #for (k,v) in data_dict.items():
-    #    print(k,len(v))
-    return pd.DataFrame(data = data_dict)
-
-PS129_CTDs = get_PS129_CTD_data()
-CTDs = CTDs.merge(PS129_CTDs, on = columns, how = "outer")
-#Drop all rows that are not even close to the moorings
-CTDs.drop(CTDs[CTDs.Latitude < -64.5].index, inplace = True)
-CTDs.drop(CTDs[CTDs.Latitude > -63].index, inplace = True)
-CTDs.drop(CTDs[CTDs.Longitude < -54].index, inplace = True)
-CTDs.drop(CTDs[CTDs.Longitude > -47].index, inplace = True)
-
-CTDs.drop(CTDs[
-    m*CTDs.Longitude-b+shift < CTDs.Latitude
-].index, inplace = True)
-
-CTDs.drop(CTDs[
-    m*CTDs.Longitude-b-shift > CTDs.Latitude 
-].index, inplace = True)
-
-CTDs.reset_index(inplace = True, drop=True)
-
-def find_line_number(filename, target_string):
-    with open(filename, 'r') as file:
-        for line_number, line in enumerate(file):
-            if line.startswith(target_string):
-                return line_number
-    return None
-
-data_paths = helper.IO.get_filepaths_from_directory(directory = "/media/sf_VM_Folder/data/CTD", inclusive = ".tab", exclusive = ())
-#for p in data_paths: print(p)
-
-for i, path in enumerate(data_paths):
-    target_string = "Event\tDate/Time\tLatitude\tLongitude\tElevation [m]"
-    skiprows = find_line_number(path, target_string)
-    if skiprows == None:
-        target_string = "Event	Type	Date/Time	Longitude"
-        skiprows = find_line_number(path, target_string)
-
-    data = pd.read_csv(path, delimiter = "\t", skiprows= skiprows)
-    
-    data = data[data.columns.intersection(columns)]
-    
-    #Drop all rows that are not even close to the moorings
-    data.drop(data[data.Latitude < -64.5].index, inplace = True)
-    data.drop(data[data.Latitude > -63].index, inplace = True)
-    data.drop(data[data.Longitude < -54].index, inplace = True)
-    data.drop(data[data.Longitude > -47].index, inplace = True)
-
-    data.drop(data[
-        m*data.Longitude-b+shift < data.Latitude
-    ].index, inplace = True)
-    
-    data.drop(data[
-        m*data.Longitude-b-shift > data.Latitude 
-    ].index, inplace = True)
-            
-    data.reset_index(inplace = True, drop=True)
-    
-    data['Date/Time'] =  pd.to_datetime(data['Date/Time'])#, format='%d%b%Y:%H:%M:%S.%f')
-    data['Event'] = data['Event'].astype('category')
-    
-    try:
-        if data['Event'].iloc[0][4] != "/": 
-            current_expedition = data['Event'].iloc[0][0:5]
-        else:
-            current_expedition = data['Event'].iloc[0][0:4]
-        print(current_expedition, path)
-        data['Expedition'] = current_expedition
-        CTDs = CTDs.merge(data, on = columns, how = "outer")  
-        assert not data.empty
-    
-    except IndexError as e:
-        print(f"Error loading {path}")
-        assert data.empty
-        continue
-
-        
-CTDs['Event'] = CTDs['Event'].astype('category')    
-CTDs['Expedition'] = CTDs['Expedition'].astype('category')  
-
-CTDs_grouped = CTDs.groupby("Event")
-events = CTDs_grouped.groups.keys()
-
-
-# # Show Overview
-
-# In[12]:
-
-
-CTDs_grouped = CTDs.groupby("Event")
-events = CTDs_grouped.groups.keys()
-
-
-
 # Select Example Mooring
 mooring = list_of_moorings[1]
-print(f"{mooring.location = }, {mooring.time_delta = }")
-
 measurement_depth  =  "1513"
-
-import matplotlib.dates as mdates
+print(f"{mooring.location = }, {mooring.time_delta = }")
 
 cv = mooring[str(measurement_depth)].to_numpy()
 time = mooring["time"].to_numpy()
@@ -423,8 +243,8 @@ print(
 
 # Put everything together in a complicated figure
 
-#fig, ax = plt.subplots(nrows = 2, figsize=(TWO_COLUMN_WIDTH*cm, 0.8*TWO_COLUMN_WIDTH*cm), height_ratios = (1,2))
-fig, ax = plt.subplots(2, figsize = (8,6), height_ratios = (1,2))
+fig, ax = plt.subplots(nrows = 2, figsize=(TWO_COLUMN_WIDTH*cm, 0.8*TWO_COLUMN_WIDTH*cm), height_ratios = (1,2))
+#fig, ax = plt.subplots(2, figsize = (8,6), height_ratios = (1,2))
 
 
 cv = mooring[str(1513)].to_numpy()
