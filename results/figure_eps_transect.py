@@ -12,50 +12,55 @@ TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1/2.54  # centimeters in inches
 
-# read data
 #-------------------------------------------------------------------
-data = np.load("../interim_results/interim_data/Thorpe/Thorpe_result.npz", allow_pickle=True)
-mab = data["mab"]
-
-energy_levels = pd.read_csv("../interim_results/interim_data/IDEMIX/wave_energy_result.csv")
-
-eps_df = pd.read_pickle("../interim_results/interim_data/Thorpe/Thorpe_eps_df.pkl")
-T_df = pd.read_pickle("../interim_results/interim_data/Thorpe/Thorpe_T_df.pkl")
-
-#TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TODO#
-eps_df = eps_df*2.694 #Correction from Rw =3 to Rw = 7 of the strain-only parametrization
-#TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TODO#
+# read thorpe results data
+thorpe_eps_df = pd.read_pickle("../scripts/thorpe_scales/method_data/Thorpe_eps_df_with_mab.pkl")
+thorpe_mab = thorpe_eps_df.index
+thorpe_T_df = pd.read_pickle("../scripts/thorpe_scales/method_data/Thorpe_T_df_with_mab.pkl")
 
 # add background dissipation, but only where there is temperature data
 BACKGROUND_DISSIPATION = 1e-10 #value taken from Hirano et al 2015
-eps_df.fillna(value = BACKGROUND_DISSIPATION, inplace = True)
-eps_df.where(cond = ~T_df.isna(), other = np.nan, inplace = True)
+thorpe_eps_df.fillna(value = BACKGROUND_DISSIPATION, inplace = True)
+thorpe_eps_df.where(cond = ~thorpe_T_df.isna(), other = np.nan, inplace = True)
 
-lons = eps_df.columns.to_numpy()
-max_lon = max(lons)
-min_lon = min(lons)
-NUMBER_OF_BINS = 20
-BIN_EDGES = np.linspace(min_lon-1e-3*min_lon, max_lon+1e-3*max_lon, NUMBER_OF_BINS + 1)
+thorpe_lons = thorpe_eps_df.columns.to_numpy()
+max_lon = max(thorpe_lons)
+min_lon = min(thorpe_lons)
+
+
+# half a degree bins
+BIN_EDGES = np.arange(min_lon-1e-3*min_lon, max_lon+1e-3*max_lon, 0.5)
+#NUMBER_OF_BINS = 20
+#BIN_EDGES = np.linspace(min_lon-1e-3*min_lon, max_lon+1e-3*max_lon, NUMBER_OF_BINS + 1)
 
 # depth-level-wise (row-wise) arithmetic averaging
 rows = []
-for index, row in eps_df.iterrows():
+for index, row in thorpe_eps_df.iterrows():
     values = row.to_numpy()
-    bin_means= ss.binned_statistic(x = lons, values = values, statistic=np.nanmean, bins = BIN_EDGES)[0]
+    bin_means= ss.binned_statistic(x = thorpe_lons, values = values, statistic=np.nanmean, bins = BIN_EDGES)[0]
     new_eps = bin_means
     new_row = pd.DataFrame([new_eps], columns = BIN_EDGES[:-1])
     rows.append(new_row)
-binned_eps_df = pd.concat(rows, sort = False).reset_index(drop = True)
+binned_thorpe_eps_df = pd.concat(rows, sort = False).reset_index(drop = True)
 
 rows = []
-for index, row in T_df.iterrows():
+for index, row in thorpe_T_df.iterrows():
     values = row.to_numpy()
-    bin_means= ss.binned_statistic(x = lons, values = values, statistic=np.nanmean, bins = BIN_EDGES)[0]
+    bin_means= ss.binned_statistic(x = thorpe_lons, values = values, statistic=np.nanmean, bins = BIN_EDGES)[0]
     new_row = pd.DataFrame([bin_means], columns = BIN_EDGES[:-1])
     rows.append(new_row)
 
-binned_T_df = pd.concat(rows, sort = False).reset_index(drop = True)
+binned_thorpe_T_df = pd.concat(rows, sort = False).reset_index(drop = True)
+
+
+
+
+
+
 #-------------------------------------------------------------------
+# read eps_IGW results from IDEMIX method
+eps_IGW_IDEMIX_df = pd.read_csv("../scripts/IDEMIX_parametrization/method_data/eps_IGW_IDEMIX_results.csv")
+
 
 
 fig,ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.8*TWO_COLUMN_WIDTH*cm))
@@ -83,10 +88,10 @@ ncolors = len(bounds) - 1
 norm = mcolors.BoundaryNorm(boundaries=bounds, ncolors= 256)
 """
 mpp = ax.pcolormesh(
-    binned_eps_df.columns, 
-    mab, 
-    binned_eps_df,
-    norm = mcolors.LogNorm(vmin=1e-10, vmax=1e-6), #TODO
+    binned_thorpe_eps_df.columns, 
+    thorpe_mab, 
+    binned_thorpe_eps_df,
+    norm = mcolors.LogNorm(vmin=1e-10, vmax=1e-7), 
     cmap = cmap,
     rasterized = True
 )
@@ -103,9 +108,9 @@ cb.set_label(r"Dissipation rate $\varepsilon\,$(W kg$^{-1}$)")
 
 # Draw gravity courrent boundary defined as the -0.7 °C isotherm (Fahrbach 2001 et al.) 
 ax.contour(
-    binned_T_df.columns, 
-    mab, 
-    binned_T_df,
+    binned_thorpe_T_df.columns, 
+    thorpe_mab, 
+    binned_thorpe_T_df,
     levels = [-0.7],
     colors = "k",
     linewidths = 3,
@@ -114,7 +119,7 @@ ax.contour(
 """
 ax.scatter(
     energy_levels["lon"],
-    energy_levels["mab"]+5,
+    energy_levels["mab"],
     c=energy_levels["eps_IW"],
     cmap = cmap,
     norm = mcolors.LogNorm(vmin=1e-10, vmax=1e-6), #TODO
@@ -126,11 +131,11 @@ ax.scatter(
 """
 
 ax.scatter(
-    energy_levels["lon"],
-    energy_levels["mab"]+5,
-    c=energy_levels["eps"],
+    eps_IGW_IDEMIX_df["lon"],
+    eps_IGW_IDEMIX_df["rounded_mab"],
+    c=eps_IGW_IDEMIX_df["eps_IGW"],
     cmap = cmap,
-    norm = mcolors.LogNorm(vmin=1e-10, vmax=1e-6), #TODO
+    norm = mcolors.LogNorm(vmin=1e-10, vmax=1e-7), #TODO
     edgecolor="black",
     marker=MarkerStyle("o"),
     s = 300,
@@ -145,7 +150,7 @@ ax.set_xlabel("Longitude (°)")
 """
 ax.scatter(
     energy_levels["lon"],
-    energy_levels["mab"]+5,
+    energy_levels["mab"],
     #c=energy_levels["eps_IW"],
     color = "tab:gray",
     edgecolor="black",
@@ -156,9 +161,12 @@ ax.scatter(
 )
 """
 
+
+# for the legend
+# eps_IGW icon
 ax.scatter(
-    energy_levels["lon"],
-    energy_levels["mab"]+5,
+    eps_IGW_IDEMIX_df["lon"],
+    eps_IGW_IDEMIX_df["rounded_mab"],
     #c=energy_levels["eps"],
     color = "tab:gray",
     edgecolor="black",
@@ -168,9 +176,10 @@ ax.scatter(
     label = "$\\varepsilon_{\\mathrm{IGW}}$",
 )
 
+# artificial eps_total icon
 ax.scatter(
-    energy_levels["lon"],
-    energy_levels["mab"]+5,
+    eps_IGW_IDEMIX_df["lon"],
+    eps_IGW_IDEMIX_df["rounded_mab"],
     color = "tab:gray",
     edgecolor="black",
     marker=MarkerStyle("s"),
@@ -187,7 +196,7 @@ ax.annotate('gravity current\nboundary', xy=(-48.8, 130), xytext=(-48.5, 270), #
             
 fig.tight_layout()
 #fig.savefig("./eps_transect.svg", bbox_inches = "tight")
-#fig.savefig("./eps_transect.png", dpi = 400, bbox_inches = "tight")
+fig.savefig("./eps_transect.png", dpi = 400, bbox_inches = "tight")
 plt.show()
 
 

@@ -104,32 +104,24 @@ cats_df = pd.read_pickle("../../data/CATS/cats_data.pickle")
 cats_mean_HKE = cats_df.loc[:, cats_df.columns!='time'].abs().pow(2).mean()
 cats_lons = [_[1] for _ in cats_mean_HKE.index.to_numpy()]
 
-
-
-SEMIDIURNAL_TIDAL_CONSTITUENTS = helper.Constants.get_tidal_frequencies_in_hours(tide_type = "semidiurnal")
+semidiurnal_tidal_constits = helper.Constants.get_tidal_frequencies_in_hours(tide_type = "semidiurnal")
+print(semidiurnal_tidal_constits)
 # sort the constituents in descending order after their tidal periods
 # This is important for finding overlapping tidal peaks
-SEMIDIURNAL_TIDAL_CONSTITUENTS = dict(sorted(SEMIDIURNAL_TIDAL_CONSTITUENTS.items(), key=lambda x: x[1], reverse=True))
-print(f"{SEMIDIURNAL_TIDAL_CONSTITUENTS = }")
+semidiurnal_tidal_constits = dict(sorted(semidiurnal_tidal_constits.items(), key=lambda x: x[1], reverse=True))
+
 
     
-barotropic_energies = [] #data-based estimation as the highest possibly barotropic energy => the lowest measured energy per water column
-baroclinic_energies = []
-continuum_energies = [] # energy in the continuum without the energy at tidal frequencies
+upper_limit_barotropic_energies = [] #data-based estimation as the highest possibly barotropic energy => the lowest measured energy per water column
 available_energies = [] # the energy available for local dissipation, baroclinic energy of higher modes
-cats_barotropic = []
-
-#extension_errors = []
+continuum_energies = [] # energy in the continuum without the energy at tidal frequencies
+extension_errors = []
 latitudes = []
 longitudes = []
 depths = []
-mabs = []
 
 TIME_BANDWIDTH_PRODUCT = 10
 UPPER_INTEGRATION_BOUND_IN_CPD = 10    
-
-fig, ax = plt.subplots(1)
-    
 for nr, mooring in enumerate(list_of_moorings):
 
     # pick the shallowest velocity time series
@@ -162,21 +154,15 @@ for nr, mooring in enumerate(list_of_moorings):
     # == barotropic tidal energy ==
     cats_semidiurnal_barotropic_energy_between_f_and_N = src.spectra.integrate_psd_interval(cats_freq, cats_HKE_spectrum, a = 1.5, b = 2.5)
 
-    cats_barotropic.append(cats_semidiurnal_barotropic_energy_between_f_and_N)
-
 
     #--------------------------------------------------------------------------------------------------
-    #Calculate the barotropic tide per mooring
-    # 1. Calculate the minimal energy at semidiurnal tidal frequencies in the water column 
-    #    That corresponds to the measured maximum barotropic energy (assuming we are in a node of the standing wave of the baroclinic tides)
-    # 2. Compare with barotropic tide prediction of the CATS model
-    
-    
+    # Calculate the minimal energy at semidiurnal tidal frequencies in the water column 
+    # That corresponds to the maximum barotropic energy (assuming we are in a node of the standing wave of the baroclinic tides)
     # iterate over all time series/columns in the mooring dataframe
     print("Columns: ",sorted_nicely(mooring.columns))
     
     horizontal_kinetic_energies_at_tidal_frequencies = []
-    barotropic_estimation_depths = []
+    measurement_depths = []
     
     for measurement_depth in sorted_nicely(mooring.columns):
         if measurement_depth == "time":
@@ -201,48 +187,36 @@ for nr, mooring in enumerate(list_of_moorings):
         horizontal_kinetic_energy_per_peak = [] #no physical meaning, as it does not differentiate between barotropic and baroclinic tides
         # calculate integration intervals for the tidal peaks
         integration_indices_intervals = get_integration_intervals_for_tidal_peaks(
-            freq, P=TIME_BANDWIDTH_PRODUCT, tidal_periods = SEMIDIURNAL_TIDAL_CONSTITUENTS.values()
+            fN_freq, P=TIME_BANDWIDTH_PRODUCT, tidal_periods = semidiurnal_tidal_constits.values()
         )
 
         # iterate over the tidal peaks and calculate energy per peak
         for interval_tuple in integration_indices_intervals:
-            a = freq[interval_tuple[0]]
-            b = freq[interval_tuple[1]]
+            a = fN_freq[interval_tuple[0]]
+            b = fN_freq[interval_tuple[1]]
             peak_integral = src.spectra.integrate_psd_interval(
-                freq,
+                fN_freq,
                 resolved_HKE_spectrum,
                 a=a,
                 b=b
             )
-            horizontal_kinetic_energy_per_peak.append(peak_integral)
+            background_height = min(
+                resolved_HKE_spectrum[interval_tuple[0]],
+                resolved_HKE_spectrum[interval_tuple[1]]
+            )
+            background_integral = background_height * (b - a)
+            horizontal_kinetic_energy_per_peak.append(peak_integral - background_integral)
             
-        horizontal_kinetic_energy_at_tidal_frequencies = np.sum(horizontal_kinetic_energy_per_peak)        
-        horizontal_kinetic_energies_at_tidal_frequencies.append(horizontal_kinetic_energy_at_tidal_frequencies)   
-        barotropic_estimation_depths.append(measurement_depth)
+         horizontal_kinetic_energy_at_tidal_frequencies = np.sum(horizontal_kinetic_energy_per_peak)   
+                    
+         horizontal_kinetic_energies_at_tidal_frequencies.append(horizontal_kinetic_energy_at_tidal_frequencies)   
+         measurement_depths.append(measurement_depth)
 
-        ax.plot(mooring.location.lon, horizontal_kinetic_energy_at_tidal_frequencies, "D", color = "tab:red")
-    
-    # select the depth, where the lowest amount of energy was measured
-    measured_maximum_barotropic_energy = np.min(horizontal_kinetic_energies_at_tidal_frequencies)
-    measured_maximum_barotropic_instrument_index = np.argmin(horizontal_kinetic_energies_at_tidal_frequencies)
-
-    # if CATS predicts more barotropic energy then full kinetic energy we measured 
-    if cats_semidiurnal_barotropic_energy_between_f_and_N > measured_maximum_barotropic_energy:
-        # take the measured energy as the barotropic tidal estimation
-        semidiurnal_barotropic_kinetic_energy = measured_maximum_barotropic_energy  
-        print(f"barotropic energy is taken as energy at {barotropic_estimation_depths[measured_maximum_barotropic_instrument_index]}m of {barotropic_estimation_depths}")
-    # else take the CATS prediction
-    else:
-        semidiurnal_barotropic_kinetic_energy = cats_semidiurnal_barotropic_energy_between_f_and_N         
-        print(f"barotropic energy is taken from CATS model")       
+    np.min(horizontal_kinetic_energies_at_tidal_frequencies)
+    instrument_index = np.argmin(horizontal_kinetic_energies_at_tidal_frequencies)
+    measurement_depths[instrument_index]
 
 
- 
-    
-    
-    #--------------------------------------------------------------------------------------------------
-    #Calculate the wave energy per mooring, which is available for local dissipation
-    
     # iterate over all time series/columns in the mooring dataframe
     #print("Columns: ",sorted_nicely(mooring.columns))
     for measurement_depth in sorted_nicely(mooring.columns):
@@ -266,7 +240,8 @@ for nr, mooring in enumerate(list_of_moorings):
         #kinetic_psd
         assert not np.any(np.isnan(resolved_HKE_spectrum))
 
-
+        # get N value at the geographic locations and depths of the velocity measurement
+        # column in N_table is fixed by the mooring latitude, row by the measurement_depth
 
         # get instrument depth in units of meter above the sea floor
         mab_of_measurement = int(max_depth_dict[mooring.location.lon]) - int(measurement_depth) 
@@ -284,9 +259,7 @@ for nr, mooring in enumerate(list_of_moorings):
                 mab_of_measurement = 0
             else:
                 raise AssertionError
-
-        # get N value at the geographic locations and depths of the velocity measurement
-        # column in N_table is fixed by the mooring latitude, row by the measurement_depth                
+                
         column_name = f"({mooring.location.lat:.2f},{mooring.location.lon:.2f})"    
         avrg_N_in_rads = N_table.loc[
             N_table["mab"] == mab_of_measurement, column_name
@@ -351,7 +324,7 @@ for nr, mooring in enumerate(list_of_moorings):
         total_energy_per_peak = [] #no physical meaning, as it did not differentiate between barotropic and baroclinic tides
         # calculate integration intervals for the tidal peaks
         integration_indices_intervals = get_integration_intervals_for_tidal_peaks(
-            fN_freq, P=TIME_BANDWIDTH_PRODUCT, tidal_periods = SEMIDIURNAL_TIDAL_CONSTITUENTS.values()
+            fN_freq, P=TIME_BANDWIDTH_PRODUCT, tidal_periods = semidiurnal_tidal_constits.values()
         )
 
         # iterate over the tidal peaks and calculate energy per peak
@@ -422,16 +395,16 @@ for nr, mooring in enumerate(list_of_moorings):
 
 
         #--------------------------------------------------------------------------------------------------
-        # Calculate available total energy at tidal frequencies, for which the baroclinic tide at this depth has to be determined first
+        # Calculate available total energy at tidal frequencies
         
         # start again at the HKE
         horizontal_kinetic_energy_per_peak = [] #no physical meaning, as it does not differentiate between barotropic and baroclinic tides
         # calculate integration intervals for the tidal peaks
         integration_indices_intervals = get_integration_intervals_for_tidal_peaks(
-            fN_freq, P=TIME_BANDWIDTH_PRODUCT, tidal_periods = SEMIDIURNAL_TIDAL_CONSTITUENTS.values()
+            fN_freq, P=TIME_BANDWIDTH_PRODUCT, tidal_periods = semidiurnal_tidal_constits.values()
         )
 
-        # iterate over the tidal peaks and calculate energy at tidal frequencies (peak + background)
+        # iterate over the tidal peaks and calculate energy per peak
         for interval_tuple in integration_indices_intervals:
             a = fN_freq[interval_tuple[0]]
             b = fN_freq[interval_tuple[1]]
@@ -441,20 +414,19 @@ for nr, mooring in enumerate(list_of_moorings):
                 a=a,
                 b=b
             )
-            horizontal_kinetic_energy_per_peak.append(peak_integral)
-
-        # sum over energies at tidal frequencies    
-        horizontal_kinetic_energy_at_tidal_frequencies = np.sum(horizontal_kinetic_energy_per_peak)
-  
-        # subtract barotropic tide to get baroclinic tide
-        # the barotropic tide for each mooring was calculated above
-        semidiurnal_baroclinic_kinetic_energy = horizontal_kinetic_energy_at_tidal_frequencies - semidiurnal_barotropic_kinetic_energy
+            background_height = min(
+                resolved_HKE_spectrum_between_f_and_N[interval_tuple[0]],
+                resolved_HKE_spectrum_between_f_and_N[interval_tuple[1]]
+            )
+            background_integral = background_height * (b - a)
+            horizontal_kinetic_energy_per_peak.append(peak_integral - background_integral)
         
-        # baroclinic energy cannot be negative and is 0 in the worst case
-        assert semidiurnal_baroclinic_kinetic_energy >= 0
-              
+        
+        assert np.sum(horizontal_kinetic_energy_per_peak) > cats_semidiurnal_barotropic_energy_between_f_and_N  
+        # semidiurnal barotropic_energy = energy in all peaks - predicted semidiurnal barotropic_energy
+        semidiurnal_baroclinic_kinetic_energy = np.sum(horizontal_kinetic_energy_per_peak) -  cats_semidiurnal_barotropic_energy_between_f_and_N
+  
         # As this energy is contained in internal waves, it also must be converted to include the potential energy
-        # use conversion factor value at 2 cpd
         semidiurnal_index = np.argmin(np.abs(fN_freq - 2))
         # assert the index is neither the start or end of the frequency array
         assert semidiurnal_index != 0 and semidiurnal_index != len(fN_freq) - 1
@@ -467,53 +439,67 @@ for nr, mooring in enumerate(list_of_moorings):
         # Citation: Vic et al, 2019
         available_semidiurnal_baroclinic_energy = 0.3 * semidiurnal_baroclinic_total_energy
   
+        assert available_semidiurnal_baroclinic_energy > 0
         
+
+
+
 
 
         #--------------------------------------------------------------------------------------------------
         # Combine all energies
         
         available_energy = continuum_total_energy + available_semidiurnal_baroclinic_energy  
-        print(f"{column_name}, {measurement_depth}m: available semidiurnal baroclinic energy is responsible for {(available_semidiurnal_baroclinic_energy/available_energy):.1%} of the total available energy")           
+        print(f"{column_name}, {measurement_depth}m: available semidiurnal baroclinic energy is responsible for {(available_semidiurnal_baroclinic_energy/available_energy):.1%} of the total continuum energy")           
         
-        # save results
-        continuum_energies.append(continuum_total_energy)
-        barotropic_energies.append(semidiurnal_barotropic_kinetic_energy)
-        baroclinic_energies.append(available_semidiurnal_baroclinic_energy)
-        available_energies.append(available_energy)
+        
+        """
+        # unelegant implementation 
+        #slope_error = np.sqrt(np.diag(pcov))[0]
+        #def func_powerlaw_total_psd(x, c):
+        #    return x**(slope-slope_error) * c       
+        #upper_extension_energy  
+       
+        
+        # subtract the energy from the peaks
+        IW_energy = spectral_energy - tidal_energy_between_f_and_N
+        # Sanity check: Internal wave energy should always be greater 0
+        assert IW_energy > 0
+
+        # go from the energies per peak to the total energy per time series
+        barotropic_energy = np.sum(barotropic_energy_per_peak)
+        baroclinic_energy = np.sum(tidal_energy_per_peak) - barotropic_energy
+        if baroclinic_energy == 0:
+            baroclinic_energy = np.nan
+        if barotropic_energy == 0:
+            barotropic_energy = np.nan
+
+        # every energy level is for a individual time series
+        # add levels to lists to they can be saved later together as file
+        barotropic_energies.append(barotropic_energy)
+        baroclinic_energies.append(baroclinic_energy)
+        IW_energies.append(IW_energy)
+        #extension_errors.append(extension_error)
         latitudes.append(mooring.location.lat)
         longitudes.append(mooring.location.lon)
         depths.append(measurement_depth)
-        mabs.append(mab_of_measurement)
+        """
+
+
 
 
                 
 print("Done")                
-     
-     
-
-ax.plot(longitudes,  barotropic_energies, label = "assumed barotropic energy")
-#ax.plot(longitudes,  available_energies, "D")
-print(cats_lons)
-ax.plot(cats_lons,  cats_barotropic, label = "CATS model")
-ax.plot(mooring.location.lon, horizontal_kinetic_energy_at_tidal_frequencies, "D", color = "tab:red", label = "measured maximum energy")
-ax.legend()
-  
-ax.set_title("Energy at semidurnal tidal frequencies")
-  
-plt.show()     
-  
-"""              
+"""               
 # save results as nz file
 np.savez(
-    "./results_data/results_available_energy",
-    continuum = continuum_energies,
-    barotropic = barotropic_energies,
-    baroclinic = ,
-    available = available_energies,
-    lat = latitudes,
-    lon = longitudes,
-    depth = depths,
-    mab = mabs,      
+    "./results_data/",
+    barotropic=barotropic_energies,
+    baroclinic=baroclinic_energies,
+    IW=IW_energies,
+    #error = extension_errors,
+    lats=latitudes,
+    lons=longitudes,
+    rounded_depths=depths,
 )
 """

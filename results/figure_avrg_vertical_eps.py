@@ -7,14 +7,14 @@ from matplotlib.markers import MarkerStyle
 
 # read Thorpe and strain results data
 #-------------------------------------------------------------------
-data = np.load("/home/ole/Desktop/Mooring_Analysis/energy_levels/data/Thorpe_result.npz", allow_pickle=True)
-mab = data["mab"]
+#data = np.load("/home/ole/Desktop/Mooring_Analysis/energy_levels/data/Thorpe_result.npz", allow_pickle=True)
+#mab = data["mab"]
 
-data = np.load("/home/ole/Desktop/CTD/mixsea/Thorpe_vertical_eps.npz")
+data = np.load("../scripts/thorpe_scales/method_data/horizontally_averaged_Thorpe_eps.npz")
 thorpe_z = data["z"]
 thorpe_eps = data["eps"]
 
-data = np.load("/home/ole/Desktop/CTD/mixsea/Strain_vertical_eps.npz")
+data = np.load("../scripts/shear_strain_parametrization/method_data/Strain_vertical_eps.npz")
 strain_z = data["z"]
 strain_eps = data["eps"]
 
@@ -26,14 +26,14 @@ strain_eps = strain_eps*2.694 #Correction from Rw =3 to Rw = 7
 
 #Horizontally average of the mooring results
 #-------------------------------------------------------------------
-energy_levels = pd.read_csv("/home/ole/Desktop/Mooring_Analysis/energy_levels/wave_energy_result.csv")
+energy_levels = pd.read_csv("../scripts/IDEMIX_parametrization/method_data/eps_IGW_IDEMIX_results.csv")
 mab_ranges = [(20,60),(120,160),(320,400)]
 mabs = []
 IGWs = []
 for mab_range in mab_ranges:
     inbetween_mabs = []
     inbetween_IGWs = []
-    for mab, IGW in zip(energy_levels["mab"], energy_levels["eps_IW"]):
+    for mab, IGW in zip(energy_levels["rounded_mab"], energy_levels["eps_IGW"]):
         if not (mab > mab_range[0] and mab < mab_range[1]):
             continue
         inbetween_mabs.append(mab)        

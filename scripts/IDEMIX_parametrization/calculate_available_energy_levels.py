@@ -81,7 +81,7 @@ def sorted_nicely( l ):
 list_of_moorings = helper.IO.load_pickle(name="../../data/mooring/list_of_moorings.pkl")
 
 # load Stratification information
-N_table = pd.read_pickle("../../data/CTD/N_values.pkl")
+N_table = pd.read_pickle("./method_data/N_values.pkl")
 
 
 data = np.load("../../data/max_depth_dict.npz", allow_pickle = True)
@@ -114,6 +114,8 @@ print(f"{SEMIDIURNAL_TIDAL_CONSTITUENTS = }")
 
     
 barotropic_energies = [] #data-based estimation as the highest possibly barotropic energy => the lowest measured energy per water column
+cats_barotropic = [] # barotropic tide prediction of the CATS model
+tidal_energies = [] # barotropic + baroclinic semidurnal tidal energy
 continuum_energies = [] # energy in the continuum without the energy at tidal frequencies
 available_energies = [] # the energy available for local dissipation, baroclinic energy of higher modes
 
@@ -150,21 +152,20 @@ for nr, mooring in enumerate(list_of_moorings):
     #dt = 1/24 because the model is hourly
     cats_freq, cats_velocity_spectrum = src.spectra.total_multitaper(
         cats_uv , dt= 1 / 24, P=TIME_BANDWIDTH_PRODUCT)
-    # The integral over the whole integral yield the variance of the velocity
+    # The integral over the whole integral yields the variance of the velocity
     # The energy of a signal of mean 0 is then half the variance
     # Therefore we divide by 2 to have the correct physical interpretation of the spectrum      
     cats_HKE_spectrum = cats_velocity_spectrum / 2    
     # == barotropic tidal energy ==
     cats_semidiurnal_barotropic_energy_between_f_and_N = src.spectra.integrate_psd_interval(cats_freq, cats_HKE_spectrum, a = 1.5, b = 2.5)
-
-
+    
     #--------------------------------------------------------------------------------------------------
     #Calculate the barotropic tide per mooring
     # 1. Calculate the minimal energy at semidiurnal tidal frequencies in the water column 
     #    That corresponds to the measured maximum barotropic energy (assuming we are in a node of the standing wave of the baroclinic tides)
     # 2. Compare with barotropic tide prediction of the CATS model
     
-    
+
     # iterate over all time series/columns in the mooring dataframe
     print("Columns: ",sorted_nicely(mooring.columns))
     
@@ -213,10 +214,13 @@ for nr, mooring in enumerate(list_of_moorings):
         horizontal_kinetic_energies_at_tidal_frequencies.append(horizontal_kinetic_energy_at_tidal_frequencies)   
         barotropic_estimation_depths.append(measurement_depth)
 
+
+    tidal_energies.extend(horizontal_kinetic_energies_at_tidal_frequencies)
     # select the depth, where the lowest amount of energy was measured
     measured_maximum_barotropic_energy = np.min(horizontal_kinetic_energies_at_tidal_frequencies)
     measured_maximum_barotropic_instrument_index = np.argmin(horizontal_kinetic_energies_at_tidal_frequencies)
 
+            
     # if CATS predicts more barotropic energy then full kinetic energy we measured 
     if cats_semidiurnal_barotropic_energy_between_f_and_N > measured_maximum_barotropic_energy:
         # take the measured energy as the barotropic tidal estimation
@@ -469,25 +473,29 @@ for nr, mooring in enumerate(list_of_moorings):
         
         # save results
         continuum_energies.append(continuum_total_energy)
+        cats_barotropic.append(cats_semidiurnal_barotropic_energy_between_f_and_N)
         barotropic_energies.append(semidiurnal_barotropic_kinetic_energy)
-        baroclinic_energies.append(available_semidiurnal_baroclinic_energy)
+        #baroclinic_energies.append(available_semidiurnal_baroclinic_energy)
         available_energies.append(available_energy)
         latitudes.append(mooring.location.lat)
         longitudes.append(mooring.location.lon)
         depths.append(measurement_depth)
         mabs.append(mab_of_measurement)
-
+    
 
                 
 print("Done")                
+   
               
 # save results as nz file
 np.savez(
-    "./results_data/results_available_energy",
+    "./method_data/results_available_energy",
     continuum = continuum_energies,
     barotropic = barotropic_energies,
-    baroclinic = available_semidiurnal_baroclinic_energy,
+    #baroclinic = available_semidiurnal_baroclinic_energy,
     available = available_energies,
+    cats = cats_barotropic,
+    tidal_energies = tidal_energies, # barotropic + baroclinic semidurnal tidal kinetic energy
     lat = latitudes,
     lon = longitudes,
     depth = depths,
