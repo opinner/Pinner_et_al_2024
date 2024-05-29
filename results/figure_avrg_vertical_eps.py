@@ -49,13 +49,22 @@ fig, ax = plt.subplots(1, figsize=(ONE_COLUMN_WIDTH*cm, GOLDEN_RATIO*ONE_COLUMN_
 
 ax.semilogx(thorpe_eps, thorpe_z, c = "tab:red", label = "$\\langle\\varepsilon_{\\mathrm{total, Thorpe}}\\rangle$")
 ax.semilogx(IGWs, mabs, "o", c = "k", label = "$\\langle\\varepsilon_{\\mathrm{IGW, IDEMIX}}\\rangle$", zorder = 10)
-ax.semilogx(strain_eps, strain_z, '-o', lw = 3, ms = 6, c = "tab:blue", mec = "xkcd:darkblue", label = "$\\langle\\varepsilon_{\\mathrm{IGW, strain}}\\rangle$")
+
+label = "$\\langle\\varepsilon_{\\mathrm{IGW, strain}}\\rangle$"
+for x, z in zip(strain_eps, strain_z):
+    spacing = np.abs(np.mean(np.diff(strain_z)))
+    ax.vlines(x, z-spacing/2, z+spacing/2, lw = 3,  colors = "tab:blue", label = label)
+    label = None # use only the label from the first plot instance
+    ax.fill_betweenx([z-spacing/2, z+spacing/2], x/5, x*5, color = "tab:blue", alpha = 0.3)
+#ax.semilogx(strain_eps, strain_z, 'o', ms = 6, mec = "xkcd:darkblue")
+
+#
 
 # Plot Errors
 for IGW, IGW_error, mab in zip(IGWs, IGW_errors, mabs):
     ax.plot([IGW-IGW_error, IGW+IGW_error], [mab,mab], lw = 3, c = "k", alpha = 0.5)
 ax.fill_betweenx(thorpe_z, thorpe_eps/5, thorpe_eps*5, color = "tab:red", alpha = 0.5)
-ax.fill_betweenx(strain_z, strain_eps/5, strain_eps*5, color = "tab:blue", alpha = 0.3)
+
 
 
 ax.set_ylabel("Distance from sea floor (m)")
