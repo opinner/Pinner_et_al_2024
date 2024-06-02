@@ -53,9 +53,12 @@ ax.semilogx(IGWs, mabs, "o", c = "k", label = "$\\langle\\varepsilon_{\\mathrm{I
 label = "$\\langle\\varepsilon_{\\mathrm{IGW, strain}}\\rangle$"
 for x, z in zip(strain_eps, strain_z):
     spacing = np.abs(np.mean(np.diff(strain_z)))
-    ax.vlines(x, z-spacing/2, z+spacing/2, lw = 3,  colors = "tab:blue", label = label)
+    upper = z+spacing/2
+    lower = z-spacing/2
+    if lower < 0: lower = 0
+    ax.vlines(x, lower, upper , lw = 3,  colors = "tab:blue", label = label)
     label = None # use only the label from the first plot instance
-    ax.fill_betweenx([z-spacing/2, z+spacing/2], x/5, x*5, color = "tab:blue", alpha = 0.3)
+    ax.fill_betweenx([lower, upper], x/5, x*5, color = "tab:blue", alpha = 0.3)
 #ax.semilogx(strain_eps, strain_z, 'o', ms = 6, mec = "xkcd:darkblue")
 
 #
@@ -67,7 +70,7 @@ ax.fill_betweenx(thorpe_z, thorpe_eps/5, thorpe_eps*5, color = "tab:red", alpha 
 
 
 
-ax.set_ylabel("Distance from sea floor (m)")
+ax.set_ylabel("Height above bottom (m)")
 
 ax.set_xlabel("$\\langle\\varepsilon\\rangle\\,$(W kg$^{-1})$")
 ax.set_ylim(-10,450)
