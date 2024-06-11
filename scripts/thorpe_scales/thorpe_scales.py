@@ -15,7 +15,7 @@ plt.rcParams.update({
 })
 import mixsea as mx
 
-from src.read_CTDs import read_CTDs
+from src.read_CTDs import read_transect_CTDs
 import src.helper as helper
 from scipy.interpolate import interp1d  # is considered legacy code, will be in the future removed from scipy
 import warnings
@@ -26,12 +26,12 @@ DENSITY_NOISE = 1e-4  # Noise parameter, Default value = 5e-4
 ALPHA = 0.8  # Coefficient relating the Thorpe and Ozmidov scales.
 BACKGROUND_EPS = np.nan  # Background value of epsilon applied where no overturns are detected.
 
-CTDs = read_CTDs()
+CTDs = read_transect_CTDs
 CTDs_grouped = CTDs.groupby("Event")
 events = CTDs_grouped.groups.keys()
 
 # define a common axis with grid spacing of 1
-new_mab = np.arange(0, 500, 1)
+new_mab = np.arange(0, 5000, 1)
 
 # objects for saving the data later    
 eps_df = pd.DataFrame()
@@ -65,9 +65,10 @@ for event in events:
 
     if max_depth < 200:
         print(f"{event} has {max_depth}m and is too shallow")
-
+        continue
     if current_profile['Temp [°C]'].iloc[-1] > 0.2:
         print(f"{event} shows {current_profile['Temp [°C]'].iloc[-1]:.2f} °C at the bottom, which is too high ")
+        continue
 
     # nearest interpolation to the defined axis
     N_func = interp1d(max_depth - depth, N[cut], kind='nearest', bounds_error=False, fill_value=(np.nan, np.nan))
@@ -98,16 +99,15 @@ except AssertionError:
     pass
 
 f, ax = plt.subplots(nrows=1, figsize=(10, 5))
-
 # mab_bin_edges = bin_edges(eps_strain_df.index,dz)
 # lon_edges = eps_strain_df.columns - np.diff(eps_strain_df.columns)
 mpp = ax.pcolormesh(eps_df.columns, eps_df.index, eps_df,
-                    norm= mcolors.LogNorm(),
+                    norm= mcolors.LogNorm(vmax = 1e-7),
                     shading="nearest"
                     )
 cb = plt.colorbar(mpp, ax=ax)
 cb.set_label(r"$\varepsilon$ / (W kg$^{-1}$)")
-ax.set_facecolor('lightgrey')
+#ax.set_facecolor('lightgrey')
 ax.set_ylim(0,500)
 ax.set_title(r"Mixing diagnosed from Strain parametrization")
 helper.Plot.path_as_footnote(fig = f,
@@ -127,9 +127,9 @@ mean_profile = vertical_eps_df.mean(axis=1)
 std_of_mean_profile = vertical_eps_df.std(axis=1)
 
 # save data
-# eps_df.to_pickle("./method_data/Thorpe_eps_df_with_mab.pkl")
-# T_df.to_pickle("./method_data/Thorpe_T_df_with_mab.pkl")
-# np.savez("./method_data/horizontally_averaged_Thorpe_eps", z=vertical_eps_df.index, eps= mean_profile)
+eps_df.to_pickle("./method_data/Thorpe_eps_df_with_mab.pkl")
+T_df.to_pickle("./method_data/Thorpe_T_df_with_mab.pkl")
+np.savez("./method_data/horizontally_averaged_Thorpe_eps", z=vertical_eps_df.index, eps= mean_profile)
 
 print("done")
 plt.show()
