@@ -18,20 +18,6 @@ CTDs_grouped = CTDs.groupby("Expedition")
 expedition_names = CTDs_grouped.groups.keys()
 print(expedition_names)
 
-max_depth_dict = {}
-for i, expedition_name in enumerate(expedition_names):
-    expedition = CTDs_grouped.get_group(expedition_name).reset_index(drop=True)
-    expedition = expedition.groupby("Event")
-    events = expedition.groups.keys()
-
-    for event in events:
-        if expedition_name not in event: continue
-
-        current_profile = expedition.get_group(event).reset_index(drop=True)
-
-        depth = current_profile['Depth water [m]']
-        lon = current_profile["Longitude"].iloc[0]
-        max_depth_dict[lon] = depth.max()
 
 shst_params = dict()
 
