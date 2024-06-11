@@ -11,9 +11,9 @@ import scipy.stats as ss
 warnings.filterwarnings('ignore', category=RuntimeWarning)
 
 # import my self written functions
-from src.read_CTDs import read_CTDs
+from src.read_CTDs import read_transect_CTDs
 
-CTDs = read_CTDs()
+CTDs = read_transect_CTDs()
 CTDs_grouped = CTDs.groupby("Expedition")
 expedition_names = CTDs_grouped.groups.keys()
 print(expedition_names)
@@ -99,7 +99,7 @@ for i, expedition_name in enumerate(expedition_names):
             eps, krho, diag = mx.shearstrain.nan_shearstrain(
                 depth, t, SP, lon, lat, **shst_params
             )
-        except:
+        except ValueError:
             print(f"errors at {expedition_name}, {event}")
             continue
 
