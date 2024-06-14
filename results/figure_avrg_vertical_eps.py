@@ -12,7 +12,7 @@ thorpe_z = data["z"]
 thorpe_eps = data["eps"]
 
 data = np.load("../scripts/shear_strain_parametrization/method_data/Strain_vertical_eps.npz")
-strain_z = data["z"]
+strain_mab = data["mab"]
 strain_eps = data["eps"]
 
 
@@ -51,17 +51,18 @@ ax.semilogx(thorpe_eps, thorpe_z, c = "tab:red", label = "$\\langle\\varepsilon_
 ax.semilogx(IGWs, mabs, "o", c = "k", label = "$\\langle\\varepsilon_{\\mathrm{IGW, IDEMIX}}\\rangle$", zorder = 10)
 
 label = "$\\langle\\varepsilon_{\\mathrm{IGW, strain}}\\rangle$"
-for x, z in zip(strain_eps, strain_z):
-    spacing = np.abs(np.mean(np.diff(strain_z)))
+for x, z in zip(strain_eps, strain_mab):
+    spacing = np.abs(np.mean(np.diff(strain_mab)))
+    assert spacing == 125
     upper = z+spacing/2
     lower = z-spacing/2
-    if lower < 0: lower = 0
+    #if lower < 0: lower = 0
     ax.vlines(x, lower, upper , lw = 3,  colors = "tab:blue", label = label)
     label = None # use only the label from the first plot instance
     ax.fill_betweenx([lower, upper], x/5, x*5, color = "tab:blue", alpha = 0.3)
 #ax.semilogx(strain_eps, strain_z, 'o', ms = 6, mec = "xkcd:darkblue")
 
-#
+print(strain_mab)
 
 # Plot Errors
 for IGW, IGW_error, mab in zip(IGWs, IGW_errors, mabs):
@@ -78,7 +79,7 @@ ax.legend(loc = "upper left", framealpha = 0.6, labelspacing = 0.4, ncols = 1, f
 #lims = ax.get_xlim()
 #ax.set_xlim((0.95*lims[0],lims[1]))
 fig.tight_layout()
-fig.savefig("./avrg_vertical_eps.png", dpi = 400, bbox_inches = "tight")
+#fig.savefig("./avrg_vertical_eps.png", dpi = 400, bbox_inches = "tight")
 fig.savefig("./avrg_vertical_eps.svg", bbox_inches = "tight")
 plt.show()
 

@@ -11,7 +11,7 @@ ONE_COLUMN_WIDTH = 8.3
 TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1/2.54  # centimeters in inches
-#-------------------------------------------------------------------
+# -------------------------------------------------------------------
 # read thorpe results data
 thorpe_eps_df = pd.read_pickle("../scripts/thorpe_scales/method_data/Thorpe_eps_df_with_mab.pkl")
 
@@ -45,7 +45,7 @@ binned_thorpe_T_df = pd.concat(rows, sort = False).reset_index(drop = True)
 
 
 #-------------------------------------------------------------------
-# read eps_IGW results from strain-based finestructure analyis 
+# read eps_IGW results from strain-based finestructure analysis
 eps_IGW_strain_df = pd.read_csv("../scripts/shear_strain_parametrization/method_data/strain_eps.csv")
 eps_IGW_strain_df.set_index('Unnamed: 0', inplace=True)
 # TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TODO#

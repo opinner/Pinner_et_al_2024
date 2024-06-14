@@ -12,7 +12,7 @@ def get_transect_CTDs():
     data = src.read_CTDs.get_PS129_CTD_data()
 
     def load_stations(path):
-        transect_names, transect_numbers = np.loadtxt(path, dtype= (str), delimiter="\t", unpack=True)
+        transect_names, transect_numbers = np.loadtxt(path, dtype=(str), delimiter="\t", unpack=True)
         translate = dict(zip(transect_names, transect_numbers))
         # print(translate)
         return translate
@@ -127,14 +127,13 @@ fine_eps_df = pd.concat(eps_list, axis=1)
 fine_eps_df.sort_index(axis=1, inplace=True)  # sort columns
 fine_eps_df.sort_index(inplace=True)  # sort rows TODO Why is this necessary?
 
-
 f, ax = plt.subplots(nrows=1, figsize=(10, 5))
 # mab_bin_edges = bin_edges(eps_strain_df.index,dz)
 # lon_edges = eps_strain_df.columns - np.diff(eps_strain_df.columns)
 mpp = ax.pcolormesh(fine_eps_df.columns, fine_eps_df.index, fine_eps_df,
                     norm=mcolors.LogNorm(vmax=1e-8, vmin=1e-10),
                     shading="nearest",
-                    cmap = cm.cm.matter
+                    cmap=cm.cm.matter
                     )
 cb = plt.colorbar(mpp, ax=ax)
 cb.set_label(r"$\varepsilon$ / (W kg$^{-1}$)")
@@ -146,7 +145,7 @@ f, ax = plt.subplots(nrows=1, figsize=(10, 5))
 # mab_bin_edges = bin_edges(eps_strain_df.index,dz)
 # lon_edges = eps_strain_df.columns - np.diff(eps_strain_df.columns)
 mpp = ax.pcolormesh(Rw_df.columns, Rw_df.index, Rw_df,
-                    norm=mcolors.LogNorm(vmax= 300, vmin= 1),
+                    norm=mcolors.LogNorm(vmax=300, vmin=1),
                     shading="nearest",
                     )
 cb = plt.colorbar(mpp, ax=ax)
@@ -156,13 +155,13 @@ ax.set_title(r"Shear/Strain ratio Rw")
 f.tight_layout()
 
 print(f"Across the Weddell Sea: {np.nanmean(Rw_df.values.flatten()):.1f}±{np.nanstd(Rw_df.values.flatten()):.1f}")
-fig,ax = plt.subplots(2, sharex = True, figsize = (5,5), layout = "constrained")
-ax[0].hist(Rw_df.values.flatten(), bins  = np.logspace(np.log10(1), np.log10(300), 20),
-           color = "k", edgecolor='white', linewidth=1)
+fig, ax = plt.subplots(2, sharex=True, figsize=(5, 5), layout="constrained")
+ax[0].hist(Rw_df.values.flatten(), bins=np.logspace(np.log10(1), np.log10(300), 20),
+           color="k", edgecolor='white', linewidth=1)
 ax[0].set_xscale("log")
 ax[0].set_title("Rw, across the Weddell Sea")
-ax[0].axvline(3, color = "tab:red", ls = "--")
-ax[0].axvline(7, color = "tab:red")
+ax[0].axvline(3, color="tab:red", ls="--")
+ax[0].axvline(7, color="tab:red")
 
 # Drop all rows that are outside the continental slope
 min_longitude = -54
@@ -172,10 +171,11 @@ filtered_columns = [col for col in Rw_df.columns if min_longitude <= float(col) 
 
 # Create a new DataFrame with the filtered columns
 slope_Rw_df = Rw_df[filtered_columns]
-print(f"Across continental slope: {np.nanmean(slope_Rw_df.values.flatten()):.1f}±{np.nanstd(slope_Rw_df.values.flatten()):.1f}")
-ax[1].hist(slope_Rw_df.values.flatten(), bins  = np.logspace(np.log10(1), np.log10(300), 20),
-           color = "k", edgecolor='white', linewidth=1)
+print(
+    f"Across continental slope: {np.nanmean(slope_Rw_df.values.flatten()):.1f}±{np.nanstd(slope_Rw_df.values.flatten()):.1f}")
+ax[1].hist(slope_Rw_df.values.flatten(), bins=np.logspace(np.log10(1), np.log10(300), 20),
+           color="k", edgecolor='white', linewidth=1)
 ax[1].set_title("Rw, across continental slope")
-ax[1].axvline(3, color = "tab:red", ls = "--")
-ax[1].axvline(7, color = "tab:red")
+ax[1].axvline(3, color="tab:red", ls="--")
+ax[1].axvline(7, color="tab:red")
 plt.show()
