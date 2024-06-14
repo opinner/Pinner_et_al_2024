@@ -12,12 +12,14 @@ from src.location import Location
 from src.ctd_cast import CTDCast
 import src.helper as helper
 
+
 # Set up conversion from ID number to cast name
 def load_stations(path):
     transect_names, transect_numbers = np.loadtxt(path, dtype=str, delimiter="\t", unpack=True)
     translate = dict(zip(transect_names, transect_numbers))
     # print(translate)
     return translate
+
 
 def get_PS129_CTD_data():
     # get location of CTD files from the LADCP data files
@@ -85,7 +87,7 @@ def get_PS129_CTD_data():
             data_dict["Depth water [m]"].extend(np.abs(gsw.z_from_p(p=pressure, lat=cast.location.lat)))
 
         except ValueError as e:
-            print("Error at ", cast.name, cast.location)
+            print("ValueError at ", cast.name, cast.location)
             print(e)
             continue
         # print(cast.name)
@@ -94,52 +96,54 @@ def get_PS129_CTD_data():
         print(k, len(v))
     return pd.DataFrame(data=data_dict)
 
-
+def find_line_number(filename, target_string):
+    with open(filename, 'r') as file:
+        for line_number, line in enumerate(file):
+            if line.startswith(target_string):
+                return line_number
+    return None
 
 def read_transect_CTDs():
     columns = ['Event', 'Date/Time', 'Latitude', 'Longitude',
-           'Depth water [m]', 'Press [dbar]', 'Temp [°C]', 'Sal', 'Expedition']
+               'Depth water [m]', 'Press [dbar]', 'Temp [°C]', 'Sal', 'Expedition']
     CTDs = pd.DataFrame(columns=columns)
 
     # definition of box around the transect
-    m = (63.21 - 64.22)/(53.8 - 47)
+    m = (63.21 - 64.22) / (53.8 - 47)
     b = 63.21 - m * 53.8
-    shift = 0.12
+    shift = 0.14 #0.12
 
     PS129_CTDs = get_PS129_CTD_data()
-    CTDs = CTDs.merge(PS129_CTDs, on = columns, how = "outer")
-    #Drop all rows that are not even close to the moorings
-    CTDs.drop(CTDs[CTDs.Latitude < -64.5].index, inplace = True)
-    CTDs.drop(CTDs[CTDs.Latitude > -63].index, inplace = True)
-    CTDs.drop(CTDs[CTDs.Longitude < -54].index, inplace = True)
-    CTDs.drop(CTDs[CTDs.Longitude > -47].index, inplace = True)
+    CTDs = CTDs.merge(PS129_CTDs, on=columns, how="outer")
+    # Drop all rows that are not even close to the moorings
+    CTDs.drop(CTDs[CTDs.Latitude < -64.5].index, inplace=True)
+    CTDs.drop(CTDs[CTDs.Latitude > -63].index, inplace=True)
+    CTDs.drop(CTDs[CTDs.Longitude < -54].index, inplace=True)
+    CTDs.drop(CTDs[CTDs.Longitude > -47].index, inplace=True)
 
     CTDs.drop(CTDs[
-        m*CTDs.Longitude-b+shift < CTDs.Latitude
-    ].index, inplace = True)
+                  m * CTDs.Longitude - b + shift < CTDs.Latitude
+                  ].index, inplace=True)
 
     CTDs.drop(CTDs[
-        m*CTDs.Longitude-b-shift > CTDs.Latitude
-    ].index, inplace = True)
+                  m * CTDs.Longitude - b - shift > CTDs.Latitude
+                  ].index, inplace=True)
 
-    CTDs.reset_index(inplace = True, drop=True)
+    CTDs.reset_index(inplace=True, drop=True)
 
-    def find_line_number(filename, target_string):
-        with open(filename, 'r') as file:
-            for line_number, line in enumerate(file):
-                if line.startswith(target_string):
-                    return line_number
-        return None
-
-    data_paths = helper.IO.get_filepaths_from_directory(directory = "/media/sf_VM_Folder/data/CTD", inclusive = ".tab", exclusive = ())
+    data_paths = helper.IO.get_filepaths_from_directory(directory="/media/sf_VM_Folder/data/CTD", inclusive=".tab",
+                                                        exclusive=())
     for p in data_paths: print(p)
 
     for i, path in enumerate(data_paths):
         target_string = "Event\tDate/Time\tLatitude\tLongitude\tElevation [m]"
         skiprows = find_line_number(path, target_string)
-        if skiprows == None:
+        if skiprows is None: #if skiprows failed
+            # try different target string
             target_string = "Event	Type	Date/Time	Longitude"
             skiprows = find_line_number(path, target_string)
+        if path == '/media/sf_VM_Folder/data/CTD/ANT-XXIV_3_phys_oce.tab':
+            skiprows = 235 # test
 
         data = pd.read_csv(path, delimiter="\t", skiprows=skiprows)
 
@@ -150,6 +154,11 @@ def read_transect_CTDs():
         data.drop(data[data.Latitude > -63].index, inplace=True)
         data.drop(data[data.Longitude < -54].index, inplace=True)
         data.drop(data[data.Longitude > -47].index, inplace=True)
+
+        # skip to next file if no data points lose to teh transect remain
+        if data.empty:
+            print(f"no data close to the joinville transect in {path}")
+            continue
 
         plt.plot(data.Longitude, data.Latitude, ".", color="lightgrey")
 
@@ -171,17 +180,21 @@ def read_transect_CTDs():
                 current_expedition = data['Event'].iloc[0][0:5]
             else:
                 current_expedition = data['Event'].iloc[0][0:4]
-            print(current_expedition, path)
-            data['Expedition'] = current_expedition
-            plt.plot(data.Longitude, data.Latitude, ".", label=path.split("/")[-1])
-            CTDs = CTDs.merge(data, on=columns, how="outer")
-            assert not data.empty
 
         except IndexError as e:
-            print(f"!! Error loading {path}")
-            print(e)
             assert data.empty
+            print(f"No data on defined transect {path}, {skiprows = }")
             continue
+
+        print(current_expedition, path)
+        data['Expedition'] = current_expedition
+        plt.plot(data.Longitude, data.Latitude, ".", label=path.split("/")[-1])
+
+        print("\t",path[-25:-8], data['Event'].nunique())
+
+        CTDs = CTDs.merge(data, on=columns, how="outer")
+
+
 
     CTDs['Event'] = CTDs['Event'].astype('category')
     CTDs['Expedition'] = CTDs['Expedition'].astype('category')
@@ -191,8 +204,6 @@ def read_transect_CTDs():
     plt.plot(x, m * x - b - shift)
 
     return CTDs
-
-
 
 
 def bin_to_10m_resolution(x, values, bin_center):
@@ -278,8 +289,21 @@ def get_PS129_CTDs_and_LADCPs():
             CTD_cast["t"] = in_situ_temperature
             CTD_cast["SP"] = practical_salinity
 
-        except ValueError as e:
+        except ValueError:
             print(f"Not able to load profile PS129_{LADCP_cast.name} at {LADCP_cast.location}")
             continue
 
     return [list_of_LADCP_casts, list_of_CTD_casts]
+
+def profiles_per_expedition(df):
+    # Group by 'expedition' and count the number of unique 'event' occurrences
+    event_counts = df.groupby('Expedition')['Event'].nunique().reset_index()
+
+    # Rename the columns for better readability
+    event_counts.columns = ['Expedition', 'number_of_events']
+    event_counts = event_counts.sort_values(by='Expedition').reset_index(drop=True)
+    return event_counts
+
+if __name__ == '__main__':
+    CTDs = read_transect_CTDs()
+    print(profiles_per_expedition(CTDs))
