@@ -66,14 +66,15 @@ def kinetic_to_total_energy(f, N, omega):
     )
     return conversion
         
-import re 
+
 def sorted_nicely( l ): 
     """ 
     Sort the given iterable alphanumerically in the way that humans expect.
     https://stackoverflow.com/questions/2669059/how-to-sort-alpha-numeric-set-in-python
-    """ 
+    """
+    import re
     convert = lambda text: int(text) if text.isdigit() else text 
-    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+    alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
     return sorted(l, key = alphanum_key)
     
             
@@ -113,11 +114,11 @@ SEMIDIURNAL_TIDAL_CONSTITUENTS = dict(sorted(SEMIDIURNAL_TIDAL_CONSTITUENTS.item
 print(f"{SEMIDIURNAL_TIDAL_CONSTITUENTS = }")
 
     
-barotropic_energies = [] #data-based estimation as the highest possibly barotropic energy => the lowest measured energy per water column
-cats_barotropic = [] # barotropic tide prediction of the CATS model
-tidal_energies = [] # barotropic + baroclinic semidurnal tidal energy
-continuum_energies = [] # energy in the continuum without the energy at tidal frequencies
-available_energies = [] # the energy available for local dissipation, baroclinic energy of higher modes
+barotropic_energies = []  #data-based estimation as the highest possibly barotropic energy => the lowest measured energy per water column
+cats_barotropic = []  # barotropic tide prediction of the CATS model
+tidal_energies = []  # barotropic + baroclinic semidurnal tidal energy
+continuum_energies = []  # energy in the continuum without the energy at tidal frequencies
+available_energies = []  # the energy available for local dissipation, baroclinic energy of higher modes
 
 #extension_errors = []
 latitudes = []
@@ -141,17 +142,13 @@ for nr, mooring in enumerate(list_of_moorings):
     coriolis_frequency_in_cpd = helper.Constants.get_coriolis_frequency(
         mooring.location.lat, unit="cpd", absolute=True
         )
-        
-        
-        
-        
-        
+
     # Barotropic semidiurnal tidal energy, predicted from CATS, needed later 
-    #select the corresponding column in the CATS dataframe , +1 is needed to skip the time column
-    cats_uv = cats_df.iloc[:,nr+1].to_numpy()
-    #dt = 1/24 because the model is hourly
+    # select the corresponding column in the CATS dataframe , +1 is needed to skip the time column
+    cats_uv = cats_df.iloc[:, nr+1].to_numpy()
+    # dt = 1/24, because the model is hourly
     cats_freq, cats_velocity_spectrum = src.spectra.total_multitaper(
-        cats_uv , dt= 1 / 24, P=TIME_BANDWIDTH_PRODUCT)
+        cats_uv, dt= 1 / 24, P=TIME_BANDWIDTH_PRODUCT)
     # The integral over the whole integral yields the variance of the velocity
     # The energy of a signal of mean 0 is then half the variance
     # Therefore we divide by 2 to have the correct physical interpretation of the spectrum      
@@ -160,7 +157,7 @@ for nr, mooring in enumerate(list_of_moorings):
     cats_semidiurnal_barotropic_energy_between_f_and_N = src.spectra.integrate_psd_interval(cats_freq, cats_HKE_spectrum, a = 1.5, b = 2.5)
     
     #--------------------------------------------------------------------------------------------------
-    #Calculate the barotropic tide per mooring
+    # Calculate the barotropic tide per mooring
     # 1. Calculate the minimal energy at semidiurnal tidal frequencies in the water column 
     #    That corresponds to the measured maximum barotropic energy (assuming we are in a node of the standing wave of the baroclinic tides)
     # 2. Compare with barotropic tide prediction of the CATS model
@@ -189,7 +186,7 @@ for nr, mooring in enumerate(list_of_moorings):
         # The energy of a signal of mean 0 is then half the variance
         # Therefore we divide by 2 to have the correct physical interpretation of the spectrum
         resolved_HKE_spectrum = velocity_spectrum / 2
-        #kinetic_psd
+        # kinetic_psd
         assert not np.any(np.isnan(resolved_HKE_spectrum))
         
         horizontal_kinetic_energy_per_peak = [] #no physical meaning, as it does not differentiate between barotropic and baroclinic tides
@@ -232,11 +229,9 @@ for nr, mooring in enumerate(list_of_moorings):
         print(f"barotropic energy is taken from CATS model")       
 
 
- 
-    
-    
+
     #--------------------------------------------------------------------------------------------------
-    #Calculate the wave energy per mooring, which is available for local dissipation
+    # Calculate the wave energy per mooring, which is available for local dissipation
     
     # iterate over all time series/columns in the mooring dataframe
     #print("Columns: ",sorted_nicely(mooring.columns))
@@ -298,16 +293,11 @@ for nr, mooring in enumerate(list_of_moorings):
             N = avrg_N_in_cpd
         )
         
-        
 
-        
-        
-        
         
         #--------------------------------------------------------------------------------------------------
         # convert resolved kinetic to resolved total (kinetic+potential) energy between f and N
 
-                
         # Correction factor in cpd
         kinetic_to_total_energy_factor = kinetic_to_total_energy(
             f = coriolis_frequency_in_cpd,
@@ -330,9 +320,6 @@ for nr, mooring in enumerate(list_of_moorings):
     
         # PSD and the frequency is in units of cpd
         resolved_total_energy_spectrum_between_f_and_N = kinetic_to_total_energy_factor * resolved_HKE_spectrum_between_f_and_N
-
-
-
 
 
         #--------------------------------------------------------------------------------------------------
@@ -408,12 +395,6 @@ for nr, mooring in enumerate(list_of_moorings):
 
         continuum_total_energy = resolved_continuums_total_energy + extension_total_energy 
         print(f"{column_name}, {measurement_depth}m: spectral slope = {slope:.2f}, total extension energy is responsible for {(extension_total_energy/continuum_total_energy):.1%} of the total continuum energy")        
-        
-        
-        
-        
-        
-        
 
 
         #--------------------------------------------------------------------------------------------------
@@ -495,7 +476,7 @@ np.savez(
     #baroclinic = available_semidiurnal_baroclinic_energy,
     available = available_energies,
     cats = cats_barotropic,
-    tidal_energies = tidal_energies, # barotropic + baroclinic semidurnal tidal kinetic energy
+    tidal_energies = tidal_energies, # barotropic + baroclinic semidiurnal tidal kinetic energy
     lat = latitudes,
     lon = longitudes,
     depth = depths,
