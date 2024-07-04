@@ -16,6 +16,7 @@ import equations as eq
 N_table = pd.read_pickle("./method_data/N_values.pkl")
 N_error_table = pd.read_pickle("./method_data/N_std.pkl")
 
+print("Load wave energy table")
 data = np.load("./method_data/results_available_energy.npz", allow_pickle = True)
 energy_levels = pd.DataFrame(data = {
     "lon":data["lon"],
@@ -27,9 +28,10 @@ energy_levels = pd.DataFrame(data = {
     "available":data["available"],
 })
 energy_levels["rounded_depth"] = energy_levels["rounded_depth"].astype("int")
-print("Loaded wave energy table")
+
 
 # Assign N and its error to each location, where the wave energy level is know
+print("Add N values")
 N_array = []
 N_error_array = []
 for index, row in energy_levels.iterrows():
@@ -47,10 +49,40 @@ for index, row in energy_levels.iterrows():
 
 energy_levels["N"] = N_array
 energy_levels["N Error"] = N_error_array
-print("Added N values")
+
 
 # get coriolis frequency at the geographic location of every mooring
+print("Add f values")
 energy_levels["coriolis frequency"] = energy_levels.apply(lambda row: helper.Constants.get_coriolis_frequency(row["lat"], unit = "rad/s"), axis=1)
-print("Added f values")
 
+
+print("calculate dissipation rate and its error")
+energy_levels["eps_IGW"] = energy_levels.apply(
+    lambda row: eq.get_dissipation_rate(
+        coriolis_frequency = row['coriolis frequency'],
+        buoyancy_frequency = row['N'],
+        energy_level = row['available'])
+    , axis=1)
+
+energy_levels["eps_IGW_mult_error"] = energy_levels.apply(
+    lambda row: eq.get_multiplicative_error_of_dissipation_rate(
+        coriolis_frequency = row['coriolis frequency'],
+        buoyancy_frequency = row['N'],
+        error_buoyancy_frequency = row['N Error'],
+        energy_level = row['available'],
+        error_energy_level = 0) # TODO
+    , axis=1)
+
+energy_levels["eps_IGW_add_error"] = energy_levels.apply(
+    lambda row: eq.get_additive_error_of_dissipation_rate(
+        coriolis_frequency = row['coriolis frequency'],
+        buoyancy_frequency = row['N'],
+        error_buoyancy_frequency = row['N Error'],
+        energy_level = row['available'],
+        error_energy_level = 0) #TODO
+    , axis=1)
+
+save_results_str = './method_data/eps_IGW_IDEMIX_results.csv'
+print(f"save results to {save_results_str}")
+energy_levels.to_csv(save_results_str)
 
