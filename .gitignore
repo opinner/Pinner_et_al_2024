@@ -15,6 +15,7 @@
 *.JPG
 *.svg
 *.tiff
+*.tif
 *.eps
 
 # Compiled source #
