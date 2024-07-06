@@ -82,6 +82,8 @@ energy_levels["eps_IGW_add_error"] = energy_levels.apply(
         error_energy_level = 0) #TODO
     , axis=1)
 
+print(energy_levels["eps_IGW_mult_error"])
+
 save_results_str = './method_data/eps_IGW_IDEMIX_results.csv'
 print(f"save results to {save_results_str}")
 energy_levels.to_csv(save_results_str)

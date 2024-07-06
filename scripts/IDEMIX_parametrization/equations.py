@@ -57,8 +57,9 @@ def get_multiplicative_error_of_dissipation_rate(coriolis_frequency, buoyancy_fr
             / (energy_level * np.log(10))
     )
 
-    dissipation_total_error = np.sqrt(error_due_to_N ** 2 + error_due_to_E ** 2)
-    return dissipation_total_error
+    error_to_magnitude = np.sqrt(error_due_to_N ** 2 + error_due_to_E ** 2)
+    # return error of the observable instead of error to the magnitude
+    return 10**error_to_magnitude
 
 
 def get_additive_error_of_dissipation_rate(coriolis_frequency, buoyancy_frequency, error_buoyancy_frequency, energy_level,
