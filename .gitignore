@@ -1,3 +1,9 @@
+# Project specific paths #
+############
+# Neutral density toolbox
+/src/eos80_legacy_gamma_n/*
+
+
 # Figures  #
 ############
 *.pdf
