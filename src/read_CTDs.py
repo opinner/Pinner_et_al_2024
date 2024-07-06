@@ -103,7 +103,7 @@ def find_line_number(filename, target_string):
                 return line_number
     return None
 
-def read_transect_CTDs():
+def save_Joinville_transect_CTDs_to_csv():
     columns = ['Event', 'Date/Time', 'Latitude', 'Longitude',
                'Depth water [m]', 'Press [dbar]', 'Temp [°C]', 'Sal', 'Expedition']
     CTDs = pd.DataFrame(columns=columns)
@@ -203,8 +203,12 @@ def read_transect_CTDs():
     plt.plot(x, m * x - b + shift, "--")
     plt.plot(x, m * x - b - shift)
 
-    return CTDs
+    CTDs.save_csv()
 
+    return None
+
+def load_Joinville_transect_CTDs():
+    raise NotImplementedError
 
 def bin_to_10m_resolution(x, values, bin_center):
     from scipy.stats import binned_statistic
@@ -305,5 +309,6 @@ def profiles_per_expedition(df):
     return event_counts
 
 if __name__ == '__main__':
-    CTDs = read_transect_CTDs()
+    save_Joinville_transect_CTDs_to_csv()
+    CTDS = load_Joinville_transect_CTDs()
     print(profiles_per_expedition(CTDs))

@@ -60,8 +60,6 @@ for x, z in zip(strain_eps, strain_mab):
     ax.fill_betweenx([lower, upper], x / 5, x * 5, color="tab:blue", alpha=0.3)
 #ax.semilogx(strain_eps, strain_z, 'o', ms = 6, mec = "xkcd:darkblue")
 
-print(strain_mab)
-
 # Plot multiplicative errors
 for IGW, IGW_error, mab in zip(IGWs, IGW_errors, mabs):
     ax.plot([IGW / IGW_error, IGW * IGW_error], [mab, mab], lw=3, c="k", alpha=0.5)
