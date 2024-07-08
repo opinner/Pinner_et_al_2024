@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import gsw
 import pandas as pd
+import pathlib
 
 # data handling
 import scipy.io as sio
@@ -11,6 +12,8 @@ import datetime
 from src.location import Location
 from src.ctd_cast import CTDCast
 import src.helper as helper
+
+RAW_DATA_DIR = " "
 
 
 # Set up conversion from ID number to cast name
@@ -96,12 +99,14 @@ def get_PS129_CTD_data():
         print(k, len(v))
     return pd.DataFrame(data=data_dict)
 
+
 def find_line_number(filename, target_string):
     with open(filename, 'r') as file:
         for line_number, line in enumerate(file):
             if line.startswith(target_string):
                 return line_number
     return None
+
 
 def save_Joinville_transect_CTDs_to_csv():
     columns = ['Event', 'Date/Time', 'Latitude', 'Longitude',
@@ -111,7 +116,7 @@ def save_Joinville_transect_CTDs_to_csv():
     # definition of box around the transect
     m = (63.21 - 64.22) / (53.8 - 47)
     b = 63.21 - m * 53.8
-    shift = 0.14 #0.12
+    shift = 0.14  #0.12
 
     PS129_CTDs = get_PS129_CTD_data()
     CTDs = CTDs.merge(PS129_CTDs, on=columns, how="outer")
@@ -138,12 +143,12 @@ def save_Joinville_transect_CTDs_to_csv():
     for i, path in enumerate(data_paths):
         target_string = "Event\tDate/Time\tLatitude\tLongitude\tElevation [m]"
         skiprows = find_line_number(path, target_string)
-        if skiprows is None: #if skiprows failed
+        if skiprows is None:  #if skiprows failed
             # try different target string
             target_string = "Event	Type	Date/Time	Longitude"
             skiprows = find_line_number(path, target_string)
         if path == '/media/sf_VM_Folder/data/CTD/ANT-XXIV_3_phys_oce.tab':
-            skiprows = 235 # test
+            skiprows = 235  # test
 
         data = pd.read_csv(path, delimiter="\t", skiprows=skiprows)
 
@@ -190,11 +195,9 @@ def save_Joinville_transect_CTDs_to_csv():
         data['Expedition'] = current_expedition
         plt.plot(data.Longitude, data.Latitude, ".", label=path.split("/")[-1])
 
-        print("\t",path[-25:-8], data['Event'].nunique())
+        print("\t", path[-25:-8], data['Event'].nunique())
 
         CTDs = CTDs.merge(data, on=columns, how="outer")
-
-
 
     CTDs['Event'] = CTDs['Event'].astype('category')
     CTDs['Expedition'] = CTDs['Expedition'].astype('category')
@@ -203,12 +206,86 @@ def save_Joinville_transect_CTDs_to_csv():
     plt.plot(x, m * x - b + shift, "--")
     plt.plot(x, m * x - b - shift)
 
-    CTDs.save_csv()
+    # try out different steps up the folder structure
+    path = "data/CTD/joinville_transect_ctds.csv"
+
+    for _ in range(5):  #try to find the right folder only five times to avoid an endless loop
+        file = pathlib.Path(path)
+        # Check if the file exists
+        if file.exists():
+            # Ask the user if they want to continue
+            user_input = input(f"The file {file} already exists. Do you want to overwrite it? (y/n): ").strip().lower()
+
+            # Only continue if the user agrees
+            if user_input != 'y':
+                print("Operation cancelled by the user.")
+                return None
+
+            else:
+                print(f"{file} will be overwritten")
+
+        try:
+            CTDs.to_csv(path)
+            print(f"saved CTDs at {path}")
+        except OSError:
+            path = "../" + path
+            continue
+        else:
+            break
 
     return None
 
+
 def load_Joinville_transect_CTDs():
-    raise NotImplementedError
+    # try the file with neutral densities (matlab output)
+    path = "data/CTD/joinville_transect_ctds_incl_neutral_density.csv"
+    for _ in range(6):  # try to find the right folder only five times to avoid an endless loop
+        try:
+            CTDs = pd.read_csv(path)
+        except FileNotFoundError as error:
+            path = "../" + path
+            continue
+
+        else:
+            print(f"loading of {path} was successful")
+            print("renaming of matlab style columns")
+            new_columns = ['index', 'Event', 'Latitude', 'Longitude', 'Press [dbar]', 'Sal', 'Temp [°C]', 'Absolute Salinity', 'Conservative Temperature', 'Date/Time',
+               'Depth water [m]',   'Expedition', "Neutral density [kg m^-3]"]
+            for i,j in zip(CTDs.columns, new_columns):
+                print(i,"\t",j)
+            CTDs.columns = new_columns
+            CTDs.set_index("index", inplace=True)
+            return CTDs
+
+
+    print("CTD data including neutral densities could not be found")
+
+    # try the file without neutral density
+    path = "data/CTD/joinville_transect_ctds.csv"
+    for _ in range(6):  # try to find the right folder only five times to avoid an endless loop
+        try:
+            CTDs = pd.read_csv(path)
+        except FileNotFoundError as error:
+            path = "../" + path
+            continue
+
+        else:
+            print(f"loading of {path} successfull")
+            if "neutral_density" not in CTDs.columns:
+                print("!!! Warning: !!!\n"
+                      "neutral_density is missing and has to be computed with the corresponding matlab toolbox\n"
+                      "This variable may be required for some code to run successfully"
+                      "")
+
+            return CTDs
+
+    print("joinville_transect_ctds could not be found")
+    print(f"last checked at {path}")
+    print(
+        "Did you preprocess the raw CTD profiles first by running save_Joinville_transect_CTDs_to_csv() ?")
+    raise FileNotFoundError
+
+
 
 def bin_to_10m_resolution(x, values, bin_center):
     from scipy.stats import binned_statistic
@@ -299,6 +376,7 @@ def get_PS129_CTDs_and_LADCPs():
 
     return [list_of_LADCP_casts, list_of_CTD_casts]
 
+
 def profiles_per_expedition(df):
     # Group by 'expedition' and count the number of unique 'event' occurrences
     event_counts = df.groupby('Expedition')['Event'].nunique().reset_index()
@@ -308,7 +386,12 @@ def profiles_per_expedition(df):
     event_counts = event_counts.sort_values(by='Expedition').reset_index(drop=True)
     return event_counts
 
+
 if __name__ == '__main__':
-    save_Joinville_transect_CTDs_to_csv()
-    CTDS = load_Joinville_transect_CTDs()
+    try:
+        CTDs = load_Joinville_transect_CTDs()
+    except FileNotFoundError:
+        save_Joinville_transect_CTDs_to_csv()
+        CTDs = load_Joinville_transect_CTDs()
+
     print(profiles_per_expedition(CTDs))

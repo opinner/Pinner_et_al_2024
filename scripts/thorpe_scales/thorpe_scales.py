@@ -13,7 +13,6 @@ plt.rcParams.update({
     "figure.figsize": [8, 6]
 })
 import mixsea as mx
-
 from src.read_CTDs import load_Joinville_transect_CTDs
 import src.helper as helper
 from scipy.interpolate import interp1d  # is considered legacy code, will be in the future removed from scipy
@@ -75,15 +74,19 @@ for event in events:
     eps_func = interp1d(max_depth - depth, eps[cut], kind='nearest', bounds_error=False, fill_value=(np.nan, np.nan))
     T_func = interp1d(max_depth - depth, current_profile['Temp [°C]'][cut], kind='nearest', bounds_error=False,
                       fill_value=(np.nan, np.nan))
+    gamma_n_func = interp1d(max_depth - depth, current_profile['Neutral density [kg m^-3]'][cut], kind='nearest', bounds_error=False,
+                      fill_value=(np.nan, np.nan))
 
     N_df[current_profile["Longitude"].mean()] = N_func(new_mab)
     eps_df[current_profile["Longitude"].mean()] = eps_func(new_mab)
     T_df[current_profile["Longitude"].mean()] = T_func(new_mab)
+    gamma_n_df[current_profile["Longitude"].mean()] = gamma_n_func(new_mab)
 
 # sort columns after their longitude value
 eps_df.sort_index(axis=1, inplace=True)
 N_df.sort_index(axis=1, inplace=True)
 T_df.sort_index(axis=1, inplace=True)
+gamma_n_df.sort_index(axis=1, inplace=True)
 
 # small data cleaning
 try:
@@ -92,6 +95,7 @@ try:
     eps_df.drop(T_df.columns[35], axis="columns", inplace=True)
     N_df.drop(T_df.columns[35], axis="columns", inplace=True)
     T_df.drop(T_df.columns[35], axis="columns", inplace=True)
+    gamma_n_df.drop(T_df.columns[35], axis="columns", inplace=True)
 except AssertionError:
     print("Wrong clean up parameters")
     pass
@@ -111,6 +115,16 @@ ax.set_title(r"Mixing diagnosed from Strain parametrization")
 helper.Plot.path_as_footnote(fig=f,
                              path="Pinner_et_al_2024/scripts/thorpe_scales/thorpe_scales.py",
                              rot="vertical")
+
+levels = [28.00, 28.26, 28.40]
+ax.contour(
+    gamma_n_df.columns,
+    gamma_n_df.index,
+    gamma_n_df,
+    levels=levels,
+    colors="k",
+    linewidths=1,
+)
 f.tight_layout()
 
 # cut to only cover the core of the gravity current
@@ -127,6 +141,7 @@ std_of_mean_profile = vertical_eps_df.std(axis=1)
 # save data
 eps_df.to_pickle("./method_data/Thorpe_eps_df_with_mab.pkl")
 T_df.to_pickle("./method_data/Thorpe_T_df_with_mab.pkl")
+gamma_n_df.to_pickle("./method_data/Thorpe_neutral_density_df_with_mab.pkl")
 np.savez("./method_data/horizontally_averaged_Thorpe_eps", z=vertical_eps_df.index, eps=mean_profile)
 
 print("done")
