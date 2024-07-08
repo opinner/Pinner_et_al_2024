@@ -1,5 +1,10 @@
+%---------------------------
+% this code builds on the eos80_legacy_gamma_n toolbox
+% be warned, running the neutral density calculation is extremly slow
+%---------------------------
+
 % Load the CSV file
-data = readtable('joinville_transect_ctds_without_gamma_n.csv');
+data = readtable('data/CTD/joinville_transect_ctds_without_gamma_n.csv');
 
 % Get unique events
 uniqueEvents = unique(data.Event);
@@ -36,5 +41,5 @@ for i = 1:length(uniqueEvents)
 end
 
 % Save the result back to a CSV file
-writetable(resultTable, 'joinville_transect_CTDs_neutral_density.csv');
+writetable(resultTable, 'data/CTD/joinville_transect_ctds_incl_neutral_density.csv');
 disp('done!');
