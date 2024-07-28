@@ -4,8 +4,6 @@ import matplotlib.colors as mcolors
 import pandas as pd
 import cmocean
 
-
-
 def main():
 
     ONE_COLUMN_WIDTH = 8.3
@@ -28,9 +26,8 @@ def main():
     fig,ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.8*TWO_COLUMN_WIDTH*cm))
 
 
-    ax.plot(energy_levels["lon"],  energy_levels["cats"], c = "tab:blue", lw = 3, label = "CATS model")
-    ax.plot(energy_levels["lon"], energy_levels["barotropic"], lw = 3, color = "k", label = "assumed barotropic energy", )
-    
+    ax.plot(energy_levels["lon"],  energy_levels["cats"], c = "tab:blue", lw = 3, label = "semidiurnal barotropic tide\nin CATS model")
+
     # plot x-shifted tidal energy level
     groups = energy_levels.groupby("lon")
     for i,lon in enumerate(set(energy_levels["lon"])):
@@ -55,22 +52,27 @@ def main():
     
         label = None
         if i == 0:
-            label = "measured"
+            label = "measured semidiurnal energy"
         ax.scatter(group["lon"] + xshift, group["tidal"], marker = ".", c = "tab:gray", ls = "None", s = 200, label = label, edgecolor = "k", zorder = 5)    
 
 
-    #ax.plot(longitudes,  available_energies, "D")
+    ax.plot(energy_levels["lon"], energy_levels["barotropic"], lw = 3, color = "k", label = "assumed semidiurnal\nbarotropic energy", )
 
     #ax.fill_between(energy_levels["lon"],  [0]*len(energy_levels["barotropic"]), energy_levels["barotropic"], label = "assumed barotropic energy", hatch= "//", facecolor = "none")
     ax.legend()
     ax.ticklabel_format(axis = "y", scilimits = (0,0), style = "scientific", useMathText=True)  
     ax.yaxis.get_offset_text().set_x(-0.1)
 
-    ax.set_title("Energy at semidurnal tidal frequencies")
+    mooring_label = ["A","B","C","D","E","F","G"]
+    for i,lon in enumerate(energy_levels["lon"].unique()):
+        ax.plot(lon, -0.05e-3, alpha=0)
+        ax.text(x=lon, y=-0.05e-3, s=mooring_label[i])
+
+    # ax.set_title("Energy at semidiurnal tidal frequencies")
     ax.set_xlabel("Longitude (°)")
-    ax.set_ylabel(r"$E$ / (m$^2$ s$^{-2}$)")  
+    ax.set_ylabel(r"Energy (m$^2\,$s$^{-2}$)")
     fig.tight_layout()
-    fig.savefig("./barotropic_tide.png", dpi = 400, bbox_inches = "tight")
+    fig.savefig("./barotropic_tide.pdf")
     
     
 if __name__ == '__main__':

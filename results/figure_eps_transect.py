@@ -9,13 +9,17 @@ import warnings
 # Suppress specific RuntimeWarning related to mean of empty slice
 warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*Mean of empty slice.*")
 
+plt.rcParams.update({
+    "figure.facecolor": "white",
+    "savefig.facecolor": "white",
+    "font.size": 9
+})
 
 ONE_COLUMN_WIDTH = 8.3
 TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1/2.54  # centimeters in inches
 
-# -------------------------------------------------------------------
 # read thorpe results data
 thorpe_eps_df = pd.read_pickle("../scripts/thorpe_scales/method_data/Thorpe_eps_df_with_mab.pkl")
 thorpe_mab = thorpe_eps_df.index
@@ -32,9 +36,7 @@ min_lon = min(thorpe_lons)
 
 
 # half a degree bins
-BIN_EDGES = np.arange(min_lon-1e-3*min_lon, max_lon+1e-3*max_lon, 0.5)
-#NUMBER_OF_BINS = 20
-#BIN_EDGES = np.linspace(min_lon-1e-3*min_lon, max_lon+1e-3*max_lon, NUMBER_OF_BINS + 1)
+BIN_EDGES = np.arange(min_lon-1e-3*min_lon, 0.5+max_lon+1e-3*max_lon, 0.5)
 
 # depth-level-wise (row-wise) arithmetic averaging
 rows = []
@@ -100,13 +102,12 @@ assert cb.ax.get_xticklabels()
 cb.ax.set_xticklabels([f'{fman(b):.0f}$\\times10^{{{fexp(b):.0f}}}$' for b in bounds])
 """
 
-cb = plt.colorbar(mpp, ax=ax, location="top")  # , aspect=40, shrink=0.8)
-cb.set_label(r"Dissipation rate $\varepsilon\,$(W kg$^{-1}$)", extend = "both")
+cb = plt.colorbar(mpp, ax=ax, location="top", extend = "max")  # , aspect=40, shrink=0.8)
+cb.set_label(r"Dissipation rate $\varepsilon\,$(W$\,$kg$^{-1}$)")
 
-# Draw gravity courrent boundary defined as the -0.7 °C isotherm (Fahrbach et al., 2001)
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
 gravity_current_boundary = [28.40]  # from Garabato et al 2002
-ax.contour(
+CS = ax.contour(
     binned_thorpe_gamma_n_df.columns,
     thorpe_mab, 
     binned_thorpe_gamma_n_df,
@@ -114,21 +115,25 @@ ax.contour(
     linestyles=["dashed", "solid"],
     colors="k",
     linewidths=3,
+    zorder=10
 )
+fmt = {}
+strs = ['WSDW', 'WSBW']
+for l, s in zip(CS.levels, strs):
+    fmt[l] = s
 
-"""
-ax.scatter(
-    energy_levels["lon"],
-    energy_levels["mab"],
-    c=energy_levels["eps_IW"],
-    cmap = cmap,
-    norm = mcolors.LogNorm(vmin=1e-10, vmax=1e-6), #TODO
-    edgecolor="black",
-    marker=MarkerStyle("o", fillstyle="left"),
-    s = 300,
-    zorder = 10
+# Label every other level using strings
+clabels = ax.clabel(
+    CS,
+    CS.levels,
+    inline=False,
+    fmt=fmt,
+    colors="black",
+    fontsize=10,
+    zorder=11
 )
-"""
+# adjust bboxes for better readability
+[txt.set_bbox(dict(facecolor='lightgrey', alpha = 0.8, edgecolor='darkgrey', boxstyle="round", pad=0)) for txt in clabels]
 
 ax.scatter(
     eps_IGW_IDEMIX_df["lon"],
@@ -145,22 +150,6 @@ ax.scatter(
 ax.set_facecolor('lightgrey')
 ax.set_ylabel("Meters above bottom")
 ax.set_xlabel("Longitude (°)")
-#ax[0].set_title(r"Dissipation rate $\varepsilon$ across the slope")
-
-"""
-ax.scatter(
-    energy_levels["lon"],
-    energy_levels["mab"],
-    #c=energy_levels["eps_IW"],
-    color = "tab:gray",
-    edgecolor="black",
-    marker=MarkerStyle("o", fillstyle="left"),
-    s = 200,
-    zorder = -10,
-    label = "$\\varepsilon_{\\mathrm{IGW}}$",
-)
-"""
-
 
 # for the legend
 # eps_IGW icon
@@ -173,7 +162,7 @@ ax.scatter(
     marker=MarkerStyle("o"),
     s=200,
     zorder=-10,
-    label="$\\varepsilon_{\\mathrm{IGW}}$",
+    label='$\\varepsilon_{\\mathrm{IGW, IDEMIX}}$',
 )
 
 # artificial eps_total icon
@@ -185,29 +174,16 @@ ax.scatter(
     marker=MarkerStyle("s"),
     s=80,
     zorder=-10,
-    label="$\\varepsilon_{\\mathrm{total}}$"
+    label="$\\varepsilon_{\\mathrm{total, Thorpe}}$"
 )
 
 
-ax.legend(loc = "upper left", ncol=3, columnspacing=1)
-ax.annotate('gravity current\nboundary', xy=(-48.8, 130), xytext=(-48.5, 270), #fontsize=9,
-            arrowprops = dict(facecolor='black', width = 2, shrink=0.05), ha = "center", va = "center", color = "white", bbox=dict(facecolor='black', alpha = 0.8, edgecolor='black', boxstyle='round, pad = 0.5'))
+ax.legend(loc = "upper left", ncol=3, columnspacing=1).set_zorder(50)
+# ax.annotate('gravity current\nboundary', xy=(-48.8, 130), xytext=(-48.5, 270), #fontsize=9,
+#             arrowprops = dict(facecolor='black', width = 2, shrink=0.05), ha = "center", va = "center", color = "white", bbox=dict(facecolor='black', alpha = 0.8, edgecolor='black', boxstyle='round, pad = 0.5'))
 
 ax.set_ylim(-10,500)
 fig.tight_layout()
-fig.savefig("./eps_transect.pdf", bbox_inches = "tight")
-fig.savefig("./eps_transect.png", dpi = 400, bbox_inches = "tight")
+fig.savefig("./eps_transect.pdf")
+#fig.savefig("./eps_transect.png", dpi = 400, bbox_inches = "tight")
 plt.show()
-
-
-
-
-
-
-
-   
-
-
-
-
-

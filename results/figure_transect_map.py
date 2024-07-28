@@ -1,5 +1,6 @@
 import rioxarray
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import cmocean as cmocean
@@ -11,6 +12,12 @@ ONE_COLUMN_WIDTH = 8.3
 TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1/2.54  # centimeters in inches
+
+plt.rcParams.update({
+    "figure.facecolor": "white",
+    "savefig.facecolor": "white",
+    "font.size": 9
+})
 
 # Open the raster data
 input_file = '../data/bathymetry/IBCSO_v2_ice-surface_WGS84.tif'
@@ -28,8 +35,10 @@ left, bottom, right, top = subset.rio.bounds()
 subset_data = subset[0, :, :]
 
 # Create the plot with a South Polar Stereographic projection
-fig, ax = plt.subplots(1, 1, figsize=(TWO_COLUMN_WIDTH * cm, 0.8 * TWO_COLUMN_WIDTH * cm),
-                       layout="tight", subplot_kw=dict(projection=ccrs.SouthPolarStereo(central_longitude=-50))
+fig, ax = plt.subplots(1, 1,
+                       figsize=(0.5 * TWO_COLUMN_WIDTH * cm, 0.5 * TWO_COLUMN_WIDTH * cm),
+                       layout="tight",
+                       subplot_kw=dict(projection=ccrs.SouthPolarStereo(central_longitude=-50))
                        )
 ax.set_extent([-55, -45, -65, -63], crs=ccrs.PlateCarree())
 
@@ -44,12 +53,25 @@ shade_only = shade_only.astype(float)  # Ensure float type
 shade = ls.hillshade(shade_only, vert_exag=0.1)
 
 # Plot the shaded relief using imshow
-ax.imshow(shade, extent=(left, right, bottom, top), transform=ccrs.PlateCarree(), origin='upper', cmap=cmocean.cm.gray, interpolation = 'none')
+ax.imshow(shade, extent=(left, right, bottom, top),
+          transform=ccrs.PlateCarree(),
+          origin='upper', cmap=cmocean.cm.gray,
+          interpolation = 'none'
+          )
 
 # Use imshow to plot the bathymetry (negative values)
 bathymetry = np.where(subset_data >= 0, np.nan, subset_data)
-im = ax.imshow(bathymetry, extent=(left, right, bottom, top), transform=ccrs.PlateCarree(), origin='upper', cmap=cmocean.cm.ice, vmin = -5000, interpolation = 'none')
-cbar = plt.colorbar(im, ax = ax, orientation='horizontal')#, shrink = 0.4);
+im = ax.imshow(bathymetry,
+               vmin=-5000,
+               extent=(left, right, bottom, top),
+               transform=ccrs.PlateCarree(),
+               origin='upper',
+               cmap=cmocean.cm.ice,
+               interpolation = 'none'
+               )
+
+# cbar_fig, cbar_ax = plt.subplots(1)
+cbar = plt.colorbar(im, ax = ax, location = "top")#, shrink = 0.4);
 cbar.set_label('Bathymetry (m)')
 
 # Prepare data for hill shading only below 0 with transparency
@@ -74,8 +96,8 @@ lon_grid, lat_grid = np.meshgrid(lon, lat)
 # Create contour lines for specified depths, in the bathymetry map as well as in the colormap
 levels = [-4000, -3000, -2000, -1000]
 contour = ax.contour(lon_grid, lat_grid, subset_data, transform=ccrs.PlateCarree(),
-                     levels=levels, colors="white", linestyles="solid", linewidths=0.5)
-cbar.add_lines(levels, colors=len(levels)*["w"], linewidths=1)
+                     levels=levels, colors="lightgrey", linestyles="solid", linewidths=0.5)
+cbar.add_lines(levels, colors=len(levels)*["lightgrey"], linewidths=1)
 
 
 gl = ax.gridlines(xlocs=np.arange(min_lon, max_lon, 2), ylocs=np.arange(min_lat, max_lat, 1),
@@ -83,46 +105,38 @@ gl = ax.gridlines(xlocs=np.arange(min_lon, max_lon, 2), ylocs=np.arange(min_lat,
                   rotate_labels=False,
                   y_inline=False)
 
+
+markersize = 7
+
 # load all 7 moorings as dataframes
 list_of_moorings = helper.IO.load_pickle(name="../data/mooring/list_of_moorings.pkl")
 for mooring in list_of_moorings:
-    ax.plot(mooring.location.lon, mooring.location.lat, "D", c="tab:red", markersize=10,
+    ax.plot(mooring.location.lon, mooring.location.lat, "D", c="tab:red", markersize=markersize,
              transform=ccrs.PlateCarree())
 
-ax.plot(-mooring.location.lon, -mooring.location.lat, "D", c="tab:red", markersize=10,
+ax.plot(-mooring.location.lon, -mooring.location.lat, "D", c="tab:red", markersize=markersize,
          transform=ccrs.PlateCarree(), label="Moorings")
 
-color = "grey"
-markersize = 10
 
 CTDs = load_Joinville_transect_CTDs()
 unique_coords_df = CTDs.drop_duplicates(subset=["Latitude", "Longitude"])
 
+color = "darkgrey"
 ax.plot(unique_coords_df["Longitude"], unique_coords_df["Latitude"],
         ".",
-        markersize=markersize,
-        color=color,
-        alpha=0.8,
-        # markeredgewidth=1,
-        # markeredgecolor = "black",
+        markersize=markersize+1,
+        alpha=0.7,
+        #markeredgewidth=,
+        markeredgecolor=color,
+        markerfacecolor='none',
         transform=ccrs.PlateCarree(),
         label="CTD profiles"
         )
 
-# ax.plot(-unique_coords_df["Longitude"].iloc[0],
-#          -unique_coords_df["Latitude"].iloc[0],
-#          ".",
-#          markersize=markersize,
-#          color=color,
-#          alpha=0.8,
-#          # markeredgewidth=1,
-#          # markeredgecolor = "black",
-#          transform=ccrs.PlateCarree(), )
-
-ax.legend()
+ax.legend(fontsize = "small")
 
 
 # Show the plot
-plt.savefig(f"../results/transect_map.svg", bbox_inches='tight')
-plt.savefig(f"../results/transect_map.png", dpi = 400, bbox_inches='tight')
+plt.savefig(f"../results/transect_map.svg")
+# plt.savefig(f"../results/transect_map.png", dpi = 400, bbox_inches='tight')
 plt.show()

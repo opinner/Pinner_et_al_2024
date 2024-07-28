@@ -48,7 +48,7 @@ fig, ax = plt.subplots(1, figsize=(ONE_COLUMN_WIDTH * cm, GOLDEN_RATIO * ONE_COL
 ax.semilogx(thorpe_eps, thorpe_z, c="tab:red", label="$\\langle\\varepsilon_{\\mathrm{total, Thorpe}}\\rangle$")
 ax.semilogx(IGWs, mabs, "o", c="k", label="$\\langle\\varepsilon_{\\mathrm{IGW, IDEMIX}}\\rangle$", zorder=10)
 
-label = "$\\langle\\varepsilon_{\\mathrm{IGW, strain}}\\rangle$"
+label = "$\\langle\\varepsilon_{\\mathrm{IGW, fine}}\\rangle$"
 for x, z in zip(strain_eps, strain_mab):
     spacing = np.abs(np.mean(np.diff(strain_mab)))
     assert spacing == 125
@@ -74,5 +74,5 @@ ax.legend(loc="upper left", framealpha=0.6, labelspacing=0.4, ncols=1, fontsize=
 #ax.set_xlim((0.95*lims[0],lims[1]))
 fig.tight_layout()
 fig.savefig("./avrg_vertical_eps.png", dpi=400, bbox_inches="tight")
-fig.savefig("./avrg_vertical_eps.pdf", bbox_inches="tight")
+fig.savefig("./avrg_vertical_eps.pdf")
 plt.show()
