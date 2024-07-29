@@ -55,10 +55,9 @@ for event in events:
 
     # Plot only in the depth range:
     max_depth = current_profile['Depth water [m]'].max()
-    cut = current_profile['Depth water [m]'] > (max_depth - 500)
-    depth = current_profile['Depth water [m]'][cut]
+    depth = current_profile['Depth water [m]']
 
-    if np.all(np.isnan(N[cut])):
+    if np.all(np.isnan(N)):
         print(f"{event} only produces NaNs")
         continue
 
@@ -70,11 +69,11 @@ for event in events:
         continue
 
     # nearest interpolation to the defined axis
-    N_func = interp1d(max_depth - depth, N[cut], kind='nearest', bounds_error=False, fill_value=(np.nan, np.nan))
-    eps_func = interp1d(max_depth - depth, eps[cut], kind='nearest', bounds_error=False, fill_value=(np.nan, np.nan))
-    T_func = interp1d(max_depth - depth, current_profile['Temp [°C]'][cut], kind='nearest', bounds_error=False,
+    N_func = interp1d(max_depth - depth, N, kind='nearest', bounds_error=False, fill_value=(np.nan, np.nan))
+    eps_func = interp1d(max_depth - depth, eps, kind='nearest', bounds_error=False, fill_value=(np.nan, np.nan))
+    T_func = interp1d(max_depth - depth, current_profile['Temp [°C]'], kind='nearest', bounds_error=False,
                       fill_value=(np.nan, np.nan))
-    gamma_n_func = interp1d(max_depth - depth, current_profile['Neutral density [kg m^-3]'][cut], kind='nearest', bounds_error=False,
+    gamma_n_func = interp1d(max_depth - depth, current_profile['Neutral density [kg m^-3]'], kind='nearest', bounds_error=False,
                       fill_value=(np.nan, np.nan))
 
     N_df[current_profile["Longitude"].mean()] = N_func(new_mab)
@@ -88,17 +87,17 @@ N_df.sort_index(axis=1, inplace=True)
 T_df.sort_index(axis=1, inplace=True)
 gamma_n_df.sort_index(axis=1, inplace=True)
 
-# small data cleaning
-try:
-    assert T_df.iloc[:, 35].count() < 120
-    print(f"Profile at {T_df.columns[35]:.1f}°W contains only {T_df.iloc[:, 35].count()} values and will be removed")
-    eps_df.drop(T_df.columns[35], axis="columns", inplace=True)
-    N_df.drop(T_df.columns[35], axis="columns", inplace=True)
-    T_df.drop(T_df.columns[35], axis="columns", inplace=True)
-    gamma_n_df.drop(T_df.columns[35], axis="columns", inplace=True)
-except AssertionError:
-    print("Wrong clean up parameters")
-    pass
+# # small data cleaning
+# try:
+#     assert T_df.iloc[:, 35].count() < 120
+#     print(f"Profile at {T_df.columns[35]:.1f}°W contains only {T_df.iloc[:, 35].count()} values and will be removed")
+#     eps_df.drop(T_df.columns[35], axis="columns", inplace=True)
+#     N_df.drop(T_df.columns[35], axis="columns", inplace=True)
+#     T_df.drop(T_df.columns[35], axis="columns", inplace=True)
+#     gamma_n_df.drop(T_df.columns[35], axis="columns", inplace=True)
+# except AssertionError:
+#     print("Wrong clean up parameters")
+#     pass
 
 f, ax = plt.subplots(nrows=1, figsize=(10, 5))
 # mab_bin_edges = bin_edges(eps_strain_df.index,dz)
@@ -138,11 +137,14 @@ vertical_eps_df.where(cond=~T_df.isna(), other=np.nan, inplace=True)
 mean_profile = vertical_eps_df.mean(axis=1)
 std_of_mean_profile = vertical_eps_df.std(axis=1)
 
+
+
+
 # save data
-eps_df.to_pickle("./method_data/Thorpe_eps_df_with_mab.pkl")
-T_df.to_pickle("./method_data/Thorpe_T_df_with_mab.pkl")
-gamma_n_df.to_pickle("./method_data/Thorpe_neutral_density_df_with_mab.pkl")
-np.savez("./method_data/horizontally_averaged_Thorpe_eps", z=vertical_eps_df.index, eps=mean_profile)
+eps_df.to_pickle("./method_results/Thorpe_eps_df_with_mab.pkl")
+T_df.to_pickle("./method_results/Thorpe_T_df_with_mab.pkl")
+gamma_n_df.to_pickle("./method_results/Thorpe_neutral_density_df_with_mab.pkl")
+np.savez("method_results/horizontally_averaged_Thorpe_eps", z=vertical_eps_df.index, eps=mean_profile)
 
 print("done")
 plt.show()
