@@ -11,9 +11,9 @@ import scipy.stats as ss
 warnings.filterwarnings('ignore', category=RuntimeWarning)
 
 # import my self written functions
-from src.read_CTDs import read_transect_CTDs
+from src.read_CTDs import load_Joinville_transect_CTDs
 
-CTDs = read_transect_CTDs()
+CTDs = load_Joinville_transect_CTDs()
 CTDs_grouped = CTDs.groupby("Expedition")
 expedition_names = CTDs_grouped.groups.keys()
 print(expedition_names)
@@ -120,82 +120,82 @@ eps_strain_df.sort_index(axis=1, inplace=True)  # sort columns
 eps_strain_df.sort_index(inplace=True)  # sort rows TODO Why is this necessary?
 eps_strain_df.columns = [el[0] for el in eps_strain_df.columns]  # convert multiindex to single index
 
-print(eps_strain_df)
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+eps_strain_df = eps_strain_df * 2.694  #Correction from Rw =3 to Rw = 7
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
 
-def fexp(f):
-    return int(np.floor(np.log10(abs(f)))) if f != 0 else 0
-def fman(f):
-    return f / 10 ** fexp(f)
-def generate_exp_pattern(start, end):
-    num_steps = (end - start) * 2  # Each step has a multiplier of 1 and 5
-    return [multiplier * 10 ** (start + i // 2) for i, multiplier in enumerate([1, 5] * (num_steps + 1)) if
-            start + i // 2 <= end]
-
-
-start_point = -12
-end_point = -8
-bounds = generate_exp_pattern(start_point, end_point)[:-1]
-print(bounds)
-ncolors = len(bounds) - 1
-cmap = plt.cm.get_cmap('magma_r', ncolors)
-norm = mcolors.BoundaryNorm(boundaries=bounds, ncolors=ncolors)
-
-f, ax = plt.subplots(nrows=1, figsize=(10, 5))
-
-# mab_bin_edges = bin_edges(eps_strain_df.index,dz)
-# lon_edges = eps_strain_df.columns - np.diff(eps_strain_df.columns)
-mpp = ax.pcolormesh(eps_strain_df.columns, eps_strain_df.index, eps_strain_df,
-                    cmap=cmap,
-                    norm=norm,
-                    shading="nearest"
-                    )
-cb = plt.colorbar(mpp, ax=ax)
-cb.set_label(r"$\varepsilon$ / (W kg$^{-1}$)")
-cb.ax.set_yticklabels([f'{fman(b):.1f}$\\times10^{{{fexp(b):.0f}}}$' for b in bounds])
-ax.set_facecolor('lightgrey')
-# ax.set_ylim(0,500)
-
-ax.set_title(r"Mixing diagnosed from Strain parametrization")
-# helper.Plot.path_as_footnote(fig = f,
-#                             path = "/home/ole/Desktop/CTD/mixsea/Weddell Sea Thorpe Scale.ipynb",
-#                             rot = "vertical")
-f.tight_layout()
-# f.savefig("./ThorpeDissipation_individ_Cruises.png", dpi = 300)
+# def fexp(f):
+#     return int(np.floor(np.log10(abs(f)))) if f != 0 else 0
+# def fman(f):
+#     return f / 10 ** fexp(f)
+# def generate_exp_pattern(start, end):
+#     num_steps = (end - start) * 2  # Each step has a multiplier of 1 and 5
+#     return [multiplier * 10 ** (start + i // 2) for i, multiplier in enumerate([1, 5] * (num_steps + 1)) if
+#             start + i // 2 <= end]
+#
+#
+# start_point = -12
+# end_point = -8
+# bounds = generate_exp_pattern(start_point, end_point)[:-1]
+# print(bounds)
+# ncolors = len(bounds) - 1
+# cmap = plt.cm.get_cmap('magma_r', ncolors)
+# norm = mcolors.BoundaryNorm(boundaries=bounds, ncolors=ncolors)
+#
+# f, ax = plt.subplots(nrows=1, figsize=(10, 5))
+#
+# # mab_bin_edges = bin_edges(eps_strain_df.index,dz)
+# # lon_edges = eps_strain_df.columns - np.diff(eps_strain_df.columns)
+# mpp = ax.pcolormesh(eps_strain_df.columns, eps_strain_df.index, eps_strain_df,
+#                     cmap=cmap,
+#                     norm=norm,
+#                     shading="nearest"
+#                     )
+# cb = plt.colorbar(mpp, ax=ax)
+# cb.set_label(r"$\varepsilon$ / (W kg$^{-1}$)")
+# cb.ax.set_yticklabels([f'{fman(b):.1f}$\\times10^{{{fexp(b):.0f}}}$' for b in bounds])
+# ax.set_facecolor('lightgrey')
+# # ax.set_ylim(0,500)
+#
+# ax.set_title(r"Mixing diagnosed from Strain parametrization")
+# # helper.Plot.path_as_footnote(fig = f,
+# #                             path = "/home/ole/Desktop/CTD/mixsea/Weddell Sea Thorpe Scale.ipynb",
+# #                             rot = "vertical")
+# f.tight_layout()
+# # f.savefig("./ThorpeDissipation_individ_Cruises.png", dpi = 300)
 
 # trim to gravity current core
 vertical_eps_df = eps_strain_df.drop(eps_strain_df.columns[eps_strain_df.columns < -51.5], axis="columns")
 vertical_eps_df.drop(vertical_eps_df.columns[vertical_eps_df.columns > -48.5], axis="columns", inplace=True)
-vertical_eps_df.head()
 
-fig, ax = plt.subplots(1)
 mean = vertical_eps_df.mean(axis=1)
 std = vertical_eps_df.std(axis=1)
-"""
-column_number = len(vertical_eps_df.columns)
-n = 5
-outliers = (vertical_eps_df > np.tile(mean+n*std, (column_number,1)).T) | (vertical_eps_df < np.tile(mean-n*std, (column_number,1)).T)
-# Set outliers to NaN
-_vertical_eps_df = vertical_eps_df.copy(deep = True)
-_vertical_eps_df[outliers] = pd.NA
-# Calculate new mean, ignoring NaNs
-#mean = _vertical_eps_df.mean(axis = 1)
-#std = _vertical_eps_df.std(axis = 1)
-"""
-# ax.fill_betweenx(vertical_eps_df.index, mean-std, mean+std, alpha = 0.5 )
-# ax.semilogx(mean, _vertical_eps_df.index)
-ax.semilogx(mean, vertical_eps_df.index)
-# ax.set_ylim(-10,510)
-print(f"{vertical_eps_df.min(axis=None):.2e},{vertical_eps_df.max(axis=None):.2e}")
+np.savez("method_results/Strain_vertical_eps", mab =vertical_eps_df.index, eps=mean)
 
-np.savez("./method_data/Strain_vertical_eps", mab =vertical_eps_df.index, eps=mean)
+# fig, ax = plt.subplots(1)
+
+# """
+# column_number = len(vertical_eps_df.columns)
+# n = 5
+# outliers = (vertical_eps_df > np.tile(mean+n*std, (column_number,1)).T) | (vertical_eps_df < np.tile(mean-n*std, (column_number,1)).T)
+# # Set outliers to NaN
+# _vertical_eps_df = vertical_eps_df.copy(deep = True)
+# _vertical_eps_df[outliers] = pd.NA
+# # Calculate new mean, ignoring NaNs
+# #mean = _vertical_eps_df.mean(axis = 1)
+# #std = _vertical_eps_df.std(axis = 1)
+# """
+# # ax.fill_betweenx(vertical_eps_df.index, mean-std, mean+std, alpha = 0.5 )
+# # ax.semilogx(mean, _vertical_eps_df.index)
+# ax.semilogx(mean, vertical_eps_df.index)
+# # ax.set_ylim(-10,510)
+# print(f"{vertical_eps_df.min(axis=None):.2e},{vertical_eps_df.max(axis=None):.2e}")
+
 
 lons = eps_strain_df.columns.to_numpy()
 max_lon = max(lons)
 min_lon = min(lons)
-LON_BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, max_lon + 1e-3 * max_lon, 0.5)
-# NUMBER_OF_BINS = 20
-# BIN_EDGES = np.linspace(min_lon-1e-3*min_lon, max_lon+1e-3*max_lon, NUMBER_OF_BINS + 1)
-
+LON_BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5+max_lon + 1e-3 * max_lon, 0.5)
 
 rows = []
 for index, row in eps_strain_df.iterrows():
@@ -209,14 +209,6 @@ binned_eps_strain_df.index = eps_strain_df.index
 
 print(binned_eps_strain_df.head())
 print(binned_eps_strain_df.info())
-binned_eps_strain_df.to_csv("./method_data/strain_eps.csv")
+binned_eps_strain_df.to_csv("./method_data/binned_strain_eps.csv")
 
 plt.show()
-
-# depth_bin_edges = np.concatenate(
-#     (
-#         [np.min(depth_bins) - dz / 2],
-#         0.5 * (depth_bins[1:] + depth_bins[:-1]),
-#         [np.max(depth_bins) + dz / 2],
-#     )
-# )

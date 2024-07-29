@@ -45,7 +45,7 @@ for LADCP_cast, CTD_cast in zip(list_of_LADCP_casts, list_of_CTD_casts):
         raise AssertionError
 
 # ----------------------------
-# Finestructure
+# Finestructure params
 # ----------------------------
 shst_params = dict()
 

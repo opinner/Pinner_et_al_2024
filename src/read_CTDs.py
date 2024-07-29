@@ -26,9 +26,9 @@ def load_stations(path):
 
 def get_PS129_CTD_data():
     # get location of CTD files from the LADCP data files
-    LADCP_DIRECTORY = f"/media/sf_VM_Folder/PS129_Plots/ladcp_profiles/"
-
+    LADCP_DIRECTORY = f"/media/sf_VM_Folder/figures/PS129_Plots/ladcp_profiles/"
     ladcp_paths = sorted(helper.IO.get_filepaths_from_directory(LADCP_DIRECTORY, inclusive=(".mat",)))
+    assert len(ladcp_paths)!= 0
 
     # all CTD cast can be identified by a number
     ladcp_cast_numbers = [path.split('/')[-1][7:-4] for path in ladcp_paths]
@@ -45,7 +45,7 @@ def get_PS129_CTD_data():
         time_stamp = datetime.datetime(*map(int, np.squeeze(data["date"])))  # convert list of values to datetime object
         ctd_timestamps.append(time_stamp)
 
-    name_to_number_dict = load_stations("/media/sf_VM_Folder/PS129_Plots/conversion.txt")
+    name_to_number_dict = load_stations("/media/sf_VM_Folder/figures/PS129_Plots/conversion.txt")
     number_to_name_dict = {int(v): k for k, v in name_to_number_dict.items()}
 
     # create as many CTDCast objects as casts itself
@@ -66,7 +66,7 @@ def get_PS129_CTD_data():
     for cast in list_of_PS129_casts:
         # load actual data to that Cast name
         try:
-            path = f"/media/sf_VM_Folder/PS129_Plots/ctd_profiles/dps129_{cast.name}.cnv"
+            path = f"/media/sf_VM_Folder/figures/PS129_Plots/ctd_profiles/dps129_{cast.name}.cnv"
 
             # SP = Practical Salinity [PSU]
             # Temperature [ITS-90, °C]
@@ -297,7 +297,7 @@ def bin_to_10m_resolution(x, values, bin_center):
 
 def get_PS129_CTDs_and_LADCPs():
     # get location of CTD files from the LADCP data files
-    LADCP_DIRECTORY = f"/media/sf_VM_Folder/PS129_Plots/ladcp_profiles/"
+    LADCP_DIRECTORY = f"/media/sf_VM_Folder/figures/PS129_Plots/ladcp_profiles/"
 
     ladcp_paths = sorted(helper.IO.get_filepaths_from_directory(LADCP_DIRECTORY, inclusive=(".mat",)))
 
@@ -307,7 +307,7 @@ def get_PS129_CTDs_and_LADCPs():
     # create as many CTDCast objects as casts itself
     list_of_LADCP_casts = [CTDCast() for _ in ladcp_cast_numbers]
 
-    name_to_number_dict = load_stations("/media/sf_VM_Folder/PS129_Plots/conversion.txt")
+    name_to_number_dict = load_stations("/media/sf_VM_Folder/figures/PS129_Plots/conversion.txt")
     number_to_name_dict = {int(v): k for k, v in name_to_number_dict.items()}
 
     # for every cast object set a location and a name
@@ -344,7 +344,7 @@ def get_PS129_CTDs_and_LADCPs():
 
         # load CTD data to that LADCP Cast name
         try:
-            path = f"/media/sf_VM_Folder/PS129_Plots/ctd_profiles/dps129_{LADCP_cast.name}.cnv"
+            path = f"/media/sf_VM_Folder/figures/PS129_Plots/ctd_profiles/dps129_{LADCP_cast.name}.cnv"
 
             # SP = Practical Salinity [PSU]
             # Temperature [ITS-90, °C]
