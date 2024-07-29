@@ -5,22 +5,17 @@ import pandas as pd
 # read Thorpe and strain results data
 #-------------------------------------------------------------------
 
-data = np.load("../scripts/thorpe_scales/method_data/horizontally_averaged_Thorpe_eps.npz")
+data = np.load("../scripts/thorpe_scales/method_results/horizontally_averaged_Thorpe_eps.npz")
 thorpe_z = data["z"]
 thorpe_eps = data["eps"]
 
-data = np.load("../scripts/shear_strain_parametrization/method_data/Strain_vertical_eps.npz")
+data = np.load("../scripts/shear_strain_parametrization/method_results/Strain_vertical_eps.npz")
 strain_mab = data["mab"]
 strain_eps = data["eps"]
 
-#TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TODO#
-strain_eps = strain_eps * 2.694  #Correction from Rw =3 to Rw = 7
-#TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TODO#
-
-
 #Horizontally average of the mooring results
 #-------------------------------------------------------------------
-energy_levels = pd.read_csv("../scripts/IDEMIX_parametrization/method_data/eps_IGW_IDEMIX_results.csv")
+energy_levels = pd.read_csv("../scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
 mab_ranges = [(20, 60), (120, 160), (320, 400)]
 mabs = []
 IGWs = []

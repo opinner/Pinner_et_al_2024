@@ -36,11 +36,11 @@ subset_data = subset[0, :, :]
 
 # Create the plot with a South Polar Stereographic projection
 fig, ax = plt.subplots(1, 1,
-                       figsize=(0.5 * TWO_COLUMN_WIDTH * cm, 0.5 * TWO_COLUMN_WIDTH * cm),
+                       figsize=(0.5 * TWO_COLUMN_WIDTH * cm +0.5, 0.5 * TWO_COLUMN_WIDTH * cm +0.5),
                        layout="tight",
                        subplot_kw=dict(projection=ccrs.SouthPolarStereo(central_longitude=-50))
                        )
-ax.set_extent([-55, -45, -65, -63], crs=ccrs.PlateCarree())
+ax.set_extent([-55, -46, -65, -63], crs=ccrs.PlateCarree())
 
 # Define parameters for hill shading
 ls = mcolors.LightSource(azdeg=315, altdeg=45)

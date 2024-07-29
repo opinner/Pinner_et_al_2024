@@ -21,9 +21,9 @@ GOLDEN_RATIO = 1.61
 cm = 1/2.54  # centimeters in inches
 
 # read thorpe results data
-thorpe_eps_df = pd.read_pickle("../scripts/thorpe_scales/method_data/Thorpe_eps_df_with_mab.pkl")
+thorpe_eps_df = pd.read_pickle("../scripts/thorpe_scales/method_results/Thorpe_eps_df_with_mab.pkl")
 thorpe_mab = thorpe_eps_df.index
-thorpe_gamma_n_df = pd.read_pickle("../scripts/thorpe_scales/method_data/Thorpe_neutral_density_df_with_mab.pkl")
+thorpe_gamma_n_df = pd.read_pickle("../scripts/thorpe_scales/method_results/Thorpe_neutral_density_df_with_mab.pkl")
 
 # add background dissipation, but only where there is temperature data
 BACKGROUND_DISSIPATION = 1e-10 #value taken from Hirano et al 2015
@@ -60,7 +60,7 @@ binned_thorpe_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
 
 #-------------------------------------------------------------------
 # read eps_IGW results from IDEMIX method
-eps_IGW_IDEMIX_df = pd.read_csv("../scripts/IDEMIX_parametrization/method_data/eps_IGW_IDEMIX_results.csv")
+eps_IGW_IDEMIX_df = pd.read_csv("../scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
 
 fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.8*TWO_COLUMN_WIDTH*cm))
 
@@ -68,23 +68,7 @@ fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.8*TWO_COLUMN_WIDTH*cm)
 ######################################################################## 
 ##################### Axis 0 ###########################################
 ######################################################################## 
-"""
-def fexp(f):
-    return int(np.floor(np.log10(abs(f)))) if f != 0 else 0
-def fman(f):
-    return f/10**fexp(f)
-def generate_pattern(start, end):
-    num_steps = (end - start) * 2  # Each step/order of magnitude has a multiplier of 1 and 5 e.g. 5 \times 10^{-8}
-    return [multiplier * 10**(start + i // 2) for i, multiplier in enumerate([1, 5] * (num_steps + 1)) if start + i // 2 <= end]
 
-# Start and stop order of magnitude:
-start_point = -10
-end_point = -7
-bounds = generate_pattern(start_point, end_point)[:-1]
-ncolors = len(bounds) - 1
-#cmap = plt.cm.get_cmap('viridis', ncolors)
-norm = mcolors.BoundaryNorm(boundaries=bounds, ncolors= 256)
-"""
 cmap = cmocean.cm.tempo
 mpp = ax.pcolormesh(
     binned_thorpe_eps_df.columns, 
@@ -94,13 +78,6 @@ mpp = ax.pcolormesh(
     cmap=cmap,
     rasterized=True
 )
-"""
-cb = plt.colorbar(mpp, ax = ax, location = "right")#, aspect = 40, shrink = 0.8)
-cb.set_label(r"Dissipation rate $\varepsilon\,$(W kg$^{-1}$)")
-print(cb.ax.get_xticklabels(), len(cb.ax.get_xticklabels()))
-assert cb.ax.get_xticklabels()
-cb.ax.set_xticklabels([f'{fman(b):.0f}$\\times10^{{{fexp(b):.0f}}}$' for b in bounds])
-"""
 
 cb = plt.colorbar(mpp, ax=ax, location="top", extend = "max")  # , aspect=40, shrink=0.8)
 cb.set_label(r"Dissipation rate $\varepsilon\,$(W$\,$kg$^{-1}$)")

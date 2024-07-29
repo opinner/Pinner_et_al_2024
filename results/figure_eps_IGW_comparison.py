@@ -23,7 +23,7 @@ plt.rcParams.update({
 
 # -------------------------------------------------------------------
 # read neutral density data
-thorpe_gamma_n_df = pd.read_pickle("../scripts/thorpe_scales/method_data/Thorpe_neutral_density_df_with_mab.pkl")
+thorpe_gamma_n_df = pd.read_pickle("../scripts/thorpe_scales/method_results/Thorpe_neutral_density_df_with_mab.pkl")
 thorpe_mab = thorpe_gamma_n_df.index
 
 thorpe_lons = thorpe_gamma_n_df.columns.to_numpy()
@@ -46,15 +46,12 @@ binned_thorpe_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
 
 #-------------------------------------------------------------------
 # read eps_IGW results from strain-based finestructure analysis
-eps_IGW_strain_df = pd.read_csv("../scripts/shear_strain_parametrization/method_data/strain_eps.csv")
+eps_IGW_strain_df = pd.read_csv("../scripts/shear_strain_parametrization/method_results/binned_strain_eps.csv")
 eps_IGW_strain_df.set_index('Unnamed: 0', inplace=True)
-# TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TODO#
-eps_IGW_strain_df = eps_IGW_strain_df*2.694 #Correction from Rw =3 to Rw = 7
-# TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!TODO#
 
 #-------------------------------------------------------------------
 # read eps_IGW results from IDEMIX method
-eps_IGW_IDEMIX_df = pd.read_csv("../scripts/IDEMIX_parametrization/method_data/eps_IGW_IDEMIX_results.csv")
+eps_IGW_IDEMIX_df = pd.read_csv("../scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
 
 
 
@@ -74,18 +71,6 @@ mpp = ax.pcolormesh(eps_IGW_strain_df.columns.astype(float), eps_IGW_strain_df.i
       
 cb = plt.colorbar(mpp, ax=ax, location="top", extend="max")
 cb.set_label(r"Wave-induced dissipation rate $\varepsilon_{\mathrm{IGW}}\,$(W$\,$kg$^{-1}$)")
-#cb.set_label(r"Dissipation rate $\\varepsilon_{\\mathrm{IGW}}\,(W kg$^{-1}$$)")
-
-"""
-cb = plt.colorbar(mpp, ax = ax, location = "right")#, aspect = 40, shrink = 0.8)
-cb.set_label(r"Dissipation rate $\varepsilon\,$(W kg$^{-1}$)")
-print(cb.ax.get_xticklabels(), len(cb.ax.get_xticklabels()))
-assert cb.ax.get_xticklabels()
-cb.ax.set_xticklabels([f'{fman(b):.0f}$\\times10^{{{fexp(b):.0f}}}$' for b in bounds])
-"""
-
- # , aspect=40, shrink=0.8)
-
 
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
 # gravity_current_boundary = [28.40]  # from Garabato et al 2002
@@ -132,19 +117,6 @@ ax.set_ylabel("Meters above bottom")
 ax.set_xlabel("Longitude (°)")
 #ax[0].set_title(r"Dissipation rate $\varepsilon$ across the slope")
 
-"""
-ax.scatter(
-    energy_levels["lon"],
-    energy_levels["mab"],
-    #c=energy_levels["eps_IW"],
-    color = "tab:gray",
-    edgecolor="black",
-    marker=MarkerStyle("o", fillstyle="left"),
-    s = 200,
-    zorder = -10,
-    label = "$\\varepsilon_{\\mathrm{IGW}}$",
-)
-"""
 
 # ------------------------------------------------------------------------------------------
 # for the legend

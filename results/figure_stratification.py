@@ -19,13 +19,13 @@ plt.rcParams.update({
     "font.size": 9
 })
 
-thorpe_gamma_n_df = pd.read_pickle("../scripts/thorpe_scales/method_data/Thorpe_neutral_density_df_with_mab.pkl")
+thorpe_gamma_n_df = pd.read_pickle("../scripts/thorpe_scales/method_results/Thorpe_neutral_density_df_with_mab.pkl")
 lons = thorpe_gamma_n_df.columns.to_numpy()
 mab = thorpe_gamma_n_df.index
 max_lon = max(lons)
 min_lon = min(lons)
 # half a degree bins
-BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, max_lon + 1e-3 * max_lon, 0.5)
+BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5+max_lon + 1e-3 * max_lon, 0.5)
 
 rows = []
 for index, row in thorpe_gamma_n_df.iterrows():
@@ -81,7 +81,7 @@ ax.clabel(
 # ax.annotate('gravity current\nboundary', xy=(-48.8, 130), xytext=(-48, 270), #fontsize=9,
 #             arrowprops = dict(facecolor='black', width = 2, shrink=0.05), ha = "center", va = "center", color = "white", bbox=dict(facecolor='black', alpha = 0.8, edgecolor='black', boxstyle='round, pad = 0.5'))
 
-mooring_info = pd.read_csv("../scripts/IDEMIX_parametrization/method_data/eps_IGW_IDEMIX_results.csv")
+mooring_info = pd.read_csv("../scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
 moorings_mabs = mooring_info["rounded_mab"]
 moorings_lons = mooring_info ["lon"]
 
