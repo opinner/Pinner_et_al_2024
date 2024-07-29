@@ -110,8 +110,6 @@ def get_additive_error_of_dissipation_rate(coriolis_frequency, buoyancy_frequenc
             * error_energy_level
     )
 
-    assert error_due_to_E == 0 or np.isnan(error_due_to_E)
-
     dissipation_total_error = np.sqrt(error_due_to_N ** 2 + error_due_to_E ** 2)
 
     return dissipation_total_error
