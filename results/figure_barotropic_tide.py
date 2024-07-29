@@ -11,7 +11,11 @@ def main():
     GOLDEN_RATIO = 1.61
     cm = 1/2.54  # centimeters in inches
 
-
+    plt.rcParams.update({
+        "figure.facecolor": "white",
+        "savefig.facecolor": "white",
+        "font.size": 9
+    })
 
     data = np.load("../scripts/IDEMIX_parametrization/method_results/results_available_energy.npz", allow_pickle = True)
     energy_levels = pd.DataFrame(data = {

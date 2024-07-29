@@ -2,6 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+plt.rcParams.update({
+    "figure.facecolor": "white",
+    "savefig.facecolor": "white",
+    "font.size": 9
+})
+
 # read Thorpe and strain results data
 #-------------------------------------------------------------------
 
@@ -16,6 +22,10 @@ strain_eps = data["eps"]
 #Horizontally average of the mooring results
 #-------------------------------------------------------------------
 energy_levels = pd.read_csv("../scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
+
+eerror = energy_levels["eps_IGW_mult_error"]
+print("E Error", np.mean(eerror), np.std(eerror), np.max(eerror), np.min(eerror))
+
 mab_ranges = [(20, 60), (120, 160), (320, 400)]
 mabs = []
 IGWs = []
@@ -24,7 +34,7 @@ for mab_range in mab_ranges:
     inbetween_mabs = []
     inbetween_IGWs = []
     inbetween_IGW_errors = []
-    for mab, IGW, IGW_error in zip(energy_levels["rounded_mab"], energy_levels["eps_IGW"],
+    for mab, IGW, IGW_error in zip(energy_levels["rounded mab"], energy_levels["eps_IGW"],
                                    energy_levels["eps_IGW_mult_error"]):
         if not (mab > mab_range[0] and mab < mab_range[1]):
             continue
@@ -65,8 +75,7 @@ ax.set_ylabel("Height above bottom (m)")
 ax.set_xlabel("$\\langle\\varepsilon\\rangle\\,$(W kg$^{-1})$")
 ax.set_ylim(-10, 450)
 ax.legend(loc="upper left", framealpha=0.6, labelspacing=0.4, ncols=1, fontsize="9")
-#lims = ax.get_xlim()
-#ax.set_xlim((0.95*lims[0],lims[1]))
+ax.set_xlim(3e-11,5e-8)
 fig.tight_layout()
 fig.savefig("./avrg_vertical_eps.png", dpi=400, bbox_inches="tight")
 fig.savefig("./avrg_vertical_eps.pdf")

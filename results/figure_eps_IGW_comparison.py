@@ -102,7 +102,7 @@ ax.clabel(
 
 ax.scatter(
     eps_IGW_IDEMIX_df["lon"],
-    eps_IGW_IDEMIX_df["rounded_mab"],
+    eps_IGW_IDEMIX_df["rounded mab"],
     c=eps_IGW_IDEMIX_df["eps_IGW"],
     cmap=cmap,
     norm=norm,
@@ -123,7 +123,7 @@ ax.set_xlabel("Longitude (°)")
 # eps_IGW IDEMIX icon
 ax.scatter(
     eps_IGW_IDEMIX_df["lon"],
-    eps_IGW_IDEMIX_df["rounded_mab"],
+    eps_IGW_IDEMIX_df["rounded mab"],
     #c=energy_levels["eps"],
     color = "tab:gray",
     edgecolor="black",
@@ -136,7 +136,7 @@ ax.scatter(
 # artificial eps_IGW strain icon
 ax.scatter(
     eps_IGW_IDEMIX_df["lon"],
-    eps_IGW_IDEMIX_df["rounded_mab"],
+    eps_IGW_IDEMIX_df["rounded mab"],
     color = "tab:gray",
     edgecolor="black",
     marker=MarkerStyle("s"),
