@@ -1,0 +1,32 @@
+{
+  "title": "Analysis code to: Internal-wave-induced dissipation rates in the Weddell Sea Bottom Water gravity current, (Pinner et al., 2024)",
+  "license": "MIT",
+  "creators": [
+    {
+      "name": "Pinner, Ole",
+      "affiliation": "Alfred Wegener Institute, Helmholtz Centre for Polar and Marine Research (AWI)",
+      "orcid": "0000-0002-4314-6232"
+    }
+  ],
+  "contributors": [
+    {
+      "type": "ContactPerson",
+      "name": "Pinner, Ole",
+      "affiliation": "Alfred Wegener Institute, Helmholtz Centre for Polar and Marine Research (AWI)",
+      "orcid": "0000-0002-4314-6232"
+    },
+    {
+      "type": "Researcher",
+      "name": "Pinner, Ole",
+      "affiliation": "Alfred Wegener Institute, Helmholtz Centre for Polar and Marine Research (AWI)",
+      "orcid": "0000-0002-4314-6232"
+    }
+  ],
+  "related_identifiers": [
+        {
+            "scheme": "url",
+            "identifier": "https://github.com/opinner/Pinner_et_al_2024",
+            "relation": "isDerivedFrom"
+        }
+    ]
+}
