@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13134609.svg)](https://doi.org/10.5281/zenodo.13134609)
+
 # Analysis code to: Pinner et al., 2024
 
 This is the analysis code for the publication  
