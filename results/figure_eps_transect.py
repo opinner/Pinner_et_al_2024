@@ -28,12 +28,18 @@ thorpe_gamma_n_df = pd.read_pickle("../scripts/thorpe_scales/method_results/Thor
 # add background dissipation, but only where there is temperature data
 BACKGROUND_DISSIPATION = 1e-10 #value taken from Hirano et al 2015
 thorpe_eps_df.fillna(value=BACKGROUND_DISSIPATION, inplace=True)
+# use gamma_n as a mask
 thorpe_eps_df.where(cond=~thorpe_gamma_n_df.isna(), other=np.nan, inplace=True)
 
+#but then use the already binned version
+binned_thorpe_gamma_n_df = pd.read_csv("../data/binned_gamma_n.csv")
+binned_thorpe_gamma_n_df.set_index(keys = 'Unnamed: 0', inplace = True)
+binned_thorpe_gamma_n_df = binned_thorpe_gamma_n_df.drop(binned_thorpe_gamma_n_df[binned_thorpe_gamma_n_df.index > 600].index)
+
+# bin dissipation rates
 thorpe_lons = thorpe_eps_df.columns.to_numpy()
 max_lon = max(thorpe_lons)
 min_lon = min(thorpe_lons)
-
 
 # half a degree bins
 BIN_EDGES = np.arange(min_lon-1e-3*min_lon, 0.5+max_lon+1e-3*max_lon, 0.5)
@@ -48,14 +54,6 @@ for index, row in thorpe_eps_df.iterrows():
     rows.append(new_row)
 binned_thorpe_eps_df = pd.concat(rows, sort=False).reset_index(drop=True)
 
-rows = []
-for index, row in thorpe_gamma_n_df.iterrows():
-    values = row.to_numpy()
-    bin_means = ss.binned_statistic(x=thorpe_lons, values=values, statistic=np.nanmean, bins=BIN_EDGES)[0]
-    new_row = pd.DataFrame([bin_means], columns=BIN_EDGES[:-1])
-    rows.append(new_row)
-
-binned_thorpe_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
 
 
 #-------------------------------------------------------------------
