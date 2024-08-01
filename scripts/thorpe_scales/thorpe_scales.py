@@ -138,8 +138,6 @@ mean_profile = vertical_eps_df.mean(axis=1)
 std_of_mean_profile = vertical_eps_df.std(axis=1)
 
 
-
-
 # save data
 eps_df.to_pickle("./method_results/Thorpe_eps_df_with_mab.pkl")
 T_df.to_pickle("./method_results/Thorpe_T_df_with_mab.pkl")
