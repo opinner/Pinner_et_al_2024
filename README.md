@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13134609.svg)](https://doi.org/10.5281/zenodo.13134609)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13134608.svg)](https://doi.org/10.5281/zenodo.13134608)
 
 # Analysis code to: Pinner et al., 2024
 
