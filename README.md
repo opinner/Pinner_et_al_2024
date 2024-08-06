@@ -1,4 +1,5 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13134608.svg)](https://doi.org/10.5281/zenodo.13134608)
+[![output data regression test](https://github.com/opinner/Pinner_et_al_2024/actions/workflows/output_regression_tests.yml/badge.svg)](https://github.com/opinner/Pinner_et_al_2024/actions/workflows/output_regression_tests.yml)
 
 # Analysis code to: Pinner et al., 2024
 
