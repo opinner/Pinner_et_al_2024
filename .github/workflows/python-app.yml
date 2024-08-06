@@ -30,4 +30,4 @@ jobs:
       run: |
         # Regression Tests to make sure the output remains the same
         pip install pytest pytest-regressions pandas
-        pytest tests/test_data.py 
+        pytest tests/test_data_outputs.py 
