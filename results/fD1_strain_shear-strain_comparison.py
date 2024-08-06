@@ -166,7 +166,7 @@ eps_strain_df = eps_strain_df * 2.694  #Correction from Rw =3 to Rw = 7
 
 comparison_df = eps_strain_df / eps_df
 
-thorpe_gamma_n_df = pd.read_pickle("../thorpe_scales/method_results/Thorpe_neutral_density_df_with_mab.pkl")
+thorpe_gamma_n_df = pd.read_pickle("../scripts/thorpe_scales/method_results/Thorpe_neutral_density_df_with_mab.pkl")
 thorpe_mab = thorpe_gamma_n_df.index
 
 thorpe_lons = thorpe_gamma_n_df.columns.to_numpy()
