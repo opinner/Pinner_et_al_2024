@@ -1,23 +1,20 @@
 import pytest
-import pytest-regressions
+# uses pytest-regressions
 import pandas as pd
 
 def test_thorpe_output():
-  data_frame = pd.DataFrame.from_dict({
-      'U_gas': U[0][positions],
-      'U_liquid': U[1][positions],
-      'gas_vol_frac [-]': vol_frac[0][positions],
-      'liquid_vol_frac [-]': vol_frac[1][positions],
-      'P': Pa_to_bar(P)[positions],
-  })
-  
-  dataframe_regression.check(data_frame)
+    thorpe_eps_df = pd.read_pickle("../scripts/thorpe_scales/method_results/Thorpe_eps_df_with_mab.pkl")
+    pytest.dataframe_regression.check(thorpe_eps_df)
 
 def test_finestructure_output():
-    pass
-  
+    eps_IGW_strain_df = pd.read_csv("../scripts/shear_strain_parametrization/method_results/binned_strain_eps.csv")
+    pytest.dataframe_regression.check(eps_IGW_strain_df)
+
 def test_idemix_output():
-    pass
+    eps_IGW_IDEMIX_df = pd.read_csv("../scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
+    pytest.dataframe_regression.check(eps_IGW_IDEMIX_df)
 
-
+def test_neutral_density_output():
+    binned_neutral_density_df = pd.read_csv("../data/binned_gamma_n.csv")
+    pytest.dataframe_regression.check(binned_neutral_density_df)
   

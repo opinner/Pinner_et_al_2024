@@ -32,7 +32,7 @@ fastjsonschema==2.16.2
 fonttools==4.51.0
 geographiclib==2.0
 geopy==2.4.1
-gsw==3.6.17
+gsw~=3.6.18
 idna==3.7
 importlib-metadata==7.0.1
 importlib-resources==6.1.1
@@ -116,7 +116,7 @@ rpds-py==0.10.6
 scipy==1.10.1
 seaborn==0.12.2
 Send2Trash==1.8.2
-setuptools==68.2.2
+setuptools~=69.5.1
 shapely==2.0.1
 sip==6.7.12
 six==1.16.0
@@ -141,3 +141,6 @@ wheel==0.41.2
 widgetsnbextension==4.0.10
 xarray==2022.11.0
 zipp==3.17.0
+
+pytest~=7.4.4
+rioxarray~=0.13.4
