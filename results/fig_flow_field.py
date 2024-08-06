@@ -25,7 +25,7 @@ plt.rcParams.update({
 list_of_moorings = helper.IO.load_pickle(name="../data/mooring/list_of_moorings.pkl")
 data = np.load("../data/max_depth_dict.npz", allow_pickle=True)
 max_depth_dict = data["max_depth_dict"].item()
-neutral_density = pd.read_csv("../data/binned_gamma_n.csv")
+neutral_density = pd.read_csv("../scripts/preprocessing/method_results/binned_gamma_n.csv")
 neutral_density.set_index(keys = 'Unnamed: 0', inplace = True)
 neutral_density = neutral_density.drop(neutral_density[neutral_density.index > 550].index)
 

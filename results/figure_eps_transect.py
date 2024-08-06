@@ -32,7 +32,7 @@ thorpe_eps_df.fillna(value=BACKGROUND_DISSIPATION, inplace=True)
 thorpe_eps_df.where(cond=~thorpe_gamma_n_df.isna(), other=np.nan, inplace=True)
 
 #but then use the already binned version
-binned_thorpe_gamma_n_df = pd.read_csv("../data/binned_gamma_n.csv")
+binned_thorpe_gamma_n_df = pd.read_csv("../scripts/preprocessing/method_results/binned_gamma_n.csv")
 binned_thorpe_gamma_n_df.set_index(keys = 'Unnamed: 0', inplace = True)
 binned_thorpe_gamma_n_df = binned_thorpe_gamma_n_df.drop(binned_thorpe_gamma_n_df[binned_thorpe_gamma_n_df.index > 600].index)
 
