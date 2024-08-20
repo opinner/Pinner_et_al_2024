@@ -1,4 +1,4 @@
-import cmocean as cm
+import cmocean
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import mixsea as mx
@@ -7,6 +7,16 @@ import pandas as pd
 
 import src.read_CTDs
 
+ONE_COLUMN_WIDTH = 8.3
+TWO_COLUMN_WIDTH = 12
+GOLDEN_RATIO = 1.61
+cm = 1/2.54  # centimeters in inches
+
+plt.rcParams.update({
+    "figure.facecolor": "white",
+    "savefig.facecolor": "white",
+    "font.size": 9
+})
 
 def get_transect_CTDs():
     data = src.read_CTDs.get_PS129_CTD_data()
@@ -17,15 +27,13 @@ def get_transect_CTDs():
         # print(translate)
         return translate
 
-    path = "/media/sf_VM_Folder/PS129_Plots/Weddell_Sea_Transect.txt"
+    path = "/media/sf_VM_Folder/figures/PS129_Plots/Weddell_Sea_Transect.txt"
     translate = load_stations(path)
     transect_names = translate.keys()
     transect_numbers = translate.values()
 
     # Filter the DataFrame
-    transect_df = data[data['Event'].str.replace('PS129_', '').isin(transect_names)]
-
-    return transect_df
+    return data[data['Event'].str.replace('PS129_', '').isin(transect_names)]
 
 
 transect_df = get_transect_CTDs()
@@ -133,7 +141,7 @@ f, ax = plt.subplots(nrows=1, figsize=(10, 5))
 mpp = ax.pcolormesh(fine_eps_df.columns, fine_eps_df.index, fine_eps_df,
                     norm=mcolors.LogNorm(vmax=1e-8, vmin=1e-10),
                     shading="nearest",
-                    cmap=cm.cm.matter
+                    cmap=cmocean.cm.matter
                     )
 cb = plt.colorbar(mpp, ax=ax)
 cb.set_label(r"$\varepsilon$ / (W kg$^{-1}$)")
@@ -155,11 +163,11 @@ ax.set_title(r"Shear/Strain ratio Rw")
 f.tight_layout()
 
 print(f"Across the Weddell Sea: {np.nanmean(Rw_df.values.flatten()):.1f}±{np.nanstd(Rw_df.values.flatten()):.1f}")
-fig, ax = plt.subplots(2, sharex=True, figsize=(5, 5), layout="constrained")
+fig, ax = plt.subplots(2, sharex=True, figsize=(0.8 * TWO_COLUMN_WIDTH * cm, 0.6 * TWO_COLUMN_WIDTH * cm), layout="constrained")
 ax[0].hist(Rw_df.values.flatten(), bins=np.logspace(np.log10(1), np.log10(300), 20),
            color="k", edgecolor='white', linewidth=1)
 ax[0].set_xscale("log")
-ax[0].set_title("Rw, across the Weddell Sea")
+ax[0].set_title(r"$R_\omega$, across the Weddell Sea transect")
 ax[0].axvline(3, color="tab:red", ls="--")
 ax[0].axvline(7, color="tab:red")
 
@@ -175,7 +183,8 @@ print(
     f"Across continental slope: {np.nanmean(slope_Rw_df.values.flatten()):.1f}±{np.nanstd(slope_Rw_df.values.flatten()):.1f}")
 ax[1].hist(slope_Rw_df.values.flatten(), bins=np.logspace(np.log10(1), np.log10(300), 20),
            color="k", edgecolor='white', linewidth=1)
-ax[1].set_title("Rw, across continental slope")
+ax[1].set_title(r"$R_\omega$, across the continental slope")
 ax[1].axvline(3, color="tab:red", ls="--")
 ax[1].axvline(7, color="tab:red")
+plt.savefig(f"./Rw_histogram.pdf")
 plt.show()
