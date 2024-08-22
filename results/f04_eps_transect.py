@@ -9,11 +9,7 @@ import warnings
 # Suppress specific RuntimeWarning related to mean of empty slice
 warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*Mean of empty slice.*")
 
-plt.rcParams.update({
-    "figure.facecolor": "white",
-    "savefig.facecolor": "white",
-    "font.size": 9
-})
+plt.style.use('./paper.mplstyle')
 
 ONE_COLUMN_WIDTH = 8.3
 TWO_COLUMN_WIDTH = 12

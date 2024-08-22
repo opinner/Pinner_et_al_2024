@@ -15,11 +15,7 @@ import matplotlib.pyplot as plt
 
 print(plt.rcParams["font.size"])
 
-plt.rcParams.update({
-    "figure.facecolor": "white",
-    "savefig.facecolor": "white",
-    "font.size": 9
-})
+plt.style.use('./paper.mplstyle')
 legend_font_size = 7
 
 import warnings

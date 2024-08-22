@@ -2,7 +2,6 @@ import warnings
 
 import cmocean
 import matplotlib.pyplot as plt
-plt.style.use('./thesis.mplstyle')
 import numpy as np
 import pandas as pd
 
@@ -16,6 +15,7 @@ ONE_COLUMN_WIDTH = 8.3
 TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1/2.54  # centimeters in inches
+plt.style.use('./paper.mplstyle')
 
 # load all 7 moorings as dataframes
 list_of_moorings = helper.IO.load_pickle(name="../data/mooring/list_of_moorings.pkl")
