@@ -1,0 +1,4 @@
+
+figure.facecolor: white,
+savefig.facecolor: "white",
+font.size: 9
