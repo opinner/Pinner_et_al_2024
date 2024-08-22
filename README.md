@@ -4,7 +4,7 @@
 
 # Analysis code to: [Pinner et al., 2024](https://doi.org/10.5194/egusphere-2024-2444)
 
-This is the PhD thesis chapter associated with the publication  
+This is the code to my PhD thesis chapter associated with the publication  
 [**Pinner et al., 2024:** *Internal-wave-induced dissipation rates in the Weddell Sea Bottom Water gravity current*](https://doi.org/10.5194/egusphere-2024-2444), 
 
 The Weddell Sea Bottom Water gravity current transports dense water from the continental shelf to the deep sea and is crucial for the formation of new deep sea water. Build on vertical profiles and time series measured in the northwestern Weddell Sea, we apply 3 methods to distinguish turbulence caused by internal waves from turbulence by other sources. We find that in the upper part of the gravity current, internal waves are important for the mixing of less dense water down into the current.
