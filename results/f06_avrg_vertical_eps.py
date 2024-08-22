@@ -2,11 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-plt.rcParams.update({
-    "figure.facecolor": "white",
-    "savefig.facecolor": "white",
-    "font.size": 9
-})
+plt.style.use('./paper.mplstyle')
+
 
 # read Thorpe and strain results data
 #-------------------------------------------------------------------

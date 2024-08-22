@@ -13,11 +13,7 @@ TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1/2.54  # centimeters in inches
 
-plt.rcParams.update({
-    "figure.facecolor": "white",
-    "savefig.facecolor": "white",
-    "font.size": 9
-})
+plt.style.use('./paper.mplstyle')
 
 # Open the raster data
 input_file = '../data/bathymetry/IBCSO_v2_ice-surface_WGS84.tif'

@@ -15,11 +15,7 @@ ONE_COLUMN_WIDTH = 8.3
 TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1/2.54  # centimeters in inches
-plt.rcParams.update({
-    "figure.facecolor": "white",
-    "savefig.facecolor": "white",
-    "font.size": 9
-})
+plt.style.use('./paper.mplstyle')
 
 # load all 7 moorings as dataframes
 list_of_moorings = helper.IO.load_pickle(name="../data/mooring/list_of_moorings.pkl")
