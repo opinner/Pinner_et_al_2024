@@ -1,6 +1,7 @@
 import cmocean
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
+plt.style.use('./thesis.mplstyle')
 import mixsea as mx
 import numpy as np
 import pandas as pd
@@ -12,11 +13,7 @@ TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1/2.54  # centimeters in inches
 
-plt.rcParams.update({
-    "figure.facecolor": "white",
-    "savefig.facecolor": "white",
-    "font.size": 9
-})
+
 
 def get_transect_CTDs():
     data = src.read_CTDs.get_PS129_CTD_data()
@@ -186,5 +183,5 @@ ax[1].hist(slope_Rw_df.values.flatten(), bins=np.logspace(np.log10(1), np.log10(
 ax[1].set_title(r"$R_\omega$, across the continental slope")
 ax[1].axvline(3, color="tab:red", ls="--")
 ax[1].axvline(7, color="tab:red")
-plt.savefig(f"./Rw_histogram.pdf")
+#plt.savefig(f"./Rw_histogram.pdf")
 plt.show()

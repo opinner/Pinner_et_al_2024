@@ -1,7 +1,11 @@
+import matplotlib.pyplot as plt
+plt.style.use('./thesis.mplstyle')
 import numpy as np
+import pandas as pd
 import src.gm_library as gm
-import src.helper_functions as helper
+import src.helper as helper
 import src.spectra as spectra
+import src.plots as plots
 
 def calculate_GM_spectrum(f,N,N0,b):
     """
@@ -55,40 +59,102 @@ def kinetic_to_total_energy(f, N, omega):
     return conversion
 
 
+def main():
 
-# Coriolis frequency in rad/s
-f = helper.Constants.get_coriolis_frequency(
-    mooring.location.lat, unit="rad/s", absolute=True
-)
-print(f"{f=:.1e}") #1.31e-4
+    ###############################
+    # Observational Data
+    ###############################
 
-# buoyancy frequency in rad/s
-N = avrg_N_in_rads #5.06e-4
-print(f"{N=:.1e}")
+    # load all 7 moorings as dataframes
+    list_of_moorings = helper.IO.load_pickle(name="../data/mooring/list_of_moorings.pkl")
+    # load Stratification information
+    N_table = pd.read_pickle("../scripts/IDEMIX_parametrization/method_results/N_values.pkl")
 
-# surface-extrapolated buoyancy frequency
-N0 = N #5.06e-4
+    data = np.load("../data/mooring/max_depth_dict.npz", allow_pickle=True)
+    max_depth_dict = data["max_depth_dict"].item()
 
-# e-folding scale of N(z)
-b = 1.7e3
+    # Select Example Mooring
+    mooring = list_of_moorings[1]
+    measurement_depth = "1513"
+    print(f"{mooring.location = }, {mooring.time_delta = }")
+
+    # cv = mooring[str(measurement_depth)].to_numpy()
+    # time = mooring["time"].to_numpy()
+
+    coriolis_frequency_in_cpd = helper.Constants.get_coriolis_frequency(
+        mooring.location.lat, unit="cpd", absolute=True
+    )
+    print(f"{coriolis_frequency_in_cpd = :.1f} cpd")
+    coriolis_frequency_in_rads = helper.Constants.get_coriolis_frequency(
+        mooring.location.lat, unit="rad/s", absolute=True
+    )
+    print(f"{coriolis_frequency_in_rads = :.1e} rad/s")
+
+    ## Adding Buoyancy frequency N
+
+    # get instrument depth in units of meter above the sea floor
+    mab_of_measurement = int(max_depth_dict[mooring.location.lon]) - int(measurement_depth)
+
+    if mab_of_measurement < 0 and mab_of_measurement > -2:
+        print(f"Instrument depth was corrected from {mab_of_measurement} to 0 mab.")
+        mab_of_measurement = 0
+
+    # get a typical N value, derived from CTD profiles
+    column_name = f"({mooring.location.lat:.2f},{mooring.location.lon:.2f})"
+    avrg_N_in_rads = N_table.loc[
+        N_table["mab"] == mab_of_measurement, column_name
+    ].item()
+
+    avrg_N_in_cpd = avrg_N_in_rads / (2 * np.pi) * 86400
+    print(f"{avrg_N_in_cpd = :.1f} cpd")
 
 
-# Correction factor in cpd
-kinetic_to_total_energy_factor = kinetic_to_total_energy(
-    f=coriolis_frequency_in_cpd,
-    N=avrg_N_in_cpd,
-    omega=fN_freq
-)
+    TIME_BANDWIDTH_PRODUCT = 10
+
+    complex_velocity = mooring[measurement_depth]
+    complex_velocity_array = helper.Data.cut_trailing_nans(
+        complex_velocity.to_numpy()
+    )
+    fN_freq, velocity_spectrum = spectra.total_multitaper(
+        complex_velocity_array, dt=1 / 12, P=TIME_BANDWIDTH_PRODUCT
+    )
+    assert not np.any(np.isnan(velocity_spectrum))
 
 
-# correction factor cannot be larger than 1, as HKE < HKE + APE
-assert np.all(kinetic_to_total_energy_factor > 0.999)
+    ###############################
+    # Garrett Munk model
+    ###############################
+    # Coriolis frequency in rad/s
+    f = helper.Constants.get_coriolis_frequency(
+        mooring.location.lat, unit="rad/s", absolute=True
+    )
+    print(f"{f=:.1e}") #1.31e-4
+    # buoyancy frequency in rad/s
+    N = avrg_N_in_rads #5.06e-4
+    print(f"{N=:.1e}")
+    # surface-extrapolated buoyancy frequency
+    N0 = N #5.06e-4
+    # e-folding scale of N(z)
+    b = 1.7e3
 
-# Compare to Correction factor in rad/s
-difference = kinetic_to_total_energy_factor - kinetic_to_total_energy(
-    f=coriolis_frequency_in_rads, N=avrg_N_in_rads, omega=fN_freq * (2 * np.pi) / 86400
-)
-assert np.all(np.abs(difference) < 1e-10)
+    omega, K_omg, P_omg = calculate_GM_spectrum(f, N, N0, b)
 
-# PSD and the frequency is in units of cpd
-resolved_total_energy_spectrum_between_f_and_N = kinetic_to_total_energy_factor * resolved_HKE_spectrum_between_f_and_N
+    ###############################
+    # Figure
+    ###############################
+    fig, ax = plt.subplots(1, figsize=plots.set_size("thesis"))
+    factor = kinetic_to_total_energy(f, N, omega)
+    E_omg = factor * K_omg
+    ax.plot(24*3600*omega[:-40]/(2*np.pi),factor[:-40], label = "factor")
+    ax.plot(24*3600*omega/(2*np.pi), (K_omg+P_omg)/K_omg, zorder = 5, lw = 4, color = "k", label = "(K_omg+P_omg)/P_omg")
+    ax.axvline(avrg_N_in_cpd, color="tab:red", alpha=0.6, linestyle="-", linewidth=2)
+    ax.text(15.7, 5, "N", color="tab:red", alpha=1, size = "large")
+    ax.axvline(coriolis_frequency_in_cpd, color="r", alpha=0.6, linestyle="-", linewidth=2)
+    ax.axvline(6, color="k", alpha=0.6, linestyle="--", linewidth=2)
+    ax.text(1.3, 5, "f", color="tab:red", alpha=1, size="large")
+    ax.legend()
+    ax[1].set_xlabel("Frequency (cycles per day)")
+
+if __name__ == "__main__":
+    main()
+    plt.show()

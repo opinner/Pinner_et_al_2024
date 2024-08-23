@@ -337,7 +337,7 @@ ax[1].text(1.5, 1e-5, "f", color="tab:red", alpha=1, size="x-large")
 ax[1].legend(loc="upper right", fontsize=legend_font_size)
 # fig.suptitle(f"Measurement at {mooring.location.pretty_print()}, Depth of {measurement_depth}$\,$m, {mab_of_measurement}$\,$m above ground")
 
-ax[1].set_xlabel("Frequency (cycles/day)")
+ax[1].set_xlabel("Frequency (cycles per day)")
 ax[1].set_ylabel(r"Energy density (m$^2\,$s$^{-2}$ days)")
 ax[1].set_xlim(1e-1, 20);
 #ax.set_xlim(5e-1,17)
