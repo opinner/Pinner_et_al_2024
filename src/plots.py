@@ -1,11 +1,49 @@
 #-------------------------------------------
 #Plotting
 #-------------------------------------------     
-
+import matplotlib as plt
+import numpy as np
 
 ONE_COLUMN_WIDTH = 8.3
 TWO_COLUMN_WIDTH = 12
-GOLDEN_RATIO = 1.61
+GOLDEN_RATIO = (5**.5 + 1) / 2
+
+def set_size(width, fraction=1, subplots=(1, 1)):
+    """Set figure dimensions to avoid scaling in LaTeX.
+
+    Parameters
+    ----------
+    width: float or string
+            Document width in points, or string of prefined document type
+    fraction: float, optional
+            Fraction of the width which you wish the figure to occupy
+    subplots: array-like, optional
+            The number of rows and columns of subplots.
+    Returns
+    -------
+    fig_dim: tuple
+            Dimensions of figure in inches
+    """
+    if width == 'thesis':
+        width_pt = 410
+    else:
+        width_pt = width
+
+    # Width of figure (in pts)
+    fig_width_pt = width_pt * fraction
+    # Convert from pt to inches
+    inches_per_pt = 1 / 72.27
+
+    # Golden ratio to set aesthetic figure height
+    # https://disq.us/p/2940ij3
+    golden_ratio = (5**.5 - 1) / 2
+
+    # Figure width in inches
+    fig_width_in = fig_width_pt * inches_per_pt
+    # Figure height in inches
+    fig_height_in = fig_width_in * golden_ratio * (subplots[0] / subplots[1])
+
+    return (fig_width_in, fig_height_in)
 
 
 class Plot:
@@ -13,8 +51,8 @@ class Plot:
     def path_as_footnote(fig = None,path = "", rot = "vertical"):
         """
         Add the script origin as a footnote below or to the right side of a figure
-        """        
-    
+        """
+
         if fig == None:
             fig = plt.gcf()
 
@@ -22,11 +60,11 @@ class Plot:
             import os
             try:
                 path = os.path.realpath(__file__)
-            except NameError: 
-                # if run in Jupyter Notebook __file__ is not defined 
+            except NameError:
+                # if run in Jupyter Notebook __file__ is not defined
                 # and the path is only the passed string
                 path = os.path.abspath('')
-        
+
         if rot == "vertical":
             plt.figtext(0.99, 0.5, f"{path}", horizontalalignment='right', va = "center",\
                 figure = fig, rotation = "vertical", fontsize = 6)
@@ -40,15 +78,15 @@ class Plot:
             [24 / (14 * 24), 24 / 12.4, 2 * 24 / 12.4, 4 * 24 / 12.4, f_cpd, 2 * f_cpd, 1]
         )
         freq_labels = ["14 days", "M2", "2M2", "4M2", " \nf", " \n2f", "K1"]
-        
+
         axis = ax.get_ylim()
         for freq in freqs:
             if freq == 24 / (14 * 24): continue
             ax.vlines(freq, lower_bound, upper_bound, color="k", alpha=0.5, linestyle="-", linewidth=0.75)
         ax.set_ylim(axis)
-        
+
         ax2 = ax.secondary_xaxis(location="bottom")
-        ax2 = Plot._axstyle(ax2, ticks="in", grid=False, spine_offset=40) 
+        ax2 = Plot._axstyle(ax2, ticks="in", grid=False, spine_offset=40)
         ax2.xaxis.set_ticks([])
         ax2.xaxis.set_ticklabels([])
         ax2.minorticks_off()
@@ -57,8 +95,8 @@ class Plot:
 
         return ax2
 
-        
-    @staticmethod    
+
+    @staticmethod
     def _axstyle(
         ax=None,
         fontsize=9,
