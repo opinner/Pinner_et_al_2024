@@ -183,5 +183,5 @@ ax[1].hist(slope_Rw_df.values.flatten(), bins=np.logspace(np.log10(1), np.log10(
 ax[1].set_title(r"$R_\omega$, across the continental slope")
 ax[1].axvline(3, color="tab:red", ls="--")
 ax[1].axvline(7, color="tab:red")
-#plt.savefig(f"./Rw_histogram.pdf")
+fig.savefig(f"./Rw_histogram.pdf")
 plt.show()

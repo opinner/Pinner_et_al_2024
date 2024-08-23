@@ -1,13 +1,15 @@
-import matplotlib.pyplot as plt
-plt.style.use('./thesis.mplstyle')
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import src.gm_library as gm
 import src.helper as helper
 import src.spectra as spectra
 import src.plots as plots
 
-def calculate_GM_spectrum(f,N,N0,b):
+plt.style.use('./thesis.mplstyle')
+
+
+def calculate_GM_spectrum(f, N, N0, b):
     """
     Here happens the actual calculation of the GM81 spectrum.
     GM equations are copied from https://github.com/joernc/GM81
@@ -20,18 +22,18 @@ def calculate_GM_spectrum(f,N,N0,b):
     # The variable names follow Munk's notation.
 
     # frequency
-    omg = np.logspace(np.log10(1.01*f), np.log10(N), 401) #Where does the 401 come from?
+    omg = np.logspace(np.log10(1.01 * f), np.log10(N), 401)  # Where does the 401 come from?
 
     # horizontal wavenumber
-    k = 2*np.pi*np.logspace(-6, -2, 401)
+    k = 2 * np.pi * np.logspace(-6, -2, 401)
 
     # mode number
     j = np.arange(1, 100)
 
     # reshape to allow multiplication into 2D array
-    Omg = np.reshape(omg, (omg.size,1))
-    K = np.reshape(k, (k.size,1))
-    J = np.reshape(j, (1,j.size))
+    Omg = np.reshape(omg, (omg.size, 1))
+    K = np.reshape(k, (k.size, 1))
+    J = np.reshape(j, (1, j.size))
 
     # frequency spectra (KE and PE)
     K_omg_j = gm.K_omg_j(Omg, J, f, N, N0, b)
@@ -49,6 +51,7 @@ def calculate_GM_spectrum(f,N,N0,b):
 
     return omg, K_omg, P_omg
 
+
 def kinetic_to_total_energy(f, N, omega):
     conversion = (
             2 * (N ** 2 - f ** 2)
@@ -60,7 +63,6 @@ def kinetic_to_total_energy(f, N, omega):
 
 
 def main():
-
     ###############################
     # Observational Data
     ###############################
@@ -95,7 +97,7 @@ def main():
     # get instrument depth in units of meter above the sea floor
     mab_of_measurement = int(max_depth_dict[mooring.location.lon]) - int(measurement_depth)
 
-    if mab_of_measurement < 0 and mab_of_measurement > -2:
+    if 0 > mab_of_measurement > -2:
         print(f"Instrument depth was corrected from {mab_of_measurement} to 0 mab.")
         mab_of_measurement = 0
 
@@ -108,7 +110,6 @@ def main():
     avrg_N_in_cpd = avrg_N_in_rads / (2 * np.pi) * 86400
     print(f"{avrg_N_in_cpd = :.1f} cpd")
 
-
     TIME_BANDWIDTH_PRODUCT = 10
 
     complex_velocity = mooring[measurement_depth]
@@ -120,7 +121,6 @@ def main():
     )
     assert not np.any(np.isnan(velocity_spectrum))
 
-
     ###############################
     # Garrett Munk model
     ###############################
@@ -128,12 +128,12 @@ def main():
     f = helper.Constants.get_coriolis_frequency(
         mooring.location.lat, unit="rad/s", absolute=True
     )
-    print(f"{f=:.1e}") #1.31e-4
+    print(f"{f=:.1e}")  #1.31e-4
     # buoyancy frequency in rad/s
-    N = avrg_N_in_rads #5.06e-4
+    N = avrg_N_in_rads  #5.06e-4
     print(f"{N=:.1e}")
     # surface-extrapolated buoyancy frequency
-    N0 = N #5.06e-4
+    N0 = N  #5.06e-4
     # e-folding scale of N(z)
     b = 1.7e3
 
@@ -142,18 +142,23 @@ def main():
     ###############################
     # Figure
     ###############################
-    fig, ax = plt.subplots(1, figsize=plots.set_size("thesis"))
+    fig, ax = plt.subplots(1, figsize=plots.set_size("thesis", fraction=0.9), layout="tight")
     factor = kinetic_to_total_energy(f, N, omega)
     E_omg = factor * K_omg
-    ax.plot(24*3600*omega[:-40]/(2*np.pi),factor[:-40], label = "factor")
-    ax.plot(24*3600*omega/(2*np.pi), (K_omg+P_omg)/K_omg, zorder = 5, lw = 4, color = "k", label = "(K_omg+P_omg)/P_omg")
-    ax.axvline(avrg_N_in_cpd, color="tab:red", alpha=0.6, linestyle="-", linewidth=2)
-    ax.text(15.7, 5, "N", color="tab:red", alpha=1, size = "large")
-    ax.axvline(coriolis_frequency_in_cpd, color="r", alpha=0.6, linestyle="-", linewidth=2)
-    ax.axvline(6, color="k", alpha=0.6, linestyle="--", linewidth=2)
-    ax.text(1.3, 5, "f", color="tab:red", alpha=1, size="large")
-    ax.legend()
-    ax[1].set_xlabel("Frequency (cycles per day)")
+    ax.plot(24 * 3600 * omega[:-40] / (2 * np.pi), factor[:-40], color="tab:blue", lw=2, label="from wave theory")
+    ax.plot(24 * 3600 * omega / (2 * np.pi), (K_omg + P_omg) / K_omg, zorder=5, lw=2, color="k",
+            label="from Garrett-Munk model")
+    ax.axvline(6, color="k", alpha=1, linestyle="--", linewidth=2)
+    ax.text(5.8, 3.2, "data\nresolution", color="k", ha="right")
+    ax.axvline(avrg_N_in_cpd, color="tab:red", alpha=0.6, linestyle="--", linewidth=2)
+    ax.text(15.7, 2.5, "N", color="tab:red", alpha=1, size="large")
+    ax.axvline(coriolis_frequency_in_cpd, color="r", alpha=0.6, linestyle="--", linewidth=2)
+    ax.text(1.3, 2.5, "f", color="tab:red", alpha=1, size="large")
+
+    ax.legend(loc="upper left", framealpha=0.9)
+    ax.set_xlabel("Frequency (cycles per day)")
+    ax.set_ylabel("HKE to TE factor")
+    fig.savefig(f"./HKE_TE_factor.pdf")
 
 if __name__ == "__main__":
     main()
