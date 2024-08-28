@@ -1,4 +1,4 @@
-# Raw Data 
+# Data 
 
 ## Topography
 Topography is taken from the [IBSCO2 data set](https://doi.pangaea.de/10.1594/PANGAEA.937574).
