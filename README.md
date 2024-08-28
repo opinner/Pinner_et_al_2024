@@ -10,11 +10,12 @@ This is the analysis code to the for open peer-review submitted publication
 The Weddell Sea Bottom Water gravity current transports dense water from the continental shelf to the deep sea and is crucial for the formation of new deep sea water. Build on vertical profiles and time series measured in the northwestern Weddell Sea, we apply 3 methods to distinguish turbulence caused by internal waves from turbulence by other sources. We find that in the upper part of the gravity current, internal waves are important for the mixing of less dense water down into the current.
 
 ## Disclaimer
-- Although this code produces the results and figures to the accompanying paper, this repository still contains unused code snippets and unfinished documentation. 
+> [!IMPORTANT]  
+> - Although this code produces the results and figures to the accompanying paper, this repository still contains unused code snippets and unfinished documentation. 
 The repository will be cleaned up further during the review process, while making sure that the output remains the same.
 This may include the renaming of files or functions to better communicate their purpose.
-- Comments or corrections to the code can be given on GitHub as issues or discussions or on EGUsphere as a community reviewer.  
-- Note that figures created here can differ slightly from the submitted versions, as some post-processing (adjustements and labeling) were made with *Inkscape*. 
+> - Comments or corrections to the code can be given on GitHub as issues or discussions or on EGUsphere as a community reviewer.  
+> - Note that figures created here can differ slightly from the submitted versions, as some post-processing (adjustements and labeling) were made with *Inkscape*. 
 
 ## Structure
 The figures 1 to 6 are produced from data as follows:
