@@ -1,0 +1,10 @@
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Pinner"
+  given-names: "Ole"
+  orcid: "https://orcid.org/0000-0002-4314-6232"
+title: "Analysis code to: Internal-wave-induced dissipation rates in the Weddell Sea Bottom Water gravity current"
+version: v0.2.2-peer-review
+doi: 10.5281/zenodo.13350486
+date-released: 2020-08-20
+url: "https://github.com/opinner/Pinner_et_al_2024"
