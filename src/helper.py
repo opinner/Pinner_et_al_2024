@@ -198,29 +198,24 @@ def get_uv_from_tidal_model(lat,lon, time_span, directory = "/media/sf_VM_Folder
 #-------------------------------------------
 #Functions for Conversions
 #-------------------------------------------
-class Conversions:  
-    @staticmethod  
-    def matlab2datetime(matlab_datenum):
-        day = dt.datetime.fromordinal(int(matlab_datenum))
-        dayfrac = dt.timedelta(days=matlab_datenum%1) - dt.timedelta(days = 366)
-        return day + dayfrac    
-    
-    @staticmethod    
-    def timedelta_to_list_of_ints(td):
-        #returns days, hours, minutes, seconds as ints
-        return td.days, td.seconds//3600, (td.seconds//60)%60, td.seconds%60
-    
-    @staticmethod    
-    def cart2pol(x, y):
-        rho = np.sqrt(x**2 + y**2)
-        phi = np.arctan2(y, x)
-        return(rho, phi)
+def matlab2datetime(matlab_datenum):
+    day = dt.datetime.fromordinal(int(matlab_datenum))
+    dayfrac = dt.timedelta(days=matlab_datenum%1) - dt.timedelta(days = 366)
+    return day + dayfrac
 
-    @staticmethod
-    def pol2cart(rho, phi):
-        x = rho * np.cos(phi)
-        y = rho * np.sin(phi)
-        return(x, y)
+def timedelta_to_list_of_ints(td):
+    #returns days, hours, minutes, seconds as ints
+    return td.days, td.seconds//3600, (td.seconds//60)%60, td.seconds%60
+
+def cart2pol(x, y):
+    rho = np.sqrt(x**2 + y**2)
+    phi = np.arctan2(y, x)
+    return(rho, phi)
+
+def pol2cart(rho, phi):
+    x = rho * np.cos(phi)
+    y = rho * np.sin(phi)
+    return(x, y)
     
     
 #-------------------------------------------
