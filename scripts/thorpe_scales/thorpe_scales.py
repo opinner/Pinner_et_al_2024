@@ -2,27 +2,29 @@
 # coding: utf-8
 # Thorpe scale approach in the Weddell Sea
 
-import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
-plt.rcParams.update({
-    "figure.facecolor": "white",
-    "savefig.facecolor": "white",
-    "figure.figsize": [8, 6]
-})
 import mixsea as mx
 from src.read_CTDs import load_Joinville_transect_CTDs
 import src.helper as helper
 from scipy.interpolate import interp1d  # is considered legacy code, will be in the future removed from scipy
 import warnings
 
+plt.rcParams.update({
+    "figure.facecolor": "white",
+    "savefig.facecolor": "white",
+    "figure.figsize": [8, 6]
+})
+
+
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 DENSITY_NOISE = 1e-4  # Noise parameter, Default value = 5e-4
 ALPHA = 0.8  # Coefficient relating the Thorpe and Ozmidov scales.
 BACKGROUND_EPS = np.nan  # Background value of epsilon applied where no overturns are detected.
+OUTLIERS = ['PS71/216-1', 'PS40/099-1', 'PS49/015-2', 'PS71/212-3', 'PS71/210-2']
 
 CTDs = load_Joinville_transect_CTDs()
 CTDs_grouped = CTDs.groupby("Event")
@@ -38,6 +40,10 @@ T_df = pd.DataFrame()
 gamma_n_df = pd.DataFrame()
 
 for event in events:
+
+    if event in OUTLIERS:
+        continue
+
     current_profile = CTDs_grouped.get_group(event).reset_index(drop=True)
 
     eps, N2 = mx.overturn.eps_overturn(
@@ -73,8 +79,9 @@ for event in events:
     eps_func = interp1d(max_depth - depth, eps, kind='nearest', bounds_error=False, fill_value=(np.nan, np.nan))
     T_func = interp1d(max_depth - depth, current_profile['Temp [°C]'], kind='nearest', bounds_error=False,
                       fill_value=(np.nan, np.nan))
-    gamma_n_func = interp1d(max_depth - depth, current_profile['Neutral density [kg m^-3]'], kind='nearest', bounds_error=False,
-                      fill_value=(np.nan, np.nan))
+    gamma_n_func = interp1d(max_depth - depth, current_profile['Neutral density [kg m^-3]'], kind='nearest',
+                            bounds_error=False,
+                            fill_value=(np.nan, np.nan))
 
     N_df[current_profile["Longitude"].mean()] = N_func(new_mab)
     eps_df[current_profile["Longitude"].mean()] = eps_func(new_mab)
@@ -108,9 +115,9 @@ mpp = ax.pcolormesh(eps_df.columns, eps_df.index, eps_df,
                     )
 cb = plt.colorbar(mpp, ax=ax)
 cb.set_label(r"$\varepsilon$ / (W kg$^{-1}$)")
-#ax.set_facecolor('lightgrey')
+# ax.set_facecolor('lightgrey')
 ax.set_ylim(0, 500)
-ax.set_title(r"Mixing diagnosed from Strain parametrization")
+ax.set_title(r"Dissipation diagnosed from Thorpe scales")
 helper.Plot.path_as_footnote(fig=f,
                              path="Pinner_et_al_2024/scripts/thorpe_scales/thorpe_scales.py",
                              rot="vertical")
@@ -136,7 +143,6 @@ vertical_eps_df.fillna(value=assumed_background_dissipation, inplace=True)
 vertical_eps_df.where(cond=~T_df.isna(), other=np.nan, inplace=True)
 mean_profile = vertical_eps_df.mean(axis=1)
 std_of_mean_profile = vertical_eps_df.std(axis=1)
-
 
 # save data
 eps_df.to_pickle("./method_results/Thorpe_eps_df_with_mab.pkl")
