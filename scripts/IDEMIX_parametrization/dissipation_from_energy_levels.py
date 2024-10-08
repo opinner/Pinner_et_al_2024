@@ -10,8 +10,8 @@ plt.rcParams.update({
 import src.helper as helper
 import equations as eq
 
-N_table = pd.read_pickle("method_results/N_values.pkl")
-N_error_table = pd.read_pickle("method_results/N_std.pkl")
+N_table = pd.read_pickle("method_results/N_values2.pkl")
+N_error_table = pd.read_pickle("method_results/N_std2.pkl")
 
 print("Load wave energy table")
 data = np.load("method_results/results_available_energy.npz", allow_pickle=True)
