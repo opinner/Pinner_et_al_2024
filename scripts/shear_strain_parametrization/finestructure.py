@@ -1,17 +1,15 @@
-import warnings
-
-import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import mixsea as mx
 import numpy as np
 import pandas as pd
 # data handling
 import scipy.stats as ss
-
-warnings.filterwarnings('ignore', category=RuntimeWarning)
-
+import warnings
 # import my self written functions
 from src.read_CTDs import load_Joinville_transect_CTDs
+warnings.filterwarnings('ignore', category=RuntimeWarning)
+
+OUTLIERS = ['PS71/216-1', 'PS40/099-1', 'PS49/015-2', 'PS71/212-3', 'PS71/210-2']
 
 CTDs = load_Joinville_transect_CTDs()
 CTDs_grouped = CTDs.groupby("Expedition")
@@ -80,6 +78,8 @@ for i, expedition_name in enumerate(expedition_names):
 
     for event in events:
         if expedition_name not in event: continue
+        if event in OUTLIERS:
+            continue
 
         current_profile = expedition.get_group(event).reset_index(drop=True)
 
@@ -209,6 +209,6 @@ binned_eps_strain_df.index = eps_strain_df.index
 
 print(binned_eps_strain_df.head())
 print(binned_eps_strain_df.info())
-binned_eps_strain_df.to_csv("./method_data/binned_strain_eps.csv")
+binned_eps_strain_df.to_csv("./method_results/binned_strain_eps.csv")
 
 plt.show()
