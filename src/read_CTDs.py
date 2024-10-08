@@ -242,6 +242,8 @@ def load_Joinville_transect_CTDs():
     for _ in range(6):  # try to find the right folder only five times to avoid an endless loop
         try:
             CTDs = pd.read_csv(path)
+
+        # try from parent directory
         except FileNotFoundError as error:
             path = "../" + path
             continue
@@ -270,7 +272,7 @@ def load_Joinville_transect_CTDs():
             continue
 
         else:
-            print(f"loading of {path} successfull")
+            print(f"loading of {path} was successful")
             if "neutral_density" not in CTDs.columns:
                 print("!!! Warning: !!!\n"
                       "neutral_density is missing and has to be computed with the corresponding matlab toolbox\n"
