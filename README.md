@@ -2,7 +2,7 @@
 [![DOI](https://img.shields.io/badge/Paper--DOI-10.5194%2Fegusphere--2024--2444-%23FFDE00.svg)](https://doi.org/10.5194/egusphere-2024-2444)  
 [![output data regression test](https://github.com/opinner/Pinner_et_al_2024/actions/workflows/output_regression_tests.yml/badge.svg)](https://github.com/opinner/Pinner_et_al_2024/actions/workflows/output_regression_tests.yml)
 
-# Analysis code to: [Pinner et al., 2024](https://doi.org/10.5194/egusphere-2024-2444)
+# Analysis code to PhD chapter: 
 
 This is the code to my PhD thesis chapter associated with the publication  
 [**Pinner et al., 2024:** *Internal-wave-induced dissipation rates in the Weddell Sea Bottom Water gravity current*](https://doi.org/10.5194/egusphere-2024-2444), 
