@@ -22,21 +22,21 @@ The figures 1 to 6 are produced from data as follows:
 ```mermaid
 flowchart TD
     bathymetry[(bathymetry)] ----> f01((f01: overview))
-    CTD1[(CTD profiles)] --> id[[""eos80_legacy_gamma_n\nmatlab toolbox""]]
+    CTD1[(CTD profiles)] --> id[[""eos80_legacy_gamma_n matlab toolbox""]]
     id --> gamma["neutral density γⁿ"]
     gamma --> f01
 
     f02((f02: spectrum))
-    TS[(velocity\ntime series)] ----> f02
+    TS[(velocity time series)] ----> f02
     TS ----> f03((f03: flowfield))
 
-    TS --> idemix[[wave energy/IDEMIX \nparameterization]]
+    TS --> idemix[[wave energy/IDEMIX parameterization]]
     idemix --> epsidemix["ε_{IGW, IDEMIX}"]
 
     CTD2[(CTD profiles)]
     CTD2 --> fine[[finestructure]]
     fine --> epsfine["ε_{IGW, fine}"]
-    f05(("f05: ε_{IGW}\ntransect"))
+    f05(("f05: ε_{IGW} transect"))
     epsfine --> f05
     epsidemix --> f05
     epsidemix --> f04(("f04: ε transect"))
