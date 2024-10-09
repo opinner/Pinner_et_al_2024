@@ -237,5 +237,5 @@ ax.set_xlabel("Longitude (°)")
 
 fig.tight_layout()
 fig.savefig("./strain_shear-strain_comparison.pdf")
-
+print("done")
 plt.show()
