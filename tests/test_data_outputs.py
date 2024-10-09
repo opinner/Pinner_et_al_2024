@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-# test assumes the default tolerance level of numpy.isclose
+# tests assumes the default tolerance level of numpy.isclose
 
 def test_thorpe_dissipation_rate_output(dataframe_regression):
     thorpe_eps_df = pd.read_pickle("./scripts/thorpe_scales/method_results/Thorpe_eps_df_with_mab.pkl")
