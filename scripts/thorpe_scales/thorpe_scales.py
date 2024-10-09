@@ -23,7 +23,7 @@ warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 DENSITY_NOISE = 1e-4  # Noise parameter, Default value = 5e-4
 ALPHA = 0.8  # Coefficient relating the Thorpe and Ozmidov scales.
-BACKGROUND_EPS = np.nan  # Background value of epsilon applied where no overturns are detected.
+BACKGROUND_EPS = 1e-10  # Background value of epsilon applied where no overturns are detected.
 OUTLIERS = ['PS71/216-1', 'PS40/099-1', 'PS49/015-2', 'PS71/212-3', 'PS71/210-2']
 
 CTDs = load_Joinville_transect_CTDs()
@@ -54,7 +54,7 @@ for event in events:
         current_profile["Latitude"].mean(),
         dnoise=DENSITY_NOISE,
         alpha=ALPHA,
-        background_eps=BACKGROUND_EPS,
+        background_eps=np.nan, #background will be added later
     )
 
     N = np.sqrt(N2)  # s* 86400 / (2 * np.pi) # Calculate buoyancy frequency in units of cycles per day (cpd).
@@ -138,8 +138,7 @@ vertical_eps_df = eps_df.drop(eps_df.columns[eps_df.columns < -51.5], axis="colu
 vertical_eps_df.drop(vertical_eps_df.columns[vertical_eps_df.columns > -48.5], axis="columns", inplace=True)
 
 # Fill NaN with 'assumed_background_dissipation' only where there is temperature data
-assumed_background_dissipation = 1e-10
-vertical_eps_df.fillna(value=assumed_background_dissipation, inplace=True)
+vertical_eps_df.fillna(value=BACKGROUND_EPS, inplace=True)
 vertical_eps_df.where(cond=~T_df.isna(), other=np.nan, inplace=True)
 mean_profile = vertical_eps_df.mean(axis=1)
 std_of_mean_profile = vertical_eps_df.std(axis=1)

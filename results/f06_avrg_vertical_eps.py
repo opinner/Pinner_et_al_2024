@@ -20,8 +20,8 @@ strain_eps = data["eps"]
 #-------------------------------------------------------------------
 energy_levels = pd.read_csv("../scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
 
-eerror = energy_levels["eps_IGW_mult_error"]
-print("E Error", np.mean(eerror), np.std(eerror), np.max(eerror), np.min(eerror))
+error = energy_levels["eps_IGW_mult_error"]
+print("E Error", np.mean(error), np.std(error), np.max(error), np.min(error))
 
 mab_ranges = [(20, 60), (120, 160), (320, 400)]
 mabs = []
@@ -74,6 +74,6 @@ ax.set_ylim(-10, 450)
 ax.legend(loc="upper left", framealpha=0.6, labelspacing=0.4, ncols=1, fontsize="9")
 ax.set_xlim(3e-11,5e-8)
 fig.tight_layout()
-fig.savefig("./avrg_vertical_eps.png", dpi=400, bbox_inches="tight")
+#fig.savefig("./avrg_vertical_eps.png", dpi=400, bbox_inches="tight")
 fig.savefig("./avrg_vertical_eps.pdf")
 plt.show()

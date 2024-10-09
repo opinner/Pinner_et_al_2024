@@ -31,6 +31,7 @@ thorpe_eps_df.where(cond=~thorpe_gamma_n_df.isna(), other=np.nan, inplace=True)
 binned_thorpe_gamma_n_df = pd.read_csv("../scripts/preprocessing/method_results/binned_gamma_n.csv")
 binned_thorpe_gamma_n_df.set_index(keys = 'Unnamed: 0', inplace = True)
 binned_thorpe_gamma_n_df = binned_thorpe_gamma_n_df.drop(binned_thorpe_gamma_n_df[binned_thorpe_gamma_n_df.index > 600].index)
+binned_thorpe_gamma_n_df.columns = binned_thorpe_gamma_n_df.columns.astype(pd.Float64Dtype())
 
 # bin dissipation rates
 thorpe_lons = thorpe_eps_df.columns.to_numpy()
@@ -78,9 +79,10 @@ cb.set_label(r"Dissipation rate $\varepsilon\,$(W$\,$kg$^{-1}$)")
 
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
 gravity_current_boundary = [28.40]  # from Garabato et al 2002
+
 CS = ax.contour(
     binned_thorpe_gamma_n_df.columns,
-    thorpe_mab, 
+    binned_thorpe_gamma_n_df.index,
     binned_thorpe_gamma_n_df,
     levels=water_mass_boundaries,
     linestyles=["dashed", "solid"],
@@ -108,7 +110,7 @@ clabels = ax.clabel(
 
 ax.scatter(
     eps_IGW_IDEMIX_df["lon"],
-    eps_IGW_IDEMIX_df["rounded_mab"],
+    eps_IGW_IDEMIX_df["rounded mab"],
     c=eps_IGW_IDEMIX_df["eps_IGW"],
     cmap=cmap,
     norm=mcolors.LogNorm(vmin=1e-10, vmax=1e-7),
@@ -126,7 +128,7 @@ ax.set_xlabel("Longitude (°)")
 # eps_IGW icon
 ax.scatter(
     eps_IGW_IDEMIX_df["lon"],
-    eps_IGW_IDEMIX_df["rounded_mab"],
+    eps_IGW_IDEMIX_df["rounded mab"],
     #c=energy_levels["eps"],
     color="tab:gray",
     edgecolor="black",
@@ -139,7 +141,7 @@ ax.scatter(
 # artificial eps_total icon
 ax.scatter(
     eps_IGW_IDEMIX_df["lon"],
-    eps_IGW_IDEMIX_df["rounded_mab"],
+    eps_IGW_IDEMIX_df["rounded mab"],
     color="tab:gray",
     edgecolor="black",
     marker=MarkerStyle("s"),
@@ -150,8 +152,6 @@ ax.scatter(
 
 
 ax.legend(loc = "upper left", ncol=3, columnspacing=1).set_zorder(50)
-# ax.annotate('gravity current\nboundary', xy=(-48.8, 130), xytext=(-48.5, 270), #fontsize=9,
-#             arrowprops = dict(facecolor='black', width = 2, shrink=0.05), ha = "center", va = "center", color = "white", bbox=dict(facecolor='black', alpha = 0.8, edgecolor='black', boxstyle='round, pad = 0.5'))
 
 ax.set_ylim(-10,500)
 fig.tight_layout()
