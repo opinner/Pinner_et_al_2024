@@ -36,7 +36,7 @@ mi_sh = np.array([0, 3])
 mii_sh = np.array(range(*mi_sh))
 mi_st = np.array([2, 20])
 mii_st = np.array(range(*mi_st))
-shst_params["m_include_sh"] = mii_sh
+shst_params["m_include_sh"] = mii_sh #not used here, but set for consistency with the shear-based finestructure computation
 shst_params["m_include_st"] = mii_st
 # Convert indices to more intuitive length scales
 m_sh = 2 * np.pi / shst_params["m"][[mi_sh[0], mi_sh[1] - 1]]
@@ -46,7 +46,7 @@ print(
     f"- Shear is integrated from {round(m_sh[0])}m to {round(m_sh[1])}m scales.\n"
     f"- Strain is integrated from {round(m_st[0])}m to {round(m_st[1])}m."
 )
-shst_params["ladcp_is_shear"] = True
+shst_params["ladcp_is_shear"] = True #not used here, but set for consistency with the shear-based finestructure computation
 shst_params["return_diagnostics"] = True
 
 
@@ -65,8 +65,7 @@ def create_fixed_step_array_includ_seafloor(start, stop, step, fixed_depth):
     return array
 
 
-# empty objects for saving the data later
-eps_list = []
+# empty list for saving the strain-based dissipation rates
 eps_strain_list = []
 
 for i, expedition_name in enumerate(expedition_names):
@@ -96,7 +95,7 @@ for i, expedition_name in enumerate(expedition_names):
         depth_bins = create_fixed_step_array_includ_seafloor(start=dz, stop=10000.0, step=dz, fixed_depth = lowest_segment)
         shst_params["depth_bin"] = depth_bins
         try:
-            eps, krho, diag = mx.shearstrain.nan_shearstrain(
+            _eps, krho, diag = mx.shearstrain.nan_shearstrain(
                 depth, t, SP, lon, lat, **shst_params
             )
         except ValueError:
@@ -106,9 +105,9 @@ for i, expedition_name in enumerate(expedition_names):
         depth_bins = diag["depth_bin"]
         # use meters above bottom as y axis
         mab_bins = np.floor(depth.max()) - depth_bins
+        # align mab bins to correct earlier inconsistent rounding up or down
         if mab_bins[-1] % 2 != 0:
             mab_bins = mab_bins-1
-        eps_list.append(pd.DataFrame(index=mab_bins, data={lon: eps}))
         eps_strain_list.append(pd.DataFrame(index=mab_bins, data={lon: diag["eps_st"]}))
 
         # use depth as y axis
@@ -124,74 +123,17 @@ eps_strain_df.columns = [el[0] for el in eps_strain_df.columns]  # convert multi
 eps_strain_df = eps_strain_df * 2.694  #Correction from Rw =3 to Rw = 7
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
 
-# def fexp(f):
-#     return int(np.floor(np.log10(abs(f)))) if f != 0 else 0
-# def fman(f):
-#     return f / 10 ** fexp(f)
-# def generate_exp_pattern(start, end):
-#     num_steps = (end - start) * 2  # Each step has a multiplier of 1 and 5
-#     return [multiplier * 10 ** (start + i // 2) for i, multiplier in enumerate([1, 5] * (num_steps + 1)) if
-#             start + i // 2 <= end]
-#
-#
-# start_point = -12
-# end_point = -8
-# bounds = generate_exp_pattern(start_point, end_point)[:-1]
-# print(bounds)
-# ncolors = len(bounds) - 1
-# cmap = plt.cm.get_cmap('magma_r', ncolors)
-# norm = mcolors.BoundaryNorm(boundaries=bounds, ncolors=ncolors)
-#
-# f, ax = plt.subplots(nrows=1, figsize=(10, 5))
-#
-# # mab_bin_edges = bin_edges(eps_strain_df.index,dz)
-# # lon_edges = eps_strain_df.columns - np.diff(eps_strain_df.columns)
-# mpp = ax.pcolormesh(eps_strain_df.columns, eps_strain_df.index, eps_strain_df,
-#                     cmap=cmap,
-#                     norm=norm,
-#                     shading="nearest"
-#                     )
-# cb = plt.colorbar(mpp, ax=ax)
-# cb.set_label(r"$\varepsilon$ / (W kg$^{-1}$)")
-# cb.ax.set_yticklabels([f'{fman(b):.1f}$\\times10^{{{fexp(b):.0f}}}$' for b in bounds])
-# ax.set_facecolor('lightgrey')
-# # ax.set_ylim(0,500)
-#
-# ax.set_title(r"Mixing diagnosed from Strain parametrization")
-# # helper.Plot.path_as_footnote(fig = f,
-# #                             path = "/home/ole/Desktop/CTD/mixsea/Weddell Sea Thorpe Scale.ipynb",
-# #                             rot = "vertical")
-# f.tight_layout()
-# # f.savefig("./ThorpeDissipation_individ_Cruises.png", dpi = 300)
 
 # trim to gravity current core
 vertical_eps_df = eps_strain_df.drop(eps_strain_df.columns[eps_strain_df.columns < -51.5], axis="columns")
 vertical_eps_df.drop(vertical_eps_df.columns[vertical_eps_df.columns > -48.5], axis="columns", inplace=True)
 
+# take horizontal average to get a single vertical profile
 mean = vertical_eps_df.mean(axis=1)
 std = vertical_eps_df.std(axis=1)
 np.savez("method_results/Strain_vertical_eps", mab =vertical_eps_df.index, eps=mean)
 
-# fig, ax = plt.subplots(1)
-
-# """
-# column_number = len(vertical_eps_df.columns)
-# n = 5
-# outliers = (vertical_eps_df > np.tile(mean+n*std, (column_number,1)).T) | (vertical_eps_df < np.tile(mean-n*std, (column_number,1)).T)
-# # Set outliers to NaN
-# _vertical_eps_df = vertical_eps_df.copy(deep = True)
-# _vertical_eps_df[outliers] = pd.NA
-# # Calculate new mean, ignoring NaNs
-# #mean = _vertical_eps_df.mean(axis = 1)
-# #std = _vertical_eps_df.std(axis = 1)
-# """
-# # ax.fill_betweenx(vertical_eps_df.index, mean-std, mean+std, alpha = 0.5 )
-# # ax.semilogx(mean, _vertical_eps_df.index)
-# ax.semilogx(mean, vertical_eps_df.index)
-# # ax.set_ylim(-10,510)
-# print(f"{vertical_eps_df.min(axis=None):.2e},{vertical_eps_df.max(axis=None):.2e}")
-
-
+# Bin resulting dissipation rates
 lons = eps_strain_df.columns.to_numpy()
 max_lon = max(lons)
 min_lon = min(lons)
