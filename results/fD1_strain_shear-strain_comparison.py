@@ -96,7 +96,7 @@ shst_params["m"] = np.arange(
 )
 
 # Set up limits for shear and strain variance integrations
-mi_sh = np.array([0, 3])
+mi_sh = np.array([0, 8])
 mii_sh = np.array(range(*mi_sh))
 mi_st = np.array([2, 20])
 mii_st = np.array(range(*mi_st))
@@ -198,7 +198,7 @@ mapp = ax.pcolormesh(
     norm=mcolors.LogNorm(vmin=0.01, vmax=100)
 )
 cb = plt.colorbar(mapp, ax=ax)
-cb.set_label(r"$\varepsilon_\mathrm{IGW, strain}$ / $\varepsilon_\mathrm{IGW, shear-strain}$")
+cb.set_label(r"$\varepsilon_\mathrm{IGW, strain}$ / $\varepsilon_\mathrm{IGW, shear}$")
 ax.set_facecolor('lightgrey')
 
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary, from Garabato et al 2002
@@ -237,5 +237,7 @@ ax.set_xlabel("Longitude (°)")
 
 fig.tight_layout()
 fig.savefig("./strain_shear-strain_comparison.pdf")
+
+#print(f"Largest deviations: {comparison_df.max(axis=None):.2e}, {comparison_df.min(axis=None):.2e}")
 print("done")
 plt.show()

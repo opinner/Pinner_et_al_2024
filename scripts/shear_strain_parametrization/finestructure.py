@@ -32,21 +32,22 @@ shst_params["m"] = np.arange(
 )
 
 # Set up limits for shear and strain variance integrations
-mi_sh = np.array([0, 3])
-mii_sh = np.array(range(*mi_sh))
+#mi_sh = np.array([0, 8])
+#mii_sh = np.array(range(*mi_sh))
 mi_st = np.array([2, 20])
 mii_st = np.array(range(*mi_st))
-shst_params["m_include_sh"] = mii_sh #not used here, but set for consistency with the shear-based finestructure computation
+#shst_params["m_include_sh"] = mii_sh #not used here, but set for consistency with the shear-based finestructure computation
 shst_params["m_include_st"] = mii_st
 # Convert indices to more intuitive length scales
-m_sh = 2 * np.pi / shst_params["m"][[mi_sh[0], mi_sh[1] - 1]]
+#m_sh = 2 * np.pi / shst_params["m"][[mi_sh[0], mi_sh[1] - 1]]
 m_st = 2 * np.pi / shst_params["m"][[mi_st[0], mi_st[1] - 1]]
 print(
     f"Wavenumber indices for integration:\n"
-    f"- Shear is integrated from {round(m_sh[0])}m to {round(m_sh[1])}m scales.\n"
-    f"- Strain is integrated from {round(m_st[0])}m to {round(m_st[1])}m."
+    f"- Strain is integrated from {round(m_st[0])}m to {round(m_st[1])}m.\n"
+    #f"- Shear would be integrated from {round(m_sh[0])}m to {round(m_sh[1])}m scales, but not now"
+
 )
-shst_params["ladcp_is_shear"] = True #not used here, but set for consistency with the shear-based finestructure computation
+#shst_params["ladcp_is_shear"] = True #not used here, but set for consistency with the shear-based finestructure computation
 shst_params["return_diagnostics"] = True
 
 
@@ -98,6 +99,7 @@ for i, expedition_name in enumerate(expedition_names):
             _eps, krho, diag = mx.shearstrain.nan_shearstrain(
                 depth, t, SP, lon, lat, **shst_params
             )
+            assert np.all(np.isnan(_eps)) # shear-based estimation should not be possible here
         except ValueError:
             print(f"errors at {expedition_name}, {event}")
             continue
@@ -131,7 +133,7 @@ vertical_eps_df.drop(vertical_eps_df.columns[vertical_eps_df.columns > -48.5], a
 # take horizontal average to get a single vertical profile
 mean = vertical_eps_df.mean(axis=1)
 std = vertical_eps_df.std(axis=1)
-np.savez("method_results/Strain_vertical_eps", mab =vertical_eps_df.index, eps=mean)
+np.savez("method_results/Strain_vertical_eps.npz", mab =vertical_eps_df.index, eps=mean)
 
 # Bin resulting dissipation rates
 lons = eps_strain_df.columns.to_numpy()
@@ -149,8 +151,8 @@ for index, row in eps_strain_df.iterrows():
 binned_eps_strain_df = pd.concat(rows, sort=False).reset_index(drop=True)
 binned_eps_strain_df.index = eps_strain_df.index
 
-print(binned_eps_strain_df.head())
-print(binned_eps_strain_df.info())
-binned_eps_strain_df.to_csv("./method_results/binned_strain_eps.csv")
+print(binned_eps_strain_df.head(),"\n")
 
-plt.show()
+print(binned_eps_strain_df.info(),"\n")
+binned_eps_strain_df.to_csv("./method_results/binned_strain_eps.csv")
+print("Done")

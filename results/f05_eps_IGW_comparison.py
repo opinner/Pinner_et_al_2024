@@ -46,7 +46,7 @@ binned_thorpe_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
 
 #-------------------------------------------------------------------
 # read eps_IGW results from strain-based finestructure analysis
-eps_IGW_strain_df = pd.read_csv("../scripts/shear_strain_parametrization/method_results/binned_strain_eps.csv")
+eps_IGW_strain_df = pd.read_csv("../scripts/shear_strain_parametrization/method_results/binned_strain_eps2.csv")
 eps_IGW_strain_df.set_index('Unnamed: 0', inplace=True)
 
 #-------------------------------------------------------------------
@@ -153,6 +153,6 @@ ax.legend(loc = "upper left", ncol=3, columnspacing=1)
 
             
 fig.tight_layout()
-fig.savefig("./eps_IGW_comparison.pdf")
+fig.savefig("./eps_IGW_comparison2.pdf")
 # fig.savefig("./eps_IGW_comparison.png", dpi = 400, bbox_inches = "tight")
 plt.show()
