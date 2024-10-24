@@ -236,7 +236,7 @@ ax.set_ylabel("Meters above bottom")
 ax.set_xlabel("Longitude (°)")
 
 fig.tight_layout()
-fig.savefig("./strain_shear-strain_comparison.pdf")
+fig.savefig("./strain_shear_comparison.pdf")
 
 #print(f"Largest deviations: {comparison_df.max(axis=None):.2e}, {comparison_df.min(axis=None):.2e}")
 print("done")
