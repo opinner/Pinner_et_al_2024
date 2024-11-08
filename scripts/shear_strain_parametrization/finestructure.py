@@ -31,25 +31,19 @@ shst_params["m"] = np.arange(
     2 * np.pi / window_size, 2 * np.pi / min_size, 2 * np.pi / window_size
 )
 
-# Set up limits for shear and strain variance integrations
-#mi_sh = np.array([0, 8])
-#mii_sh = np.array(range(*mi_sh))
+# Set up limits for strain variance integrations
 mi_st = np.array([2, 20])
 mii_st = np.array(range(*mi_st))
-#shst_params["m_include_sh"] = mii_sh #not used here, but set for consistency with the shear-based finestructure computation
 shst_params["m_include_st"] = mii_st
 # Convert indices to more intuitive length scales
-#m_sh = 2 * np.pi / shst_params["m"][[mi_sh[0], mi_sh[1] - 1]]
 m_st = 2 * np.pi / shst_params["m"][[mi_st[0], mi_st[1] - 1]]
 print(
     f"Wavenumber indices for integration:\n"
-    f"- Strain is integrated from {round(m_st[0])}m to {round(m_st[1])}m.\n"
-    #f"- Shear would be integrated from {round(m_sh[0])}m to {round(m_sh[1])}m scales, but not now"
+    f"- Strain is integrated from {round(m_st[0])}m to {round(m_st[1])}m."
 
 )
-#shst_params["ladcp_is_shear"] = True #not used here, but set for consistency with the shear-based finestructure computation
-shst_params["return_diagnostics"] = True
 
+shst_params["return_diagnostics"] = True
 
 def create_fixed_step_array_includ_seafloor(start, stop, step, fixed_depth):
     # Adjust the start point to be a multiple of step such that specific_value can be included
