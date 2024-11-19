@@ -29,7 +29,7 @@ thorpe_eps_df.where(cond=~thorpe_gamma_n_df.isna(), other=np.nan, inplace=True)
 
 #but then use the already binned version
 binned_thorpe_gamma_n_df = pd.read_csv("../scripts/preprocessing/method_results/binned_gamma_n.csv")
-binned_thorpe_gamma_n_df.set_index(keys = 'Unnamed: 0', inplace = True)
+binned_thorpe_gamma_n_df.set_index(keys='Unnamed: 0', inplace = True)
 binned_thorpe_gamma_n_df = binned_thorpe_gamma_n_df.drop(binned_thorpe_gamma_n_df[binned_thorpe_gamma_n_df.index > 600].index)
 binned_thorpe_gamma_n_df.columns = binned_thorpe_gamma_n_df.columns.astype(pd.Float64Dtype())
 
@@ -50,8 +50,7 @@ for index, row in thorpe_eps_df.iterrows():
     new_row = pd.DataFrame([new_eps], columns=BIN_EDGES[:-1])
     rows.append(new_row)
 binned_thorpe_eps_df = pd.concat(rows, sort=False).reset_index(drop=True)
-
-
+#binned_thorpe_eps_df.to_csv("./binned_thorpe_eps.csv")
 
 #-------------------------------------------------------------------
 # read eps_IGW results from IDEMIX method

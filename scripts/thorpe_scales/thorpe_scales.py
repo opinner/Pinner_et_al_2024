@@ -149,5 +149,7 @@ T_df.to_pickle("./method_results/Thorpe_T_df_with_mab.pkl")
 gamma_n_df.to_pickle("./method_results/Thorpe_neutral_density_df_with_mab.pkl")
 np.savez("method_results/horizontally_averaged_Thorpe_eps", z=vertical_eps_df.index, eps=mean_profile)
 
+eps_df.to_csv("./method_results/Thorpe_eps_df_with_mab.csv")
+gamma_n_df.to_csv("./method_results/Thorpe_neutral_density_df_with_mab.csv")
 print("done")
 plt.show()

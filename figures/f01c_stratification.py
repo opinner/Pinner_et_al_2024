@@ -95,7 +95,7 @@ xlim = ax.get_xlim()
 ax.set_xlim((xlim[0] - 0.2, xlim[1] + 0.8))
 ax.set_xlabel("Longitude (°)")
 ax.set_ylabel("Meters above Seafloor")
-cb.set_label(r"Neutral Density $\gamma_n\,$(kg$\,$m$^{-3}$)")
+cb.set_label(r"Neutral Density $\gamma^n\,$(kg$\,$m$^{-3}$)")
 cb.ax.plot([water_mass_boundaries[0], water_mass_boundaries[0]], [0, 1], 'k--', lw=2)
 cb.ax.plot([water_mass_boundaries[1], water_mass_boundaries[1]], [0, 1], 'k', lw=2, ls = "solid")
 
