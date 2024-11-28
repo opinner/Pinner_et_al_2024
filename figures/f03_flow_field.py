@@ -187,6 +187,8 @@ for nr, mooring in enumerate(list_of_moorings):
         mab_velos.append(mab_of_measurement)
 
 xi1, yi1, zi_avrg = vertical_then_horizontal_interpolation(lon_velos, mab_velos, avrg_velos)
+np.savez("./flowfield", xi=xi1, yi=yi1, avrg_v=zi_avrg) # save to be used in later figures
+
 xi2, yi2, zi_max = vertical_then_horizontal_interpolation(lon_velos, mab_velos, max_velos)
 
 levels = np.arange(0, np.max(avrg_velos)+0.025, 0.025)
