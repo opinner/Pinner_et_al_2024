@@ -52,7 +52,7 @@ for index, row in thorpe_eps_df.iterrows():
     new_row = pd.DataFrame([new_eps], columns=BIN_EDGES[:-1])
     rows.append(new_row)
 binned_thorpe_eps_df = pd.concat(rows, sort=False).reset_index(drop=True)
-#binned_thorpe_eps_df.to_csv("./binned_thorpe_eps.csv")
+binned_thorpe_eps_df.to_csv("../derived_data/binned_thorpe_dissipation.csv")
 
 #-------------------------------------------------------------------
 # read eps_IGW results from IDEMIX method

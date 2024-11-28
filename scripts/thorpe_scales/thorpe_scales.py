@@ -33,7 +33,8 @@ events = CTDs_grouped.groups.keys()
 # define a common axis with grid spacing of 1
 new_mab = np.arange(0, 5000, 1)
 
-# objects for saving the data later    
+# objects for saving the data later
+LT_df = pd.DataFrame()
 eps_df = pd.DataFrame()
 N_df = pd.DataFrame()
 T_df = pd.DataFrame()
@@ -46,7 +47,7 @@ for event in events:
 
     current_profile = CTDs_grouped.get_group(event).reset_index(drop=True)
 
-    eps, N2 = mx.overturn.eps_overturn(
+    eps, N2, diagnostics = mx.overturn.eps_overturn(
         current_profile['Depth water [m]'],
         current_profile['Temp [°C]'],
         current_profile['Sal'],
@@ -55,6 +56,7 @@ for event in events:
         dnoise=DENSITY_NOISE,
         alpha=ALPHA,
         background_eps=np.nan, #background will be added later
+        return_diagnostics=True,
     )
 
     N = np.sqrt(N2)  # s* 86400 / (2 * np.pi) # Calculate buoyancy frequency in units of cycles per day (cpd).
@@ -75,6 +77,7 @@ for event in events:
         continue
 
     # nearest interpolation to the defined axis
+    LT_func = interp1d(max_depth - depth, diagnostics["Lt"], kind='nearest', bounds_error=False, fill_value=(np.nan, np.nan))
     N_func = interp1d(max_depth - depth, N, kind='nearest', bounds_error=False, fill_value=(np.nan, np.nan))
     eps_func = interp1d(max_depth - depth, eps, kind='nearest', bounds_error=False, fill_value=(np.nan, np.nan))
     T_func = interp1d(max_depth - depth, current_profile['Temp [°C]'], kind='nearest', bounds_error=False,
@@ -83,6 +86,7 @@ for event in events:
                             bounds_error=False,
                             fill_value=(np.nan, np.nan))
 
+    LT_df[current_profile["Longitude"].mean()] = LT_func(new_mab)
     N_df[current_profile["Longitude"].mean()] = N_func(new_mab)
     eps_df[current_profile["Longitude"].mean()] = eps_func(new_mab)
     T_df[current_profile["Longitude"].mean()] = T_func(new_mab)
@@ -94,17 +98,13 @@ N_df.sort_index(axis=1, inplace=True)
 T_df.sort_index(axis=1, inplace=True)
 gamma_n_df.sort_index(axis=1, inplace=True)
 
-# # small data cleaning
-# try:
-#     assert T_df.iloc[:, 35].count() < 120
-#     print(f"Profile at {T_df.columns[35]:.1f}°W contains only {T_df.iloc[:, 35].count()} values and will be removed")
-#     eps_df.drop(T_df.columns[35], axis="columns", inplace=True)
-#     N_df.drop(T_df.columns[35], axis="columns", inplace=True)
-#     T_df.drop(T_df.columns[35], axis="columns", inplace=True)
-#     gamma_n_df.drop(T_df.columns[35], axis="columns", inplace=True)
-# except AssertionError:
-#     print("Wrong clean up parameters")
-#     pass
+## small data cleaning
+# removes the super high Thorpe scales, for which no dissipation rate is computed
+LT_df.where(cond=~eps_df.isna(), other=np.nan, inplace=True)
+# remove all Thorpe scale values larger than 200m, in particular removes one very large overturn in the deep ocean around 47° W
+LT_df.where(cond=LT_df<200, other=np.nan, inplace=True)
+# communicate changes back to eps_df
+eps_df.where(cond=~LT_df.isna(), other=np.nan, inplace=True)
 
 f, ax = plt.subplots(nrows=1, figsize=(10, 5))
 # mab_bin_edges = bin_edges(eps_strain_df.index,dz)
