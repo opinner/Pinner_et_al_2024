@@ -49,14 +49,17 @@ print(f"{mooring.location = }, {mooring.time_delta = }")
 cv = mooring[str(measurement_depth)].to_numpy()
 time = mooring["time"].to_numpy()
 
-TIME_BANDWIDTH_PRODUCT = 10
+TIME_HALF_BANDWIDTH_PRODUCT = 10
 
 complex_velocity = mooring[measurement_depth]
 complex_velocity_array = helper.Data.cut_trailing_nans(
     complex_velocity.to_numpy()
 )
+
+#print(np.shape(complex_velocity_array))
+
 freq, velocity_spectrum = spectra.total_multitaper(
-    complex_velocity_array, dt=1 / 12, P=TIME_BANDWIDTH_PRODUCT
+    complex_velocity_array, dt=1 / 12, P=TIME_HALF_BANDWIDTH_PRODUCT
 )
 assert not np.any(np.isnan(velocity_spectrum))
 
