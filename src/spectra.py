@@ -13,18 +13,30 @@ def total_multitaper(complex_velocity,dt = 1/12,P=10):
     # negative side has to be reversed to align with the positive side
     # if len(S) is even, the last data point is removed
     if len(S)%2 ==0:
-        print("even",np.shape(S[np.where(f < 0)]), np.shape(S[np.where(f > 0)]))
+        #print("even",np.shape(S[np.where(f < 0)]), np.shape(S[np.where(f > 0)]))
         freq = f[np.where(f > 0)][:-1]
         total_psd = S[np.where(f<0)][::-1] + S[np.where(f>0)][:-1]
 
     else:
-        print("odd",np.shape(S[np.where(f<0)]), np.shape(S[np.where(f>0)]))
+        #print("odd",np.shape(S[np.where(f<0)]), np.shape(S[np.where(f>0)]))
         freq = f[np.where(f > 0)]
         total_psd = S[np.where(f<0)][::-1] + S[np.where(f>0)]
 
     #print(np.shape(freq), np.shape(total_psd))
     assert np.all(np.shape(freq) == np.shape(total_psd))
-    return freq, total_psd   
+    return freq, total_psd
+ 
+def integrate_psd_interval(freq,psd,a = None, b = None):
+    """
+    Integration between a und b using the trapezoidal integration method
+    """
+    if a == None: a = np.min(freq)
+    if b == None: b = np.max(freq)
+    
+    lower = np.argmin(np.abs(freq-a)).astype(int)
+    upper = np.argmin(np.abs(freq-b)).astype(int)
+    return np.trapz(y = psd[lower:upper], x = freq[lower:upper])
+
 
 # def _total_multitaper(complex_velocity,dt = 1/12,P=10):
 #     """
@@ -53,7 +65,6 @@ def total_multitaper(complex_velocity,dt = 1/12,P=10):
 #     except ValueError:
 #         total_psd = S[np.where(f<0)][::-1][:-1] + S[np.where(f>0)]
 #     return freq, total_psd
-
 """
 @static_method
 def rotary_multitaper(cvs, dt = 1/12, labels = None, ax = None, **Kwargs):    
@@ -62,12 +73,12 @@ def rotary_multitaper(cvs, dt = 1/12, labels = None, ax = None, **Kwargs):
         fig,ax = plt.subplots(1)
         ax.set_xlabel('Frequency (cycles/day)')
         ax.set_ylabel('PSD (cm$^2$/s$^2$ days)')
-    
+
     if not isinstance(cvs, list):
         cvs = [cvs]
-    
+
     for i,cv in enumerate(cvs):
-    
+
         cv = cv[~np.isnan(cv)] #remove 
 
         f, _S = sg.periodogram(cv-np.mean(cv), fs=1/dt) #fs = sampling frequency (cyclic)
@@ -86,19 +97,6 @@ def rotary_multitaper(cvs, dt = 1/12, labels = None, ax = None, **Kwargs):
         else:
             ax.loglog(f[np.where(f>0)],S[np.where(f>0)], **Kwargs)
 
-        
+
     return f[np.where(f>0)],S[np.where(f>0)]
 """
- 
-def integrate_psd_interval(freq,psd,a = None, b = None):
-    """
-    Integration between a und b using the trapezoidal integration method
-    """
-    if a == None: a = np.min(freq)
-    if b == None: b = np.max(freq)
-    
-    lower = np.argmin(np.abs(freq-a)).astype(int)
-    upper = np.argmin(np.abs(freq-b)).astype(int)
-    return np.trapz(y = psd[lower:upper], x = freq[lower:upper]) 
-
-
