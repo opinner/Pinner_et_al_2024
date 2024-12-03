@@ -2,9 +2,9 @@ import scipy.signal as sg  #Package for signal analysis
 import numpy as np
 
 def total_multitaper(complex_velocity,dt = 1/12,P=10):
-    from multitaper import MTSpec  #using German Prieto's multitaper package, https://github.com/gaprieto/multitaper
-
-    #fo, So = sg.periodogram(complex_velocity-np.mean(complex_velocity), fs=1/dt) #fs = sampling frequency (cyclic)
+    # using German Prieto's multitaper package, https://github.com/gaprieto/multitaper,
+    # but it required manual debugging and changing of np.int() to int()
+    from multitaper import MTSpec
 
     spec = MTSpec(complex_velocity-np.mean(complex_velocity), nw=P, dt=dt, iadapt=0, nfft=len(complex_velocity))
     S = np.ravel(spec.spec)
