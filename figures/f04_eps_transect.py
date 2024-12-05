@@ -184,6 +184,6 @@ ax.legend(loc="upper left", ncol=3, columnspacing=1).set_zorder(50)
 
 ax.set_ylim(-10, 500)
 fig.tight_layout()
-#fig.savefig("./eps_transect.pdf")
+fig.savefig("./eps_transect.pdf")
 #fig.savefig("./eps_transect.png", dpi = 400, bbox_inches = "tight")
 plt.show()

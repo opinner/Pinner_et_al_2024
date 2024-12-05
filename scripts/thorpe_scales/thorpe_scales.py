@@ -21,7 +21,7 @@ plt.rcParams.update({
 
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
-DENSITY_NOISE = 1e-4  # Noise parameter, Default value = 5e-4
+DENSITY_NOISE = 5e-4  # Noise parameter, Default value = 5e-4
 ALPHA = 0.8  # Coefficient relating the Thorpe and Ozmidov scales.
 BACKGROUND_EPS = 1e-10  # Background value of epsilon applied where no overturns are detected.
 OUTLIERS = ['PS71/216-1', 'PS40/099-1', 'PS49/015-2', 'PS71/212-3', 'PS71/210-2']
@@ -110,7 +110,7 @@ f, ax = plt.subplots(nrows=1, figsize=(10, 5))
 # mab_bin_edges = bin_edges(eps_strain_df.index,dz)
 # lon_edges = eps_strain_df.columns - np.diff(eps_strain_df.columns)
 mpp = ax.pcolormesh(eps_df.columns, eps_df.index, eps_df,
-                    norm=mcolors.LogNorm(vmax=1e-7),
+                    norm=mcolors.LogNorm(vmax=1e-7, vmin=1e-10),
                     shading="nearest"
                     )
 cb = plt.colorbar(mpp, ax=ax)
