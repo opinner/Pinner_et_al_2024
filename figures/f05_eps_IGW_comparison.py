@@ -81,7 +81,7 @@ ax.fill_between(
     hatch="xx",
     facecolor='None',
     edgecolor='darkgrey',
-    alpha=0.8
+    alpha=0.5
 )
 
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
