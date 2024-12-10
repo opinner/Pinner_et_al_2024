@@ -32,7 +32,7 @@ shst_params["m"] = np.arange(
 )
 
 # Set up limits for strain variance integrations
-mi_st = np.array([2, 20])
+mi_st = np.array([0, 20])
 mii_st = np.array(range(*mi_st))
 shst_params["m_include_st"] = mii_st
 # Convert indices to more intuitive length scales
