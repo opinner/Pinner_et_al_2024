@@ -10,7 +10,7 @@ import warnings
 # Suppress specific RuntimeWarning related to mean of empty slice
 warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*Mean of empty slice.*")
 
-plt.style.use('./paper.mplstyle')
+#plt.style.use('./paper.mplstyle')
 
 ONE_COLUMN_WIDTH = 8.3
 TWO_COLUMN_WIDTH = 12
@@ -42,14 +42,14 @@ min_lon = min(thorpe_lons)
 
 # half a degree bins
 BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5 + max_lon + 1e-3 * max_lon, 0.5)
-
+BIN_CENTER = BIN_EDGES[:-1]-0.25
 # depth-level-wise (row-wise) arithmetic averaging
 rows = []
 for index, row in thorpe_eps_df.iterrows():
     values = row.to_numpy()
     bin_means = ss.binned_statistic(x=thorpe_lons, values=values, statistic=np.nanmean, bins=BIN_EDGES)[0]
     new_eps = bin_means
-    new_row = pd.DataFrame([new_eps], columns=BIN_EDGES[:-1])
+    new_row = pd.DataFrame([new_eps], columns=BIN_CENTER)
     rows.append(new_row)
 binned_thorpe_eps_df = pd.concat(rows, sort=False).reset_index(drop=True)
 binned_thorpe_eps_df.to_csv("../derived_data/binned_thorpe_dissipation.csv")
@@ -58,7 +58,7 @@ binned_thorpe_eps_df.to_csv("../derived_data/binned_thorpe_dissipation.csv")
 # read eps_IGW results from IDEMIX method
 eps_IGW_IDEMIX_df = pd.read_csv("../scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
 
-fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH * cm, 0.8 * TWO_COLUMN_WIDTH * cm))
+fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH * cm, 0.8 * TWO_COLUMN_WIDTH * cm), layout="constrained")
 
 ######################################################################## 
 ######################################################################## 
@@ -68,14 +68,14 @@ fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH * cm, 0.8 * TWO_COLUMN_WIDTH
 cmap = cmocean.cm.tempo
 mpp = ax.pcolormesh(
     binned_thorpe_eps_df.columns,
-    thorpe_mab,
-    binned_thorpe_eps_df,
+    binned_thorpe_eps_df.index,
+    binned_thorpe_eps_df.values,
     norm=mcolors.LogNorm(vmin=1e-10, vmax=1e-7),
     cmap=cmap,
     rasterized=True
 )
 
-cb = plt.colorbar(mpp, ax=ax, location="top", extend="max")  # , aspect=40, shrink=0.8)
+cb = plt.colorbar(mpp, ax=ax, location="top", extend="max", aspect=26)  # , aspect=40, shrink=0.8)
 cb.set_label(r"Dissipation rate $\varepsilon\,$(W$\,$kg$^{-1}$)")
 
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
@@ -120,10 +120,6 @@ ax.scatter(
     s=300,
     zorder=10
 )
-
-ax.set_facecolor('lightgrey')
-ax.set_ylabel("Meters above bottom")
-ax.set_xlabel("Longitude (°)")
 
 # for the legend
 # eps_IGW icon
@@ -181,9 +177,12 @@ CS = ax.contour(
 # )
 
 ax.legend(loc="upper left", ncol=3, columnspacing=1).set_zorder(50)
-
 ax.set_ylim(-10, 500)
-fig.tight_layout()
+#ax.xlim()
+ax.set_facecolor('lightgrey')
+ax.set_ylabel("Meters above bottom")
+ax.set_xlabel("Longitude (°)")
+
 fig.savefig("./eps_transect.pdf")
 #fig.savefig("./eps_transect.png", dpi = 400, bbox_inches = "tight")
 plt.show()

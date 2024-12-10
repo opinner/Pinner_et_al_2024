@@ -32,13 +32,14 @@ min_lon = min(thorpe_lons)
 
 # half a degree bins
 BIN_EDGES = np.arange(min_lon-1e-3*min_lon, 0.5+max_lon+1e-3*max_lon, 0.5)
+BIN_CENTER = BIN_EDGES[:-1]-0.25
 
 # depth-level-wise (row-wise) arithmetic averaging
 rows = []
 for index, row in thorpe_gamma_n_df.iterrows():
     values = row.to_numpy()
     bin_means = ss.binned_statistic(x=thorpe_lons, values=values, statistic=np.nanmean, bins=BIN_EDGES)[0]
-    new_row = pd.DataFrame([bin_means], columns=BIN_EDGES[:-1])
+    new_row = pd.DataFrame([bin_means], columns=BIN_CENTER)
     rows.append(new_row)
 
 binned_thorpe_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
@@ -53,24 +54,35 @@ eps_IGW_strain_df.set_index('Unnamed: 0', inplace=True)
 # read eps_IGW results from IDEMIX method
 eps_IGW_IDEMIX_df = pd.read_csv("../scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
 
-
-
-fig,ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.8*TWO_COLUMN_WIDTH*cm))
-
-
+fig,ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.8*TWO_COLUMN_WIDTH*cm), layout="constrained")
 ######################################################################## 
 ######################################################################## 
 ##################### Axis 0 ###########################################
 ########################################################################
 norm = mcolors.LogNorm(vmin=1e-10, vmax=1e-8)
-mpp = ax.pcolormesh(eps_IGW_strain_df.columns.astype(float), eps_IGW_strain_df.index, eps_IGW_strain_df,
-                      cmap=cmap,
-                      norm=norm,
-                      shading="nearest"
-                     )
+mpp = ax.pcolormesh(
+    eps_IGW_strain_df.columns.astype(float),
+    eps_IGW_strain_df.index,
+    eps_IGW_strain_df,
+    cmap=cmap,
+    norm=norm,
+    shading="nearest"
+)
       
-cb = plt.colorbar(mpp, ax=ax, location="top", extend="max")
+cb = plt.colorbar(mpp, ax=ax, location="top", extend="max", aspect=26)
 cb.set_label(r"Wave-induced dissipation rate $\varepsilon_{\mathrm{IGW}}\,$(W$\,$kg$^{-1}$)")
+
+continental_slope = BIN_EDGES[3]
+deep_sea = BIN_EDGES[-1]
+ax.fill_between(
+    [continental_slope, deep_sea],
+    [0,0],
+    [250/2, 250/2],
+    hatch="xx",
+    facecolor='None',
+    edgecolor='darkgrey',
+    alpha=0.8
+)
 
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
 # gravity_current_boundary = [28.40]  # from Garabato et al 2002
@@ -81,7 +93,7 @@ CS = ax.contour(
     levels=water_mass_boundaries,
     linestyles=["dashed", "solid"],
     colors="k",
-    linewidths=3,
+    linewidths=2,
 )
 
 fmt = {}
@@ -109,14 +121,7 @@ ax.scatter(
     edgecolor='darkgrey',
     marker=MarkerStyle("o"),
     s=300,
-    zorder=10
 )
-
-ax.set_facecolor('lightgrey')
-ax.set_ylabel("Meters above bottom")
-ax.set_xlabel("Longitude (°)")
-#ax[0].set_title(r"Dissipation rate $\varepsilon$ across the slope")
-
 
 # ------------------------------------------------------------------------------------------
 # for the legend
@@ -146,13 +151,34 @@ ax.scatter(
 )
 
 
-ax.set_ylim(0,600)
+# velocity isolines
+with np.load("./flowfield.npz") as data:
+    xi = data['xi']
+    yi = data['yi']
+    avrg_v = data['avrg_v']
+
+levels = [0.1, 0.2]
+CS = ax.contour(
+    xi, yi, avrg_v,
+    levels=levels,
+    colors='yellow',
+    linestyles=["dashed", "solid"],
+    linewidths=2,
+    alpha=0.8
+)
+
+#ax.set_ylim(-10, 500)
+ax.set_ylim(-10,600)
 ax.legend(loc = "upper left", ncol=3, columnspacing=1)
 #ax.annotate('gravity current\nboundary', xy=(-48.8, 130), xytext=(-48.5, 270), #fontsize=9,
 #            arrowprops = dict(facecolor='black', width = 2, shrink=0.05), ha = "center", va = "center", color = "white", bbox=dict(facecolor='black', alpha = 0.8, edgecolor='black', boxstyle='round, pad = 0.5'))
 
-            
-fig.tight_layout()
+ax.set_facecolor('lightgrey')
+ax.set_ylabel("Meters above bottom")
+ax.set_xlabel("Longitude (°)")
+#ax[0].set_title(r"Dissipation rate $\varepsilon$ across the slope")
+
+#fig.tight_layout()
 fig.savefig("./eps_IGW_comparison2.pdf")
 # fig.savefig("./eps_IGW_comparison.png", dpi = 400, bbox_inches = "tight")
 plt.show()

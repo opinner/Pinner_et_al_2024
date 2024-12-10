@@ -98,7 +98,7 @@ shst_params["m"] = np.arange(
 # Set up limits for shear and strain variance integrations
 mi_sh = np.array([0, 8])
 mii_sh = np.array(range(*mi_sh))
-mi_st = np.array([2, 20])
+mi_st = np.array([0, 20])
 mii_st = np.array(range(*mi_st))
 shst_params["m_include_sh"] = mii_sh
 shst_params["m_include_st"] = mii_st
@@ -175,18 +175,19 @@ min_lon = min(thorpe_lons)
 
 # half a degree bins
 BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5 + max_lon + 1e-3 * max_lon, 0.5)
+BIN_CENTER = BIN_EDGES[:-1]-0.25
 
 # depth-level-wise (row-wise) arithmetic averaging
 rows = []
 for index, row in thorpe_gamma_n_df.iterrows():
     values = row.to_numpy()
     bin_means = ss.binned_statistic(x=thorpe_lons, values=values, statistic=np.nanmean, bins=BIN_EDGES)[0]
-    new_row = pd.DataFrame([bin_means], columns=BIN_EDGES[:-1])
+    new_row = pd.DataFrame([bin_means], columns=BIN_CENTER)
     rows.append(new_row)
 
 binned_thorpe_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
 
-fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH * cm, 0.5 * TWO_COLUMN_WIDTH * cm))
+fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH * cm, 0.5 * TWO_COLUMN_WIDTH * cm), layout="constrained")
 ax.set_ylim(0, 1000)
 ax.set_xlim(-53.2, -47)
 
@@ -197,9 +198,22 @@ mapp = ax.pcolormesh(
     cmap=cmocean.cm.balance,
     norm=mcolors.LogNorm(vmin=0.01, vmax=100)
 )
-cb = plt.colorbar(mapp, ax=ax)
+
+cb = plt.colorbar(mapp, ax=ax, aspect=15)
 cb.set_label(r"$\varepsilon_\mathrm{IGW, strain}$ / $\varepsilon_\mathrm{IGW, shear}$")
 ax.set_facecolor('lightgrey')
+
+continental_slope = BIN_EDGES[3]
+deep_sea = BIN_EDGES[-1]
+ax.fill_between(
+    [continental_slope, deep_sea],
+    [0,0],
+    [250/2, 250/2],
+    hatch="xx",
+    facecolor='None',
+    edgecolor='darkgrey',
+    alpha=0.8
+)
 
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary, from Garabato et al 2002
 
@@ -235,7 +249,7 @@ ax.set_facecolor('lightgrey')
 ax.set_ylabel("Meters above bottom")
 ax.set_xlabel("Longitude (°)")
 
-fig.tight_layout()
+#fig.tight_layout()
 fig.savefig("./strain_shear_comparison.pdf")
 
 #print(f"Largest deviations: {comparison_df.max(axis=None):.2e}, {comparison_df.min(axis=None):.2e}")

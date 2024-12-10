@@ -15,7 +15,13 @@ ONE_COLUMN_WIDTH = 8.3
 TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1/2.54  # centimeters in inches
-plt.style.use('./thesis.mplstyle')
+#plt.style.use('./thesis.mplstyle')
+
+plt.rcParams.update({
+    "figure.facecolor": "white",
+    "savefig.facecolor": "white",
+    "font.size": 9
+})
 
 # load all 7 moorings as dataframes
 list_of_moorings = helper.IO.load_pickle(name="../data/mooring/list_of_moorings.pkl")
@@ -46,7 +52,7 @@ def add_neutral_density_lines(ax, binned_gamma_n_df):
         levels=water_mass_boundaries,
         linestyles=["dashed", "solid"],
         colors="k",
-        linewidths=3,
+        linewidths=2,
         zorder=50
     )
 
@@ -139,7 +145,7 @@ def vertical_then_horizontal_interpolation(x, y, z):
     return xi, yi, zi
 
 
-fig1, ax1 = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.5*TWO_COLUMN_WIDTH*cm))
+fig1, ax1 = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.5*TWO_COLUMN_WIDTH*cm), layout="constrained")
 fig2, ax2 = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.5*TWO_COLUMN_WIDTH*cm))
 
 avrg_velos = []
@@ -193,11 +199,14 @@ xi2, yi2, zi_max = vertical_then_horizontal_interpolation(lon_velos, mab_velos, 
 
 levels = np.arange(0, np.max(avrg_velos)+0.025, 0.025)
 #print(levels)
-mpp = ax1.contourf(xi1, yi1, zi_avrg,
-             levels=levels,
-             cmap='viridis'
-             )
-cb = plt.colorbar(mpp, ax = ax1)
+mpp = ax1.contourf(
+    xi1,
+    yi1,
+    zi_avrg,
+    levels=levels,
+    cmap=cmocean.cm.rain #'viridis'
+ )
+cb = fig1.colorbar(mpp, ax=ax1, aspect=10)
 cb.set_label(r'Mean Velocity (m$\,$s$^{-1}$)')
 
 ax2.contourf(xi2, yi2, zi_max,
@@ -213,13 +222,13 @@ CS = ax1.contour(
     levels=water_mass_boundaries,
     linestyles=["dashed", "solid"],
     colors="k",
-    linewidths=3,
+    linewidths=2,
 )
 
 fmt = {}
 strs = ['WSDW', 'WSBW']
-for l, s in zip(CS.levels, strs):
-    fmt[l] = s
+for level, string in zip(CS.levels, strs):
+    fmt[level] = string
 # Label every other level using strings
 ax1.clabel(
     CS,
@@ -230,7 +239,20 @@ ax1.clabel(
     colors="white"
 )
 
-for x, label in zip(np.unique(lon_velos), ["A","B","C","D","E","F","G"]):
+levels = [0.1, 0.2]
+linestyles = ["dashed", "solid"]
+CS = ax1.contour(
+    xi1, yi1, zi_avrg,
+    levels=levels,
+    colors='yellow',
+    linestyles=linestyles,
+    linewidths=2,
+    alpha=0.8
+)
+for level, linestyle in zip(levels, linestyles):
+    cb.ax.axhline(level, color='yellow', ls = linestyle)
+
+for x, label in zip(np.unique(lon_velos), ["A", "B", "C", "D", "E", "F", "G"]):
     ax1.text(x, 405,
              s=label,
              color="k",
@@ -247,6 +269,6 @@ ax1.set_ylim(-5, 380)
 ax2.set_ylim(-5, 380)
 ax1.set_xlim(-52.5, -47.3)
 ax2.set_xlim(-52.5, -47.3)
-fig1.tight_layout()
+#fig1.tight_layout()
 fig1.savefig("./flowfield.pdf")
 plt.show()
