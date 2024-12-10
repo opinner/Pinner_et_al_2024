@@ -37,6 +37,7 @@ for index, row in energy_levels.iterrows():
     try:
         N_value = N_table.loc[N_table['mab'] == row["rounded mab"], column_name].item()
         N_error = N_error_table.loc[N_error_table['mab'] == row["rounded mab"], column_name].item()
+        assert N_value**2 > 1e-9
     except ValueError:
         N_value = np.nan
         N_error = np.nan
