@@ -75,6 +75,6 @@ for index, row in gamma_n_df.iterrows():
     rows.append(new_row)
 
 binned_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
-binned_gamma_n_df.to_csv("../../data/binned_gamma_n.csv")
+binned_gamma_n_df.to_csv("./method_results/binned_gamma_n.csv")
 
 print("done")
