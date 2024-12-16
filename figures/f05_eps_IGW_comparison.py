@@ -72,45 +72,39 @@ mpp = ax.pcolormesh(
 cb = plt.colorbar(mpp, ax=ax, location="top", extend="max", aspect=26)
 cb.set_label(r"Wave-induced dissipation rate $\varepsilon_{\mathrm{IGW}}\,$(W$\,$kg$^{-1}$)")
 
-continental_slope = BIN_EDGES[3]
-deep_sea = BIN_EDGES[-1]
-ax.fill_between(
-    [continental_slope, deep_sea],
-    [0,0],
-    [250/2, 250/2],
-    hatch="xx",
-    facecolor='None',
-    edgecolor='darkgrey',
-    alpha=0.5
-)
+# continental_slope = BIN_EDGES[3]
+# deep_sea = BIN_EDGES[-1]
+# ax.fill_between(
+#     [continental_slope, deep_sea],
+#     [0,0],
+#     [250/2, 250/2],
+#     hatch="xx",
+#     facecolor='None',
+#     edgecolor='darkgrey',
+#     alpha=0.5
+# )
 
-water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
-# gravity_current_boundary = [28.40]  # from Garabato et al 2002
-CS = ax.contour(
-    binned_thorpe_gamma_n_df.columns,
-    binned_thorpe_gamma_n_df.index,
-    binned_thorpe_gamma_n_df,
-    levels=water_mass_boundaries,
-    linestyles=["dashed", "solid"],
+binned_regions = pd.read_csv("../scripts/preprocessing/method_results/binned_regions.csv", index_col=0)
+binned_regions.columns = binned_regions.columns.astype("float") #convert column names from strings to floats
+binned_regions = binned_regions.iloc[0:600]
+levels = [2.5,3.5]  # Border between IL and BL
+ax.contourf(
+    binned_regions.columns,
+    binned_regions.index,
+    binned_regions.values,
+    levels=levels,
+    hatches=["xx"],
+    colors="None",
+    zorder = 1
+)
+ax.contour(
+    binned_regions.columns,
+    binned_regions.index,
+    binned_regions.values,
+    levels=levels,
     colors="k",
-    linewidths=2,
+    zorder=1
 )
-
-fmt = {}
-strs = ['WSDW', 'WSBW']
-for l, s in zip(CS.levels, strs):
-    fmt[l] = s
-
-# Label every other level using strings
-ax.clabel(
-    CS,
-    CS.levels,
-    inline=False,
-    fmt=fmt,
-    fontsize=10,
-    colors="white"
-)
-
 
 ax.scatter(
     eps_IGW_IDEMIX_df["lon"],
@@ -121,6 +115,7 @@ ax.scatter(
     edgecolor='darkgrey',
     marker=MarkerStyle("o"),
     s=300,
+    zorder=5
 )
 
 # ------------------------------------------------------------------------------------------
@@ -133,7 +128,7 @@ ax.scatter(
     color = "tab:gray",
     edgecolor="black",
     marker=MarkerStyle("o"),
-    s = 200,
+    s=200,
     zorder=-10,
     label=r"$\varepsilon_{\mathrm{IGW, IDEMIX}}$",
 )
@@ -148,6 +143,35 @@ ax.scatter(
     s=80,
     zorder=-10,
     label=r"$\varepsilon_{\mathrm{IGW, fine}}$"
+)
+
+
+water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
+# gravity_current_boundary = [28.40]  # from Garabato et al 2002
+CS = ax.contour(
+    binned_thorpe_gamma_n_df.columns,
+    binned_thorpe_gamma_n_df.index,
+    binned_thorpe_gamma_n_df,
+    levels=water_mass_boundaries,
+    linestyles=["dashed", "solid"],
+    colors="k",
+    linewidths=2,
+    zorder=2
+)
+
+fmt = {}
+strs = ['WSDW', 'WSBW']
+for l, s in zip(CS.levels, strs):
+    fmt[l] = s
+
+# Label every other level using strings
+ax.clabel(
+    CS,
+    CS.levels,
+    inline=False,
+    fmt=fmt,
+    fontsize=10,
+    colors=["white", "black"]
 )
 
 
