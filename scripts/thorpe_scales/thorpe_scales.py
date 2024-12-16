@@ -106,33 +106,6 @@ LT_df.where(cond=LT_df<200, other=np.nan, inplace=True)
 # communicate changes back to eps_df
 eps_df.where(cond=~LT_df.isna(), other=np.nan, inplace=True)
 
-f, ax = plt.subplots(nrows=1, figsize=(10, 5))
-# mab_bin_edges = bin_edges(eps_strain_df.index,dz)
-# lon_edges = eps_strain_df.columns - np.diff(eps_strain_df.columns)
-mpp = ax.pcolormesh(eps_df.columns, eps_df.index, eps_df,
-                    norm=mcolors.LogNorm(vmax=1e-7, vmin=1e-10),
-                    shading="nearest"
-                    )
-cb = plt.colorbar(mpp, ax=ax)
-cb.set_label(r"$\varepsilon$ / (W kg$^{-1}$)")
-# ax.set_facecolor('lightgrey')
-ax.set_ylim(0, 500)
-ax.set_title(r"Dissipation diagnosed from Thorpe scales")
-helper.Plot.path_as_footnote(fig=f,
-                             path="Pinner_et_al_2024/scripts/thorpe_scales/thorpe_scales.py",
-                             rot="vertical")
-
-levels = [28.00, 28.26, 28.40]
-ax.contour(
-    gamma_n_df.columns,
-    gamma_n_df.index,
-    gamma_n_df,
-    levels=levels,
-    colors="k",
-    linewidths=1,
-)
-f.tight_layout()
-
 # cut to only cover the core of the gravity current
 vertical_eps_df = eps_df.drop(eps_df.columns[eps_df.columns < -51.5], axis="columns")
 vertical_eps_df.drop(vertical_eps_df.columns[vertical_eps_df.columns > -48.5], axis="columns", inplace=True)
@@ -147,9 +120,40 @@ std_of_mean_profile = vertical_eps_df.std(axis=1)
 eps_df.to_pickle("./method_results/Thorpe_eps_df_with_mab.pkl")
 T_df.to_pickle("./method_results/Thorpe_T_df_with_mab.pkl")
 gamma_n_df.to_pickle("./method_results/Thorpe_neutral_density_df_with_mab.pkl")
-np.savez("method_results/horizontally_averaged_Thorpe_eps", z=vertical_eps_df.index, eps=mean_profile)
+np.savez("./method_results/horizontally_averaged_Thorpe_eps", z=vertical_eps_df.index, eps=mean_profile)
 
 eps_df.to_csv("./method_results/Thorpe_eps_df_with_mab.csv")
 gamma_n_df.to_csv("./method_results/Thorpe_neutral_density_df_with_mab.csv")
 print("done")
+
+
+def plotting():
+    f, ax = plt.subplots(nrows=1, figsize=(10, 5))
+    # mab_bin_edges = bin_edges(eps_strain_df.index,dz)
+    # lon_edges = eps_strain_df.columns - np.diff(eps_strain_df.columns)
+    mpp = ax.pcolormesh(eps_df.columns, eps_df.index, eps_df,
+                        norm=mcolors.LogNorm(vmax=1e-7, vmin=1e-10),
+                        shading="nearest"
+                        )
+    cb = plt.colorbar(mpp, ax=ax)
+    cb.set_label(r"$\varepsilon$ / (W kg$^{-1}$)")
+    # ax.set_facecolor('lightgrey')
+    ax.set_ylim(0, 500)
+    ax.set_title(r"Dissipation diagnosed from Thorpe scales")
+    helper.Plot.path_as_footnote(fig=f,
+                                 path="Pinner_et_al_2024/scripts/thorpe_scales/thorpe_scales.py",
+                                 rot="vertical")
+
+    levels = [28.00, 28.26, 28.40]
+    ax.contour(
+        gamma_n_df.columns,
+        gamma_n_df.index,
+        gamma_n_df,
+        levels=levels,
+        colors="k",
+        linewidths=1,
+    )
+    f.tight_layout()
+
+plotting()
 plt.show()
