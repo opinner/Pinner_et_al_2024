@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import mixsea as mx
+import scipy.stats as ss
 from src.read_CTDs import load_Joinville_transect_CTDs
 import src.helper as helper
 from scipy.interpolate import interp1d  # is considered legacy code, will be in the future removed from scipy
@@ -124,6 +125,29 @@ np.savez("./method_results/horizontally_averaged_Thorpe_eps", z=vertical_eps_df.
 
 eps_df.to_csv("./method_results/Thorpe_eps_df_with_mab.csv")
 gamma_n_df.to_csv("./method_results/Thorpe_neutral_density_df_with_mab.csv")
+
+
+# bin dissipation rates
+thorpe_lons = eps_df.columns.to_numpy()
+max_lon = max(thorpe_lons)
+min_lon = min(thorpe_lons)
+
+# half a degree bins
+BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5 + max_lon + 1e-3 * max_lon, 0.5)
+BIN_CENTER = BIN_EDGES[:-1]-0.25
+# depth-level-wise (row-wise) arithmetic averaging
+rows = []
+for index, row in eps_df.iterrows():
+    values = row.to_numpy()
+    bin_means = ss.binned_statistic(x=thorpe_lons, values=values, statistic=np.nanmean, bins=BIN_EDGES)[0]
+    new_eps = bin_means
+    new_row = pd.DataFrame([new_eps], columns=BIN_CENTER)
+    rows.append(new_row)
+binned_thorpe_eps_df = pd.concat(rows, sort=False).reset_index(drop=True)
+binned_thorpe_eps_df.to_csv("./method_results/binned_thorpe_dissipation.csv")
+binned_thorpe_eps_df.to_csv("../derived_data/binned_thorpe_dissipation.csv")
+
+
 print("done")
 
 
