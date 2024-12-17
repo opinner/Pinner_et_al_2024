@@ -47,7 +47,7 @@ binned_thorpe_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
 
 #-------------------------------------------------------------------
 # read eps_IGW results from strain-based finestructure analysis
-eps_IGW_strain_df = pd.read_csv("../scripts/shear_strain_parametrization/method_results/binned_strain_eps2.csv")
+eps_IGW_strain_df = pd.read_csv("../scripts/finestructure/method_results/binned_strain_eps2.csv")
 eps_IGW_strain_df.set_index('Unnamed: 0', inplace=True)
 
 #-------------------------------------------------------------------
@@ -94,9 +94,9 @@ ax.contourf(
     binned_regions.index,
     binned_regions.values,
     levels=levels,
-    hatches=["xx"],
+    hatches=["x"],
     colors="None",
-    zorder=1
+    zorder=10
 )
 ax.contour(
     binned_regions.columns,
@@ -104,7 +104,7 @@ ax.contour(
     binned_regions.values,
     levels=levels,
     colors="xkcd:charcoal",
-    zorder=1
+    zorder=10
 )
 
 ax.scatter(

@@ -12,7 +12,7 @@ data = np.load("../scripts/thorpe_scales/method_results/horizontally_averaged_Th
 thorpe_z = data["z"]
 thorpe_eps = data["eps"]
 
-data = np.load("../scripts/shear_strain_parametrization/method_results/Strain_vertical_eps2.npz")
+data = np.load("../scripts/finestructure/method_results/Strain_vertical_eps2.npz")
 strain_mab = data["mab"]
 strain_eps = data["eps"]
 

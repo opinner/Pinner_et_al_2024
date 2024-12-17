@@ -6,6 +6,8 @@ from scipy.interpolate import interp1d  # is considered legacy code, will be in 
 import scipy.stats as ss
 import warnings
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
+# Suppress specific RuntimeWarning related to mean of empty slice
+warnings.filterwarnings(action="ignore", category=RuntimeWarning, message=".*Mean of empty slice.*")
 
 CTDs = load_Joinville_transect_CTDs()
 CTDs_grouped = CTDs.groupby("Event")
@@ -66,15 +68,17 @@ max_lon = max(lons)
 min_lon = min(lons)
 # half a degree bins
 BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5+max_lon + 1e-3 * max_lon, 0.5)
+BIN_CENTER = BIN_EDGES[:-1]-0.25
 
 rows = []
 for index, row in gamma_n_df.iterrows():
     values = row.to_numpy()
     bin_means = ss.binned_statistic(x=lons, values=values, statistic=np.nanmean, bins=BIN_EDGES)[0]
-    new_row = pd.DataFrame([bin_means], columns=BIN_EDGES[:-1])
+    new_row = pd.DataFrame([bin_means], columns=BIN_CENTER)
     rows.append(new_row)
 
 binned_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
 binned_gamma_n_df.to_csv("./method_results/binned_gamma_n.csv")
+binned_gamma_n_df.to_csv("../../derived_data/binned_neutral_density.csv")
 
 print("done")
