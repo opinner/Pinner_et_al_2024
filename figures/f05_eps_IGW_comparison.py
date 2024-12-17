@@ -88,6 +88,7 @@ binned_regions = pd.read_csv("../scripts/preprocessing/method_results/binned_reg
 binned_regions.columns = binned_regions.columns.astype("float") #convert column names from strings to floats
 binned_regions = binned_regions.iloc[0:600]
 levels = [2.5,3.5]  # Border between IL and BL
+plt.rcParams['hatch.color'] = 'xkcd:charcoal'
 ax.contourf(
     binned_regions.columns,
     binned_regions.index,
@@ -95,14 +96,14 @@ ax.contourf(
     levels=levels,
     hatches=["xx"],
     colors="None",
-    zorder = 1
+    zorder=1
 )
 ax.contour(
     binned_regions.columns,
     binned_regions.index,
     binned_regions.values,
     levels=levels,
-    colors="k",
+    colors="xkcd:charcoal",
     zorder=1
 )
 
@@ -114,7 +115,7 @@ ax.scatter(
     norm=norm,
     edgecolor='darkgrey',
     marker=MarkerStyle("o"),
-    s=300,
+    s=275,
     zorder=5
 )
 
@@ -128,7 +129,7 @@ ax.scatter(
     color = "tab:gray",
     edgecolor="black",
     marker=MarkerStyle("o"),
-    s=200,
+    s=175,
     zorder=-10,
     label=r"$\varepsilon_{\mathrm{IGW, IDEMIX}}$",
 )
@@ -140,7 +141,7 @@ ax.scatter(
     color = "tab:gray",
     edgecolor="black",
     marker=MarkerStyle("s"),
-    s=80,
+    s=70,
     zorder=-10,
     label=r"$\varepsilon_{\mathrm{IGW, fine}}$"
 )
@@ -203,6 +204,6 @@ ax.set_xlabel("Longitude (°)")
 #ax[0].set_title(r"Dissipation rate $\varepsilon$ across the slope")
 
 #fig.tight_layout()
-fig.savefig("./eps_IGW_comparison2.pdf")
+fig.savefig("./eps_IGW_comparison.pdf")
 # fig.savefig("./eps_IGW_comparison.png", dpi = 400, bbox_inches = "tight")
 plt.show()
