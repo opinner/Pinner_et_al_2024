@@ -127,19 +127,19 @@ vertical_eps_df.drop(vertical_eps_df.columns[vertical_eps_df.columns > -48.5], a
 # take horizontal average to get a single vertical profile
 mean = vertical_eps_df.mean(axis=1)
 std = vertical_eps_df.std(axis=1)
-np.savez("method_results/Strain_vertical_eps.npz", mab =vertical_eps_df.index, eps=mean)
+np.savez("method_results/Strain_vertical_eps.npz", mab=vertical_eps_df.index, eps=mean)
 
 # Bin resulting dissipation rates
 lons = eps_strain_df.columns.to_numpy()
 max_lon = max(lons)
 min_lon = min(lons)
-LON_BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5+max_lon + 1e-3 * max_lon, 0.5)
+BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5+max_lon + 1e-3 * max_lon, 0.5)
 BIN_CENTER = BIN_EDGES[:-1]-0.25
 
 rows = []
 for index, row in eps_strain_df.iterrows():
     values = row.to_numpy()
-    bin_means = ss.binned_statistic(x=lons, values=values, statistic=np.nanmean, bins=LON_BIN_EDGES)[0]
+    bin_means = ss.binned_statistic(x=lons, values=values, statistic=np.nanmean, bins=BIN_EDGES)[0]
     new_eps = bin_means
     new_row = pd.DataFrame([new_eps], columns=BIN_CENTER)
     rows.append(new_row)
