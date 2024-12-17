@@ -12,15 +12,15 @@ from src.read_CTDs import load_Joinville_transect_CTDs
 import src.helper as helper
 from scipy.interpolate import interp1d  # is considered legacy code, will be in the future removed from scipy
 import warnings
+warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
+# Suppress specific RuntimeWarning related to mean of empty slice
+warnings.filterwarnings(action="ignore", category=RuntimeWarning, message=".*Mean of empty slice.*")
 
 plt.rcParams.update({
     "figure.facecolor": "white",
     "savefig.facecolor": "white",
     "figure.figsize": [8, 6]
 })
-
-
-warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 DENSITY_NOISE = 5e-4  # Noise parameter, Default value = 5e-4
 ALPHA = 0.8  # Coefficient relating the Thorpe and Ozmidov scales.
@@ -71,7 +71,7 @@ for event in events:
         continue
 
     if max_depth < 200:
-        print(f"{event} has {max_depth}m and is too shallow")
+        print(f"{event} is only {max_depth}m and is too shallow")
         continue
     if current_profile['Temp [°C]'].iloc[-1] > 0.2:
         print(f"{event} shows {current_profile['Temp [°C]'].iloc[-1]:.2f} °C at the bottom, which is too high ")
@@ -145,7 +145,7 @@ for index, row in eps_df.iterrows():
     rows.append(new_row)
 binned_thorpe_eps_df = pd.concat(rows, sort=False).reset_index(drop=True)
 binned_thorpe_eps_df.to_csv("./method_results/binned_thorpe_dissipation.csv")
-binned_thorpe_eps_df.to_csv("../derived_data/binned_thorpe_dissipation.csv")
+binned_thorpe_eps_df.to_csv("../../derived_data/binned_thorpe_dissipation.csv")
 
 
 print("done")

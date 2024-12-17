@@ -33,29 +33,12 @@ binned_thorpe_gamma_n_df = pd.read_csv(
 #binned_thorpe_gamma_n_df.set_index(keys='Unnamed: 0', inplace=True)
 binned_thorpe_gamma_n_df = binned_thorpe_gamma_n_df.drop(
     binned_thorpe_gamma_n_df[binned_thorpe_gamma_n_df.index > 600].index)
-binned_thorpe_gamma_n_df.columns = binned_thorpe_gamma_n_df.columns.astype(pd.Float64Dtype())
-
-# # bin dissipation rates
-# thorpe_lons = thorpe_eps_df.columns.to_numpy()
-# max_lon = max(thorpe_lons)
-# min_lon = min(thorpe_lons)
-#
-# # half a degree bins
-# BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5 + max_lon + 1e-3 * max_lon, 0.5)
-# BIN_CENTER = BIN_EDGES[:-1]-0.25
-# # depth-level-wise (row-wise) arithmetic averaging
-# rows = []
-# for index, row in thorpe_eps_df.iterrows():
-#     values = row.to_numpy()
-#     bin_means = ss.binned_statistic(x=thorpe_lons, values=values, statistic=np.nanmean, bins=BIN_EDGES)[0]
-#     new_eps = bin_means
-#     new_row = pd.DataFrame([new_eps], columns=BIN_CENTER)
-#     rows.append(new_row)
-# binned_thorpe_eps_df = pd.concat(rows, sort=False).reset_index(drop=True)
-# binned_thorpe_eps_df.to_csv("../derived_data/binned_thorpe_dissipation.csv")
+binned_thorpe_gamma_n_df.columns = binned_thorpe_gamma_n_df.columns.astype("float")
 
 binned_thorpe_eps_df = pd.read_csv(
     "../scripts/thorpe_scales/method_results/binned_thorpe_dissipation.csv", index_col=0)
+binned_thorpe_eps_df.columns = binned_thorpe_eps_df.columns.astype("float")
+
 #-------------------------------------------------------------------
 # read eps_IGW results from IDEMIX method
 eps_IGW_IDEMIX_df = pd.read_csv("../scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
