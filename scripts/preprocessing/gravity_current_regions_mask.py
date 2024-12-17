@@ -6,7 +6,7 @@ import matplotlib.colors as mcolors
 import cmocean
 
 # load binned data
-binned_neutral_density = pd.read_csv("../../derived_data/binned_neutral_density.csv", index_col=0)
+binned_neutral_density = pd.read_csv("../preprocessing/method_results/binned_gamma_n.csv", index_col=0)
 # convert column names from strings to floats
 binned_neutral_density.columns = binned_neutral_density.columns.astype("float")
 
@@ -28,7 +28,6 @@ binned_regions = binned_regions.where(cond=binned_neutral_density > 28.40, other
 
 # shelf from longitude along the transect (the column names)
 def condition(col_name): return col_name > -52
-# condition = lambda col_name: col_name > -52
 
 
 # Create the mask
