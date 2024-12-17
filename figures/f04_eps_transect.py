@@ -16,17 +16,6 @@ TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1 / 2.54  # centimeters in inches
 
-# read thorpe results data
-thorpe_eps_df = pd.read_pickle("../scripts/thorpe_scales/method_results/Thorpe_eps_df_with_mab.pkl")
-thorpe_mab = thorpe_eps_df.index
-thorpe_gamma_n_df = pd.read_pickle("../scripts/thorpe_scales/method_results/Thorpe_neutral_density_df_with_mab.pkl")
-
-# add background dissipation, but only where there is temperature data
-BACKGROUND_DISSIPATION = 1e-10  #value taken from Hirano et al 2015
-thorpe_eps_df.fillna(value=BACKGROUND_DISSIPATION, inplace=True)
-# use gamma_n as a mask
-thorpe_eps_df.where(cond=~thorpe_gamma_n_df.isna(), other=np.nan, inplace=True)
-
 #but then use the already binned version
 binned_thorpe_gamma_n_df = pd.read_csv(
     "../scripts/preprocessing/method_results/binned_gamma_n.csv", index_col=0)
@@ -61,6 +50,7 @@ mpp = ax.pcolormesh(
 )
 
 cb = plt.colorbar(mpp, ax=ax, location="top", extend="max", aspect=26)  # , aspect=40, shrink=0.8)
+#cb = plt.colorbar(mpp, ax=ax, location="right", extend="max", aspect=26)  # , aspect=40, shrink=0.8)
 cb.set_label(r"Dissipation rate $\varepsilon\,$(W$\,$kg$^{-1}$)")
 
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
@@ -93,6 +83,19 @@ clabels = ax.clabel(
 )
 # adjust bboxes for better readability
 [txt.set_bbox(dict(facecolor='lightgrey', alpha=0.8, edgecolor='darkgrey', boxstyle="round", pad=0)) for txt in clabels]
+
+binned_regions = pd.read_csv("../scripts/preprocessing/method_results/binned_regions.csv", index_col=0)
+binned_regions.columns = binned_regions.columns.astype("float") #convert column names from strings to floats
+binned_regions = binned_regions.iloc[0:600]
+levels = [2.5,3.5]  # Border between IL and BL
+ax.contour(
+    binned_regions.columns,
+    binned_regions.index,
+    binned_regions.values,
+    levels=levels,
+    colors="k",
+    zorder=10
+)
 
 ax.scatter(
     eps_IGW_IDEMIX_df["lon"],

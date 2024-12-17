@@ -126,6 +126,16 @@ np.savez("./method_results/horizontally_averaged_Thorpe_eps", z=vertical_eps_df.
 eps_df.to_csv("./method_results/Thorpe_eps_df_with_mab.csv")
 gamma_n_df.to_csv("./method_results/Thorpe_neutral_density_df_with_mab.csv")
 
+# read thorpe results data
+#thorpe_eps_df = pd.read_pickle("../scripts/thorpe_scales/method_results/Thorpe_eps_df_with_mab.pkl")
+#thorpe_mab = thorpe_eps_df.index
+#thorpe_gamma_n_df = pd.read_pickle("../scripts/thorpe_scales/method_results/Thorpe_neutral_density_df_with_mab.pkl")
+
+# add background dissipation, but only where there is temperature data
+BACKGROUND_DISSIPATION = 1e-10  #value taken from Hirano et al 2015
+eps_df.fillna(value=BACKGROUND_DISSIPATION, inplace=True)
+# use gamma_n as a mask
+eps_df.where(cond=~gamma_n_df.isna(), other=np.nan, inplace=True)
 
 # bin dissipation rates
 thorpe_lons = eps_df.columns.to_numpy()

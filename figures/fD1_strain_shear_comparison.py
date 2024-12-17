@@ -175,7 +175,7 @@ min_lon = min(thorpe_lons)
 
 # half a degree bins
 BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5 + max_lon + 1e-3 * max_lon, 0.5)
-BIN_CENTER = BIN_EDGES[:-1]-0.25
+BIN_CENTER = BIN_EDGES[:-1] - 0.25
 
 # depth-level-wise (row-wise) arithmetic averaging
 rows = []
@@ -187,7 +187,9 @@ for index, row in thorpe_gamma_n_df.iterrows():
 
 binned_thorpe_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
 
-fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH * cm, 0.5 * TWO_COLUMN_WIDTH * cm), layout="constrained")
+fig, ax = plt.subplots(1,
+                       figsize=(TWO_COLUMN_WIDTH * cm, 0.5 * TWO_COLUMN_WIDTH * cm),
+                       layout="constrained")
 ax.set_ylim(0, 1000)
 ax.set_xlim(-53.2, -47)
 
@@ -203,17 +205,17 @@ cb = plt.colorbar(mapp, ax=ax, aspect=15)
 cb.set_label(r"$\varepsilon_\mathrm{IGW, strain}$ / $\varepsilon_\mathrm{IGW, shear}$")
 ax.set_facecolor('lightgrey')
 
-continental_slope = BIN_EDGES[3]
-deep_sea = BIN_EDGES[-1]
-ax.fill_between(
-    [continental_slope, deep_sea],
-    [0,0],
-    [250/2, 250/2],
-    hatch="xx",
-    facecolor='None',
-    edgecolor='darkgrey',
-    alpha=0.8
-)
+# continental_slope = BIN_EDGES[3]
+# deep_sea = BIN_EDGES[-1]
+# ax.fill_between(
+#     [continental_slope, deep_sea],
+#     [0,0],
+#     [250/2, 250/2],
+#     hatch="xx",
+#     facecolor='None',
+#     edgecolor='darkgrey',
+#     alpha=0.8
+# )
 
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary, from Garabato et al 2002
 
@@ -244,6 +246,45 @@ clabels = ax.clabel(
 )
 # adjust bboxes for better readability
 [txt.set_bbox(dict(facecolor='lightgrey', alpha=0.8, edgecolor='darkgrey', boxstyle="round", pad=0)) for txt in clabels]
+
+binned_regions = pd.read_csv(
+    "../scripts/preprocessing/method_results/binned_regions.csv", index_col=0)
+binned_regions.columns = binned_regions.columns.astype("float")  #convert column names from strings to floats
+binned_regions = binned_regions.iloc[0:600]
+levels = [2.5, 3.5]  # Border between IL and BL
+plt.rcParams['hatch.color'] = 'xkcd:charcoal'
+ax.contourf(
+    binned_regions.columns,
+    binned_regions.index,
+    binned_regions.values,
+    levels=levels,
+    hatches=["x"],
+    colors="None",
+    zorder=10
+)
+ax.contour(
+    binned_regions.columns,
+    binned_regions.index,
+    binned_regions.values,
+    levels=levels,
+    colors="xkcd:charcoal",
+    zorder=10
+)
+
+with np.load("./flowfield.npz") as data:
+    xi = data['xi']
+    yi = data['yi']
+    avrg_v = data['avrg_v']
+
+levels = [0.1, 0.2]
+CS = ax.contour(
+    xi, yi, avrg_v,
+    levels=levels,
+    colors='yellow',
+    linestyles=["dashed", "solid"],
+    linewidths=1.5,
+    alpha=0.8
+)
 
 ax.set_facecolor('lightgrey')
 ax.set_ylabel("Meters above bottom")
