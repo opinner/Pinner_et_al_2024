@@ -134,19 +134,21 @@ lons = eps_strain_df.columns.to_numpy()
 max_lon = max(lons)
 min_lon = min(lons)
 LON_BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5+max_lon + 1e-3 * max_lon, 0.5)
+BIN_CENTER = BIN_EDGES[:-1]-0.25
 
 rows = []
 for index, row in eps_strain_df.iterrows():
     values = row.to_numpy()
     bin_means = ss.binned_statistic(x=lons, values=values, statistic=np.nanmean, bins=LON_BIN_EDGES)[0]
     new_eps = bin_means
-    new_row = pd.DataFrame([new_eps], columns=LON_BIN_EDGES[:-1])
+    new_row = pd.DataFrame([new_eps], columns=BIN_CENTER)
     rows.append(new_row)
 binned_eps_strain_df = pd.concat(rows, sort=False).reset_index(drop=True)
 binned_eps_strain_df.index = eps_strain_df.index
 
-print(binned_eps_strain_df.head(),"\n")
+#print(binned_eps_strain_df.head(),"\n")
 
 print(binned_eps_strain_df.info(),"\n")
 binned_eps_strain_df.to_csv("./method_results/binned_strain_eps.csv")
+binned_eps_strain_df.to_csv("../../derived_data/binned_finestructure_dissipation.csv")
 print("Done")
