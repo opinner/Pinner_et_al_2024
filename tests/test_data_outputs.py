@@ -20,3 +20,4 @@ def test_idemix_dissipation_rate_output(dataframe_regression):
 def test_neutral_density_output(dataframe_regression):
     binned_neutral_density_df = pd.read_csv("./scripts/preprocessing/method_results/binned_gamma_n.csv")
     dataframe_regression.check(binned_neutral_density_df, default_tolerance=dict(rtol=1e-05, atol=1e-08))
+
