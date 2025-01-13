@@ -46,6 +46,7 @@ mpp = ax.pcolormesh(
     binned_thorpe_eps_df.values,
     norm=mcolors.LogNorm(vmin=1e-10, vmax=1e-7),
     cmap=cmap,
+    shading='nearest',
     rasterized=True
 )
 

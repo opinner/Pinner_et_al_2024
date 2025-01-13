@@ -134,7 +134,7 @@ lons = eps_strain_df.columns.to_numpy()
 max_lon = max(lons)
 min_lon = min(lons)
 #BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5+max_lon + 1e-3 * max_lon, 0.5)
-BIN_EDGES = np.arange(-54.25, -46.75, 0.5)
+BIN_EDGES = np.arange(-53.75, -46.25, 0.5)
 BIN_CENTER = BIN_EDGES[:-1]-0.25
 
 rows = []
