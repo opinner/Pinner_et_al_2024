@@ -145,9 +145,9 @@ min_lon = min(thorpe_lons)
 # half a degree bins
 #BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5 + max_lon + 1e-3 * max_lon, 0.5)
 BIN_EDGES = np.arange(-53.75, -46.25, 0.5)
+BIN_CENTER = BIN_EDGES[:-1]+0.25
 eps_df.drop(eps_df.columns[eps_df.columns < BIN_EDGES[0]], axis="columns")
 index_col = 0
-BIN_CENTER = BIN_EDGES[:-1]-0.25
 # depth-level-wise (row-wise) arithmetic averaging
 rows = []
 for index, row in eps_df.iterrows():
@@ -192,5 +192,5 @@ def plotting():
     )
     f.tight_layout()
 
-plotting()
+#plotting()
 plt.show()

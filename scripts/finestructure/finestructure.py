@@ -121,13 +121,13 @@ eps_strain_df = eps_strain_df * 2.694  #Correction from Rw =3 to Rw = 7
 
 
 # trim to gravity current core
-vertical_eps_df = eps_strain_df.drop(eps_strain_df.columns[eps_strain_df.columns < -51.5], axis="columns")
-vertical_eps_df.drop(vertical_eps_df.columns[vertical_eps_df.columns > -48.5], axis="columns", inplace=True)
-
-# take horizontal average to get a single vertical profile
-mean = vertical_eps_df.mean(axis=1)
-std = vertical_eps_df.std(axis=1)
-np.savez("method_results/Strain_vertical_eps.npz", mab=vertical_eps_df.index, eps=mean)
+# vertical_eps_df = eps_strain_df.drop(eps_strain_df.columns[eps_strain_df.columns < -51.5], axis="columns")
+# vertical_eps_df.drop(vertical_eps_df.columns[vertical_eps_df.columns > -48.5], axis="columns", inplace=True)
+#
+# # take horizontal average to get a single vertical profile
+# mean = vertical_eps_df.mean(axis=1)
+# std = vertical_eps_df.std(axis=1)
+#np.savez("method_results/Strain_vertical_eps.npz", mab=vertical_eps_df.index, eps=mean)
 
 # Bin resulting dissipation rates
 lons = eps_strain_df.columns.to_numpy()
@@ -135,7 +135,7 @@ max_lon = max(lons)
 min_lon = min(lons)
 #BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5+max_lon + 1e-3 * max_lon, 0.5)
 BIN_EDGES = np.arange(-53.75, -46.25, 0.5)
-BIN_CENTER = BIN_EDGES[:-1]-0.25
+BIN_CENTER = BIN_EDGES[:-1]+0.25
 
 rows = []
 for index, row in eps_strain_df.iterrows():

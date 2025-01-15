@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.colors as mcolors
 import pandas as pd
-import scipy.stats as ss
 from matplotlib.markers import MarkerStyle
 import cmocean
 cmap = cmocean.cm.amp
@@ -21,29 +20,8 @@ plt.rcParams.update({
     "font.size": 9
 })
 
-# -------------------------------------------------------------------
-# read neutral density data
-thorpe_gamma_n_df = pd.read_pickle("../scripts/thorpe_scales/method_results/Thorpe_neutral_density_df_with_mab.pkl")
-thorpe_mab = thorpe_gamma_n_df.index
-
-thorpe_lons = thorpe_gamma_n_df.columns.to_numpy()
-max_lon = max(thorpe_lons)
-min_lon = min(thorpe_lons)
-
-# half a degree bins
-BIN_EDGES = np.arange(min_lon-1e-3*min_lon, 0.5+max_lon+1e-3*max_lon, 0.5)
-BIN_CENTER = BIN_EDGES[:-1]-0.25
-
-# depth-level-wise (row-wise) arithmetic averaging
-rows = []
-for index, row in thorpe_gamma_n_df.iterrows():
-    values = row.to_numpy()
-    bin_means = ss.binned_statistic(x=thorpe_lons, values=values, statistic=np.nanmean, bins=BIN_EDGES)[0]
-    new_row = pd.DataFrame([bin_means], columns=BIN_CENTER)
-    rows.append(new_row)
-
-binned_thorpe_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
-
+binned_neutral_density = pd.read_csv("../derived_data/binned_neutral_density.csv", index_col = 0)
+binned_neutral_density.columns = binned_neutral_density.columns.astype("float") #convert column names from strings to floats
 
 #-------------------------------------------------------------------
 # read eps_IGW results from strain-based finestructure analysis
@@ -87,7 +65,7 @@ cb.set_label(r"Wave-induced dissipation rate $\varepsilon_{\mathrm{IGW}}\,$(W$\,
 binned_regions = pd.read_csv("../scripts/preprocessing/method_results/binned_regions.csv", index_col=0)
 binned_regions.columns = binned_regions.columns.astype("float") #convert column names from strings to floats
 binned_regions = binned_regions.iloc[0:600]
-levels = [2.5,3.5]  # Border between IL and BL
+levels = [2.5, 3.5]  # Border between IL and BL
 plt.rcParams['hatch.color'] = 'xkcd:charcoal'
 ax.contourf(
     binned_regions.columns,
@@ -150,9 +128,9 @@ ax.scatter(
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
 # gravity_current_boundary = [28.40]  # from Garabato et al 2002
 CS = ax.contour(
-    binned_thorpe_gamma_n_df.columns,
-    binned_thorpe_gamma_n_df.index,
-    binned_thorpe_gamma_n_df,
+    binned_neutral_density.columns,
+    binned_neutral_density.index,
+    binned_neutral_density,
     levels=water_mass_boundaries,
     linestyles=["dashed", "solid"],
     colors="k",

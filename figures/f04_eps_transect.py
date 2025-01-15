@@ -94,7 +94,8 @@ ax.contour(
     binned_regions.index,
     binned_regions.values,
     levels=levels,
-    colors="k",
+    colors='xkcd:charcoal',
+    linewidths=3,
     zorder=10
 )
 

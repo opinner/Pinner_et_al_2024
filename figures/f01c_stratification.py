@@ -15,30 +15,17 @@ cm = 1/2.54  # centimeters in inches
 
 plt.style.use('./paper.mplstyle')
 
-thorpe_gamma_n_df = pd.read_pickle("../scripts/thorpe_scales/method_results/Thorpe_neutral_density_df_with_mab.pkl")
-lons = thorpe_gamma_n_df.columns.to_numpy()
-mab = thorpe_gamma_n_df.index
-max_lon = max(lons)
-min_lon = min(lons)
-# half a degree bins
-BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5+max_lon + 1e-3 * max_lon, 0.5)
-
-rows = []
-for index, row in thorpe_gamma_n_df.iterrows():
-    values = row.to_numpy()
-    bin_means = ss.binned_statistic(x=lons, values=values, statistic=np.nanmean, bins=BIN_EDGES)[0]
-    new_row = pd.DataFrame([bin_means], columns=BIN_EDGES[:-1])
-    rows.append(new_row)
-binned_thorpe_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
+binned_neutral_density = pd.read_csv("../derived_data/binned_neutral_density.csv", index_col = 0)
+binned_neutral_density.columns = binned_neutral_density.columns.astype("float") #convert column names from strings to floats
 
 fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.5*TWO_COLUMN_WIDTH*cm))
 mpp = ax.pcolormesh(
-    binned_thorpe_gamma_n_df.columns,
-    mab,
-    binned_thorpe_gamma_n_df,
+    binned_neutral_density.columns,
+    binned_neutral_density.index,
+    binned_neutral_density.values,
     cmap=cmocean.cm.haline_r,
-    vmin = 27.8,
-    rasterized = True # optimize the drawing for vector graphics
+    vmin=27.8,
+    rasterized=True # optimize the drawing for vector graphics
 )
 
 cb = plt.colorbar(mpp, ax=ax, extend="min", location="top")  # pad=0.02, aspect=12
@@ -46,9 +33,9 @@ cb = plt.colorbar(mpp, ax=ax, extend="min", location="top")  # pad=0.02, aspect=
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
 # gravity_current_boundary = [28.40]  # from Garabato et al 2002
 CS = ax.contour(
-    binned_thorpe_gamma_n_df.columns,
-    binned_thorpe_gamma_n_df.index,
-    binned_thorpe_gamma_n_df,
+    binned_neutral_density.columns,
+    binned_neutral_density.index,
+    binned_neutral_density.values,
     levels=water_mass_boundaries,
     linestyles=["dashed", "solid"],
     colors="k",
@@ -78,8 +65,8 @@ ax.clabel(
 #             arrowprops = dict(facecolor='black', width = 2, shrink=0.05), ha = "center", va = "center", color = "white", bbox=dict(facecolor='black', alpha = 0.8, edgecolor='black', boxstyle='round, pad = 0.5'))
 
 mooring_info = pd.read_csv("../scripts/IDEMIX_parameterization/method_results/eps_IGW_IDEMIX_results.csv")
-moorings_mabs = mooring_info["rounded_mab"]
-moorings_lons = mooring_info ["lon"]
+moorings_mabs = mooring_info["rounded mab"]
+moorings_lons = mooring_info["lon"]
 
 # draw measurement positions
 ax.plot(moorings_lons, moorings_mabs,
@@ -107,6 +94,6 @@ ax.axhline(0, c="k")
 ax.fill_between(x, y1, y2, facecolor="xkcd:charcoal grey", zorder=5)  # , hatch="///")
 ax.legend(loc = "upper right")  #,facecolor='k', framealpha=0.8, edgecolor = "black", labelcolor = "white")
 fig.tight_layout()
-fig.savefig("./stratification.svg")
+#fig.savefig("./stratification.pdf")
 # fig.savefig("./stratification.png", dpi = 400, bbox_inches = "tight")
 plt.show()

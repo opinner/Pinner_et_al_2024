@@ -24,7 +24,7 @@ min_lon = min(lons)
 LON_BIN_EDGES = np.arange(-53.75, -46.25, 0.5)
 #LON_BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5+max_lon + 1e-3 * max_lon, 0.5)
 bin_lats = ss.binned_statistic(x=lons, values=lats, statistic=np.nanmean, bins=LON_BIN_EDGES)[0]
-bin_lons = LON_BIN_EDGES[:-1] - 0.25
+bin_lons = LON_BIN_EDGES[:-1] + 0.25
 
 print(bin_lons)
 print(len(bin_lats),len(bin_lons))

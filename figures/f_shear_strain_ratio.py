@@ -70,7 +70,7 @@ shst_params["m"] = np.arange(
 # Set up limits for shear and strain variance integrations
 mi_sh = np.array([0, 8])
 mii_sh = np.array(range(*mi_sh))
-mi_st = np.array([2, 20])
+mi_st = np.array([0, 20])
 mii_st = np.array(range(*mi_st))
 
 shst_params["m_include_sh"] = mii_sh

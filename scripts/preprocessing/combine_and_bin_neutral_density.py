@@ -63,32 +63,44 @@ gamma_n_df.sort_index(axis=1, inplace=True)
 
 gamma_n_df.to_pickle("../../data/Neutral_density_df_with_mab.pkl")
 
-# remove profiles with neutral density values below a treshold to avoid outliers
-threshold = 27.5
-mask = (gamma_n_df < threshold) & (~gamma_n_df.isna())
-columns_to_keep = gamma_n_df.columns[~mask.any()]
-gamma_n_df = gamma_n_df[columns_to_keep]
-
 lons = gamma_n_df.columns.to_numpy()
 mab = gamma_n_df.index
-# max_lon = max(lons)
-# min_lon = min(lons)
-# half a degree bins
-#BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5+max_lon + 1e-3 * max_lon, 0.5)
+#removal of outlier
+gamma_n_df.iloc[:,82] = np.nan
+
 BIN_EDGES = np.arange(-53.75, -46.25, 0.5)
-BIN_CENTER = BIN_EDGES[:-1]-0.25
+BIN_CENTER = BIN_EDGES[:-1]+0.25
+#lons = data.columns.to_numpy()
+binned_gamma_n_df = pd.DataFrame(index=gamma_n_df.index) #, columns = BIN_CENTER)
+for i, edge in enumerate(BIN_EDGES):
+    if i == len(BIN_EDGES)-1: break
+    assert BIN_EDGES[i] == edge
+    start = np.argmin(np.abs(lons - edge))
+    next_edge = BIN_EDGES[i+1]
+    stop = np.argmin(np.abs(lons - next_edge))
+    center = BIN_CENTER[i]
+    print(start, stop, f"{lons[start]:.2f}, {center}, {lons[stop]:.2f}")
 
-rows = []
-for index, row in gamma_n_df.iterrows():
-    values = row.to_numpy()
-    #try:
-    bin_means = ss.binned_statistic(x=lons, values=values, statistic=np.nanmean, bins=BIN_EDGES)[0]
-    new_row = pd.DataFrame([bin_means], columns=BIN_CENTER)
-    # except ValueError:
-    #     new_row = pd.DataFrame(np.nan, index=[index], columns=BIN_CENTER)
-    rows.append(new_row)
 
-binned_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
+    if i != len(BIN_EDGES)-2:
+        assert lons[start] <= center
+        assert lons[stop] >= center
+        binned_gamma_n_df[f"{center}"] = gamma_n_df.iloc[:, start:stop].mean(axis="columns")
+
+    else: #including the rightmost edge
+        assert lons[start] <= center
+        binned_gamma_n_df[f"{center}"] = gamma_n_df.iloc[:, start:].mean(axis="columns")
+# rows = []
+# for index, row in gamma_n_df.iterrows():
+#     values = row.to_numpy()
+#     #try:
+#     bin_means = ss.binned_statistic(x=lons, values=values, statistic=np.nanmean, bins=BIN_EDGES)[0]
+#     new_row = pd.DataFrame([bin_means], columns=BIN_CENTER)
+#     # except ValueError:
+#     #     new_row = pd.DataFrame(np.nan, index=[index], columns=BIN_CENTER)
+#     rows.append(new_row)
+#
+# binned_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
 binned_gamma_n_df.to_csv("./method_results/binned_gamma_n.csv")
 binned_gamma_n_df.to_csv("../../derived_data/binned_neutral_density.csv")
 

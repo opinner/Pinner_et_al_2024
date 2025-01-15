@@ -70,7 +70,7 @@ def main():
     mooring_label = ["A","B","C","D","E","F","G"]
     for i,lon in enumerate(energy_levels["lon"].unique()):
         ax.plot(lon, -0.05e-3, alpha=0)
-        ax.text(x=lon, y=-0.05e-3, s=mooring_label[i])
+        ax.text(x=lon, y=-0.05e-3, s=mooring_label[i], weight="bold")
 
     # ax.set_title("Energy at semidiurnal tidal frequencies")
     ax.set_xlabel("Longitude (°)")

@@ -260,7 +260,22 @@ for x, label in zip(np.unique(lon_velos), ["A", "B", "C", "D", "E", "F", "G"]):
              ha="center",
              va="center",
              fontsize=9,
+             weight='bold'
              )
+
+binned_regions = pd.read_csv("../scripts/preprocessing/method_results/binned_regions.csv", index_col=0)
+binned_regions.columns = binned_regions.columns.astype("float") #convert column names from strings to floats
+binned_regions = binned_regions.iloc[0:600]
+levels = [2.5,3.5]  # Border between IL and BL
+ax1.contour(
+    binned_regions.columns,
+    binned_regions.index,
+    binned_regions.values,
+    levels=levels,
+    colors='xkcd:charcoal',
+    linewidths=2,
+    zorder=1
+)
 
 ax1.set_facecolor('lightgrey')
 ax1.set_ylabel("Meters above bottom")
