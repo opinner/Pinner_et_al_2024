@@ -17,7 +17,7 @@ def main():
         "font.size": 9
     })
 
-    data = np.load("../scripts/IDEMIX_parametrization/method_results/results_available_energy.npz", allow_pickle = True)
+    data = np.load("../scripts/IDEMIX_parameterization/method_results/results_available_energy.npz", allow_pickle = True)
     energy_levels = pd.DataFrame(data = {
         "lat":data["lat"], 
         "lon":data["lon"], 

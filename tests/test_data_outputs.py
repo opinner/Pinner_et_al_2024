@@ -13,7 +13,7 @@ def test_finestructure_dissipation_rate_output(dataframe_regression):
 
 
 def test_idemix_dissipation_rate_output(dataframe_regression):
-    eps_IGW_IDEMIX_df = pd.read_csv("./scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
+    eps_IGW_IDEMIX_df = pd.read_csv("./scripts/IDEMIX_parameterization/method_results/eps_IGW_IDEMIX_results.csv")
     dataframe_regression.check(eps_IGW_IDEMIX_df, default_tolerance=dict(rtol=1e-05, atol=1e-10))
 
 

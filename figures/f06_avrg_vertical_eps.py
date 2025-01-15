@@ -18,7 +18,7 @@ strain_eps = data["eps"]
 
 #Horizontally average of the mooring results
 #-------------------------------------------------------------------
-energy_levels = pd.read_csv("../scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
+energy_levels = pd.read_csv("../scripts/IDEMIX_parameterization/method_results/eps_IGW_IDEMIX_results.csv")
 
 error = energy_levels["eps_IGW_mult_error"]
 print("E Error", np.mean(error), np.std(error), np.max(error), np.min(error))

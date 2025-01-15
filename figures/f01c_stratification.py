@@ -77,7 +77,7 @@ ax.clabel(
 # ax.annotate('gravity current\nboundary', xy=(-48.8, 130), xytext=(-48, 270), #fontsize=9,
 #             arrowprops = dict(facecolor='black', width = 2, shrink=0.05), ha = "center", va = "center", color = "white", bbox=dict(facecolor='black', alpha = 0.8, edgecolor='black', boxstyle='round, pad = 0.5'))
 
-mooring_info = pd.read_csv("../scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
+mooring_info = pd.read_csv("../scripts/IDEMIX_parameterization/method_results/eps_IGW_IDEMIX_results.csv")
 moorings_mabs = mooring_info["rounded_mab"]
 moorings_lons = mooring_info ["lon"]
 

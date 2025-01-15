@@ -35,7 +35,7 @@ cm = 1 / 2.54  # centimeters in inches
 # load all 7 moorings as dataframes
 list_of_moorings = helper.IO.load_pickle(name="../data/mooring/list_of_moorings.pkl")
 # load Stratification information
-N_table = pd.read_pickle("../scripts/IDEMIX_parametrization/method_results/N_values.pkl")
+N_table = pd.read_pickle("../scripts/IDEMIX_parameterization/method_results/N_values.pkl")
 
 data = np.load("../data/mooring/max_depth_dict.npz", allow_pickle=True)
 max_depth_dict = data["max_depth_dict"].item()

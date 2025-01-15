@@ -30,7 +30,7 @@ binned_thorpe_eps_df.columns = binned_thorpe_eps_df.columns.astype("float")
 
 #-------------------------------------------------------------------
 # read eps_IGW results from IDEMIX method
-eps_IGW_IDEMIX_df = pd.read_csv("../scripts/IDEMIX_parametrization/method_results/eps_IGW_IDEMIX_results.csv")
+eps_IGW_IDEMIX_df = pd.read_csv("../scripts/IDEMIX_parameterization/method_results/eps_IGW_IDEMIX_results.csv")
 
 fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH * cm, 0.8 * TWO_COLUMN_WIDTH * cm), layout="constrained")
 
