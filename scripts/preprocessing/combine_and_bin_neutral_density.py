@@ -20,6 +20,7 @@ new_mab = np.arange(0, 5000, 1)
 N_df = pd.DataFrame()
 gamma_n_df = pd.DataFrame()
 
+#loop through profiles
 for event in events:
     current_profile = CTDs_grouped.get_group(event).reset_index(drop=True)
 
@@ -62,10 +63,16 @@ gamma_n_df.sort_index(axis=1, inplace=True)
 
 gamma_n_df.to_pickle("../../data/Neutral_density_df_with_mab.pkl")
 
+# remove profiles with neutral density values below a treshold to avoid outliers
+threshold = 27.5
+mask = (gamma_n_df < threshold) & (~gamma_n_df.isna())
+columns_to_keep = gamma_n_df.columns[~mask.any()]
+gamma_n_df = gamma_n_df[columns_to_keep]
+
 lons = gamma_n_df.columns.to_numpy()
 mab = gamma_n_df.index
-max_lon = max(lons)
-min_lon = min(lons)
+# max_lon = max(lons)
+# min_lon = min(lons)
 # half a degree bins
 #BIN_EDGES = np.arange(min_lon - 1e-3 * min_lon, 0.5+max_lon + 1e-3 * max_lon, 0.5)
 BIN_EDGES = np.arange(-53.75, -46.25, 0.5)
@@ -74,8 +81,11 @@ BIN_CENTER = BIN_EDGES[:-1]-0.25
 rows = []
 for index, row in gamma_n_df.iterrows():
     values = row.to_numpy()
+    #try:
     bin_means = ss.binned_statistic(x=lons, values=values, statistic=np.nanmean, bins=BIN_EDGES)[0]
     new_row = pd.DataFrame([bin_means], columns=BIN_CENTER)
+    # except ValueError:
+    #     new_row = pd.DataFrame(np.nan, index=[index], columns=BIN_CENTER)
     rows.append(new_row)
 
 binned_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
