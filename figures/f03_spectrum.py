@@ -15,10 +15,14 @@ import src.spectra as spectra
 # from src.location import Location
 # from src.ctd_cast import CTDCast
 
-print(plt.rcParams["font.size"])
+plt.rcParams.update({
+    "figure.facecolor": "white",
+    "savefig.facecolor": "white",
+    "font.size": 9
+})
 
-plt.style.use('./paper.mplstyle')
-legend_font_size = 7
+#plt.style.use('./paper.mplstyle')
+#legend_font_size = 7
 
 import pandas as pd
 #warnings.filterwarnings("ignore")  # suppress some warnings about future code changes
@@ -69,7 +73,7 @@ def integrate_psd_interval(freq, psd, a=0, b=99):
     """
     lower = np.argmin(np.abs(freq - a)).astype(int)
     upper = np.argmin(np.abs(freq - b)).astype(int)
-    return np.trapz(y=psd[lower:upper], x=freq[lower:upper])
+    return np.trapezoid(y=psd[lower:upper], x=freq[lower:upper])
 
 
 print(f"integrated spectrum =\t{integrate_psd_interval(freq, velocity_spectrum):.6e}")
@@ -266,7 +270,7 @@ days = [get_days_between(time[0], t) for t in time]
 ax[0].grid()
 ax[0].plot(days, np.real(cv), "k", label='West-East')
 ax[0].plot(days, np.imag(cv), "tab:purple", label='North-South')
-ax[0].legend(fontsize=legend_font_size)
+ax[0].legend(ncols=2, fontsize="7", columnspacing=1)
 
 ax[0].set_xlabel(f"Days since {pd.to_datetime(time[0]).strftime('%B %d, %Y')}")
 #axis[1].set_ylabel("$v$ velocity / (m/s)")
@@ -277,8 +281,8 @@ ax[0].set_ylabel(r'Velocity (m$\,$s$^{-1}$)')
 fill_label_flag = False
 
 #ax.loglog(24*3600*omega/(2*np.pi), 2*np.pi*(K_omg+P_omg)/3600/24, lw = 3, color = "tab:blue", alpha = 0.5, label = "E = KE + PE")
-ax[1].loglog(freq[-4000:], kinetic_psd[-4000:], c="tab:blue", label=r"$\mathcal{U}$")
-ax[1].loglog(fN_freq, total_psd, c="k", label=r"$\mathcal{E}$")
+ax[1].loglog(freq[-4000:], kinetic_psd[-4000:], c="tab:blue", label=r"$\mathcal{U}(z,\omega)$")
+ax[1].loglog(fN_freq, total_psd, c="k", label=r"$\mathcal{E}(z,\omega)$")
 
 ax[1].plot(extent_freq, func_powerlaw_total_psd(extent_freq, slope_height), c="k", ls=':', lw=4,
            label=f"extension")  # with\nconstant slope {slope:1.1f}")
@@ -298,9 +302,13 @@ axins.vlines(
 )
 axins.text(1.76, 0.7 * 1e-3, "f", color="tab:red", alpha=1, size="x-large")
 axins.vlines(
-    24 / 12.4, 1e-6, 1e-1, color="tab:red", alpha=1, linestyle="--", linewidth=2
+    24 / TIDAL_CONSTITUENTS["M2"], 1e-6, 1e-1, color="tab:red", alpha=1, linestyle="--", linewidth=2
 )
-axins.text(1.95, 0.15 * 1e-3, "M2", color="tab:red", alpha=1, size="x-large")
+axins.vlines(
+    24 / TIDAL_CONSTITUENTS["S2"], 1e-6, 1e-1, color="tab:red", alpha=1, linestyle="--", linewidth=2
+)
+axins.text(1.95, 0.15 * 1e-3, "M2", color="tab:red", alpha=1, fontsize=8)
+axins.text(2.05, 0.15 * 1e-3, "S2", color="tab:red", alpha=1, fontsize=8)
 
 # Turn ticklabels of insets off
 axins.tick_params(
@@ -317,7 +325,7 @@ axins.loglog(fN_freq, total_psd, c="k", label=r"$\mathcal{E}$")
 
 axins.set_xbound(1.7, 2.3)
 axins.set_ybound(1e-4, 0.03)
-axins.set_title(r"Zoom onto f/M2", loc="left", fontsize=9, pad=4.0)
+axins.set_title(r"Semidiurnal frequencies", loc="left", fontsize=8, pad=4.0)
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -336,7 +344,7 @@ ax[1].vlines(
 )
 ax[1].text(1.5, 1e-5, "f", color="tab:red", alpha=1, size="x-large")
 
-ax[1].legend(loc="upper right", fontsize=legend_font_size)
+ax[1].legend(loc="upper right", fontsize=7)
 # fig.suptitle(f"Measurement at {mooring.location.pretty_print()}, Depth of {measurement_depth}$\,$m, {mab_of_measurement}$\,$m above ground")
 
 ax[1].set_xlabel("Frequency (cycles per day)")
@@ -351,5 +359,5 @@ ax[1].set_xlim(1e-1, 20);
 
 fig.tight_layout()
 
-#fig.savefig("./TimeSeries_plus_Spectrum.pdf")
+fig.savefig("./spectrum.svg")
 plt.show()

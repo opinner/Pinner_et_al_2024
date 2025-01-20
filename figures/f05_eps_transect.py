@@ -16,6 +16,12 @@ TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1 / 2.54  # centimeters in inches
 
+plt.rcParams.update({
+    "figure.facecolor": "white",
+    "savefig.facecolor": "white",
+    "font.size": 9
+})
+
 #but then use the already binned version
 binned_thorpe_gamma_n_df = pd.read_csv(
     "../scripts/preprocessing/method_results/binned_gamma_n.csv", index_col=0)
@@ -55,7 +61,6 @@ cb = plt.colorbar(mpp, ax=ax, location="top", extend="max", aspect=26)  # , aspe
 cb.set_label(r"Dissipation rate $\varepsilon\,$(W$\,$kg$^{-1}$)")
 
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
-gravity_current_boundary = [28.40]  # from Garabato et al 2002
 
 CS = ax.contour(
     binned_thorpe_gamma_n_df.columns,
@@ -63,27 +68,34 @@ CS = ax.contour(
     binned_thorpe_gamma_n_df,
     levels=water_mass_boundaries,
     linestyles=["dashed", "solid"],
-    colors="k",
+    colors=["white","black"],
     linewidths=3,
     zorder=10
 )
-fmt = {}
-strs = ['WSDW', 'WSBW']
-for l, s in zip(CS.levels, strs):
-    fmt[l] = s
+# fmt = {}
+# strs = ['WSDW', 'WSBW']
+# for l, s in zip(CS.levels, strs):
+#     fmt[l] = s
+
+# to be shifted in postprocessing
+strs = ['WSDW', 'WSBW', "IL", "BL"]
+colors = ["white", "black", "black", "xkcd:charcoal"]
+for ix, (s, color) in enumerate(zip(strs, colors)):
+    ax.text(0.9, 0.9-0.05*ix,s, color=color, fontsize=8, transform=ax.transAxes)
+
 
 # Label every other level using strings
-clabels = ax.clabel(
-    CS,
-    CS.levels,
-    inline=False,
-    fmt=fmt,
-    colors="black",
-    fontsize=10,
-    zorder=11
-)
-# adjust bboxes for better readability
-[txt.set_bbox(dict(facecolor='lightgrey', alpha=0.8, edgecolor='darkgrey', boxstyle="round", pad=0)) for txt in clabels]
+# clabels = ax.clabel(
+#     CS,
+#     CS.levels,
+#     inline=False,
+#     fmt=fmt,
+#     colors="black",
+#     fontsize=10,
+#     zorder=11
+# )
+# # adjust bboxes for better readability
+# [txt.set_bbox(dict(facecolor='lightgrey', alpha=0.8, edgecolor='darkgrey', boxstyle="round", pad=0)) for txt in clabels]
 
 binned_regions = pd.read_csv("../scripts/preprocessing/method_results/binned_regions.csv", index_col=0)
 binned_regions.columns = binned_regions.columns.astype("float") #convert column names from strings to floats
@@ -152,6 +164,12 @@ CS = ax.contour(
     alpha=0.8
 )
 
+# to be shifted in postprocessing
+for ix, s in enumerate(levels):
+    label = f"{s:.1f}" +r"$\,$m$\,$s$^{-1}$"
+    ax.text(0+0.05*ix,0+0.05*ix,label, color="yellow", fontsize=7, transform=ax.transAxes)
+
+
 # fmt = {}
 # for l, s in zip(CS.levels, levels):
 #     fmt[l] = f"{s:.1f}"
@@ -174,5 +192,5 @@ ax.set_ylabel("Meters above bottom")
 ax.set_xlabel("Longitude (°)")
 
 fig.savefig("./eps_transect.pdf")
-#fig.savefig("./eps_transect.png", dpi = 400, bbox_inches = "tight")
+fig.savefig("./eps_transect.svg")
 plt.show()

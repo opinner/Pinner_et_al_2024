@@ -1,7 +1,4 @@
-import numpy as np
 import pandas as pd
-import scipy.stats as ss
-import matplotlib
 import matplotlib.pyplot as plt
 import cmocean as cmocean
 import warnings
@@ -13,9 +10,15 @@ TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1/2.54  # centimeters in inches
 
-plt.style.use('./paper.mplstyle')
+#plt.style.use('./paper.mplstyle')
+plt.rcParams.update({
+    "figure.facecolor": "white",
+    "savefig.facecolor": "white",
+    "font.size": 9,
+    "svg.fonttype":'path'  # TrueType font
+})
 
-binned_neutral_density = pd.read_csv("../derived_data/binned_neutral_density.csv", index_col = 0)
+binned_neutral_density = pd.read_csv("../derived_data/binned_neutral_density.csv", index_col=0)
 binned_neutral_density.columns = binned_neutral_density.columns.astype("float") #convert column names from strings to floats
 
 fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.5*TWO_COLUMN_WIDTH*cm))
@@ -25,10 +28,11 @@ mpp = ax.pcolormesh(
     binned_neutral_density.values,
     cmap=cmocean.cm.haline_r,
     vmin=27.8,
-    rasterized=True # optimize the drawing for vector graphics
+    rasterized=True  # optimize the drawing for vector graphics
 )
 
-cb = plt.colorbar(mpp, ax=ax, extend="min", location="top")  # pad=0.02, aspect=12
+#cb = plt.colorbar(mpp, ax=ax, extend="min", location="top")  # pad=0.02, aspect=12
+cb = fig.colorbar(mpp, ax=ax, extend="min", aspect=10)
 
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
 # gravity_current_boundary = [28.40]  # from Garabato et al 2002
@@ -42,20 +46,26 @@ CS = ax.contour(
     linewidths=3,
 )
 
-fmt = {}
-strs = ['WSDW', 'WSBW']
-for l, s in zip(CS.levels, strs):
-    fmt[l] = s
+# fmt = {}
+# strs = ['WSDW', 'WSBW']
+# for l, s in zip(CS.levels, strs):
+#     fmt[l] = s
+#
+# # Label every other level using strings
+# ax.clabel(
+#     CS,
+#     CS.levels,
+#     inline=False,
+#     fmt=fmt,
+#     fontsize=10,
+#     colors="white"
+# )
 
-# Label every other level using strings
-ax.clabel(
-    CS,
-    CS.levels,
-    inline=False,
-    fmt=fmt,
-    fontsize=10,
-    colors = "white"
-)
+# to be shifted in postprocessing
+strs = ['WSDW', 'WSBW', "IL", "BL"]
+colors = ["black", "black", "black", "xkcd:charcoal"]
+for ix, (s, color) in enumerate(zip(strs, colors)):
+    ax.text(0.9, 0.9-0.05*ix,s, color=color, fontsize=8, transform=ax.transAxes)
 
 
 # ax.annotate('bottom\ncurrent', xy=(-51.69, 184), xytext=(-51.8, 230),

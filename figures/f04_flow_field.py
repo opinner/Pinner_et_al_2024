@@ -225,19 +225,25 @@ CS = ax1.contour(
     linewidths=2,
 )
 
-fmt = {}
-strs = ['WSDW', 'WSBW']
-for level, string in zip(CS.levels, strs):
-    fmt[level] = string
-# Label every other level using strings
-ax1.clabel(
-    CS,
-    CS.levels,
-    inline=False,
-    fmt=fmt,
-    fontsize=9,
-    colors="white"
-)
+# to be shifted in postprocessing
+strs = ['WSDW', 'WSBW', "IL", "BL"]
+colors = ["black", "black", "black", "xkcd:charcoal"]
+for ix, (s, color) in enumerate(zip(strs, colors)):
+    ax1.text(0.9, 0.9-0.05*ix,s, color=color, fontsize=8, transform=ax1.transAxes)
+
+# fmt = {}
+# strs = ['WSDW', 'WSBW']
+# for level, string in zip(CS.levels, strs):
+#     fmt[level] = string
+# # Label every other level using strings
+# ax1.clabel(
+#     CS,
+#     CS.levels,
+#     inline=False,
+#     fmt=fmt,
+#     fontsize=9,
+#     colors="white"
+# )
 
 levels = [0.1, 0.2]
 linestyles = ["dashed", "solid"]
@@ -249,8 +255,14 @@ CS = ax1.contour(
     linewidths=2,
     alpha=0.8
 )
+# lines in colorbar
 for level, linestyle in zip(levels, linestyles):
     cb.ax.axhline(level, color='yellow', ls = linestyle)
+
+# to be shifted in postprocessing
+for ix, s in enumerate(levels):
+    label = f"{s:.1f}" +r"$\,$m$\,$s$^{-1}$"
+    ax1.text(0+0.05*ix,0+0.05*ix,label, color="yellow", fontsize=7, transform=ax1.transAxes)
 
 for x, label in zip(np.unique(lon_velos), ["A", "B", "C", "D", "E", "F", "G"]):
     ax1.text(x, 405,
@@ -286,4 +298,5 @@ ax1.set_xlim(-52.5, -47.3)
 ax2.set_xlim(-52.5, -47.3)
 #fig1.tight_layout()
 fig1.savefig("./flowfield.pdf")
+fig1.savefig("./flowfield.svg")
 plt.show()

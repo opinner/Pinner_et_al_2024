@@ -133,26 +133,31 @@ CS = ax.contour(
     binned_neutral_density,
     levels=water_mass_boundaries,
     linestyles=["dashed", "solid"],
-    colors="k",
+    colors=["white", "black"],
     linewidths=2,
     zorder=2
 )
 
-fmt = {}
-strs = ['WSDW', 'WSBW']
-for l, s in zip(CS.levels, strs):
-    fmt[l] = s
+# to be shifted in postprocessing
+strs = ['WSDW', 'WSBW', "IL", "BL"]
+colors=["white", "black", "black", "xkcd:charcoal"]
+for ix, (s,color) in enumerate(zip(strs,colors)):
+    ax.text(0.9, 0.9-0.05*ix,s, color=color, fontsize=8, transform=ax.transAxes)
 
-# Label every other level using strings
-ax.clabel(
-    CS,
-    CS.levels,
-    inline=False,
-    fmt=fmt,
-    fontsize=10,
-    colors=["white", "black"]
-)
-
+# fmt = {}
+# strs = ['WSDW', 'WSBW']
+# for l, s in zip(CS.levels, strs):
+#     fmt[l] = s
+#
+# # Label every other level using strings
+# ax.clabel(
+#     CS,
+#     CS.levels,
+#     inline=False,
+#     fmt=fmt,
+#     fontsize=8,
+#     colors=["white", "black"]
+# )
 
 # velocity isolines
 with np.load("./flowfield.npz") as data:
@@ -170,9 +175,14 @@ CS = ax.contour(
     alpha=0.8
 )
 
+# to be shifted in postprocessing
+for ix, s in enumerate(levels):
+    label = f"{s:.1f}" +r"$\,$m$\,$s$^{-1}$"
+    ax.text(0+0.05*ix,0+0.05*ix,label, color="yellow", fontsize=7, transform=ax.transAxes)
+
 #ax.set_ylim(-10, 500)
 ax.set_ylim(-10,600)
-ax.legend(loc = "upper left", ncol=3, columnspacing=1)
+ax.legend(loc="upper left", ncol=3, columnspacing=1)
 #ax.annotate('gravity current\nboundary', xy=(-48.8, 130), xytext=(-48.5, 270), #fontsize=9,
 #            arrowprops = dict(facecolor='black', width = 2, shrink=0.05), ha = "center", va = "center", color = "white", bbox=dict(facecolor='black', alpha = 0.8, edgecolor='black', boxstyle='round, pad = 0.5'))
 
@@ -183,5 +193,5 @@ ax.set_xlabel("Longitude (°)")
 
 #fig.tight_layout()
 fig.savefig("./eps_IGW_comparison.pdf")
-# fig.savefig("./eps_IGW_comparison.png", dpi = 400, bbox_inches = "tight")
+fig.savefig("./eps_IGW_comparison.svg")
 plt.show()
