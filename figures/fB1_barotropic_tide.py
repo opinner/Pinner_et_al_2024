@@ -56,15 +56,27 @@ def main():
     
         label = None
         if i == 0:
-            label = "measured semidiurnal energy"
-        ax.scatter(group["lon"] + xshift, group["tidal"], marker = ".", c = "tab:gray", ls = "None", s = 200, label = label, edgecolor = "k", zorder = 5)    
+            label = "observed semidiurnal tides"
+        ax.scatter(
+            group["lon"] + xshift,
+            group["tidal"],
+            marker=".", c="tab:gray", ls="None",
+            s=200, edgecolor="k", zorder=5,
+            label=label,
+        )
 
 
-    ax.plot(energy_levels["lon"], energy_levels["barotropic"], lw = 3, color = "k", label = "assumed semidiurnal\nbarotropic energy", )
+    ax.plot(
+        energy_levels["lon"],
+        energy_levels["barotropic"],
+        lw=3,
+        color="k",
+        label="assumed semidiurnal\nbarotropic energy"
+    )
 
     #ax.fill_between(energy_levels["lon"],  [0]*len(energy_levels["barotropic"]), energy_levels["barotropic"], label = "assumed barotropic energy", hatch= "//", facecolor = "none")
     ax.legend()
-    ax.ticklabel_format(axis = "y", scilimits = (0,0), style = "scientific", useMathText=True)  
+    ax.ticklabel_format(axis="y", scilimits=(0,0), style="scientific", useMathText=True)
     ax.yaxis.get_offset_text().set_x(-0.1)
 
     mooring_label = ["A","B","C","D","E","F","G"]
@@ -74,7 +86,7 @@ def main():
 
     # ax.set_title("Energy at semidiurnal tidal frequencies")
     ax.set_xlabel("Longitude (°)")
-    ax.set_ylabel(r"Energy (m$^2\,$s$^{-2}$)")
+    ax.set_ylabel(r"Horizontal kinetic energy (m$^2\,$s$^{-2}$)")
     fig.tight_layout()
     fig.savefig("./barotropic_tide.pdf")
     

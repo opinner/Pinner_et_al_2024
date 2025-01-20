@@ -193,16 +193,17 @@ fig, ax = plt.subplots(1,
                        layout="constrained")
 ax.set_ylim(0, 1000)
 ax.set_xlim(-53.2, -47)
+factor = 20
 
 mapp = ax.pcolormesh(
     comparison_df.columns,
     comparison_df.index,
     comparison_df,
     cmap=cmocean.cm.balance,
-    norm=mcolors.LogNorm(vmin=0.01, vmax=100)
+    norm=mcolors.LogNorm(vmin=1/factor, vmax=1*factor)
 )
 
-cb = plt.colorbar(mapp, ax=ax, aspect=15)
+cb = plt.colorbar(mapp, ax=ax, aspect=15, extend="both")
 cb.set_label(r"$\varepsilon_\mathrm{IGW, strain}$ / $\varepsilon_\mathrm{IGW, shear}$")
 ax.set_facecolor('lightgrey')
 
