@@ -133,12 +133,18 @@ for ax, mooring_lon, closest_lon in zip(axis, desired_lons, closest_lons):
 
     current_mooring = wave_energy_dissipation[wave_energy_dissipation["lon"] == mooring_lon]
 
-    ax2.semilogx(current_mooring["eps_IGW"], current_mooring["rounded mab"], "o", c="k",
-                 label="$\\langle\\varepsilon_{\\mathrm{IGW, IDEMIX}}\\rangle$", zorder=10)
+    ax2.semilogx(current_mooring["eps_IGW"],
+                 current_mooring["rounded mab"],
+                 "o", c="k",
+                 label="$\\langle\\varepsilon_{\\mathrm{IGW, IDEMIX}}\\rangle$",
+                 zorder=10
+                 )
     # Plot multiplicative errors
     for IGW, IGW_error, mab in zip(current_mooring["eps_IGW"], current_mooring["eps_IGW_mult_error"],
                                    current_mooring["rounded mab"]):
-        ax2.plot([IGW / IGW_error, IGW * IGW_error], [mab, mab], lw=3, c="k", alpha=0.8)
+        ax2.plot([IGW / 5, IGW * 5], [mab, mab], lw=3, c="xkcd:dark grey", alpha=0.6)
+        ax2.plot([IGW / IGW_error, IGW * IGW_error], [mab, mab], lw=3, c="k", alpha=1)
+
 
 # from https://stackoverflow.com/questions/73915456/how-to-remove-duplicate-labels-in-subplot-legend
 lines_labels = [ax2.get_legend_handles_labels() for ax2 in axis2]
@@ -204,5 +210,5 @@ for ax, mooring in zip(axis, moorings):
 
 
 fig.savefig("./vertical_eps.svg")
-fig.savefig("./vertical_eps.pdf")
+#fig.savefig("./vertical_eps.pdf")
 plt.show()
