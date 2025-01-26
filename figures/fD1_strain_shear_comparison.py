@@ -191,16 +191,16 @@ binned_thorpe_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
 fig, ax = plt.subplots(1,
                        figsize=(TWO_COLUMN_WIDTH * cm, 0.5 * TWO_COLUMN_WIDTH * cm),
                        layout="constrained")
-ax.set_ylim(0, 1000)
-ax.set_xlim(-53.2, -47)
-factor = 20
+ax.set_ylim(0, 800)
+ax.set_xlim(-53.2, -46.8)
+colormap_factor = 20
 
 mapp = ax.pcolormesh(
     comparison_df.columns,
     comparison_df.index,
     comparison_df,
     cmap=cmocean.cm.balance,
-    norm=mcolors.LogNorm(vmin=1/factor, vmax=1*factor)
+    norm=mcolors.LogNorm(vmin=1/colormap_factor, vmax=1*colormap_factor)
 )
 
 cb = plt.colorbar(mapp, ax=ax, aspect=15, extend="both")
@@ -232,22 +232,28 @@ CS = ax.contour(
     linewidths=3,
 )
 
-fmt = {}
-strs = ['WSDW', 'WSBW']
-for l, s in zip(CS.levels, strs):
-    fmt[l] = s
+# fmt = {}
+# strs = ['WSDW', 'WSBW']
+# for l, s in zip(CS.levels, strs):
+#     fmt[l] = s
+#
+# # Label every other level using strings
+# clabels = ax.clabel(
+#     CS,
+#     CS.levels,
+#     inline=False,
+#     fmt=fmt,
+#     fontsize=10,
+#     colors="black"
+# )
+# # adjust bboxes for better readability
+# [txt.set_bbox(dict(facecolor='lightgrey', alpha=0.8, edgecolor='darkgrey', boxstyle="round", pad=0)) for txt in clabels]
 
-# Label every other level using strings
-clabels = ax.clabel(
-    CS,
-    CS.levels,
-    inline=False,
-    fmt=fmt,
-    fontsize=10,
-    colors="black"
-)
-# adjust bboxes for better readability
-[txt.set_bbox(dict(facecolor='lightgrey', alpha=0.8, edgecolor='darkgrey', boxstyle="round", pad=0)) for txt in clabels]
+# to be shifted in postprocessing
+strs = ['WSDW', 'WSBW', "IL", "BL"]
+colors = ["black", "black", "black", "xkcd:charcoal"]
+for ix, (s,color) in enumerate(zip(strs,colors)):
+    ax.text(0.9, 0.9-0.05*ix, s, color=color, fontsize=8, transform=ax.transAxes)
 
 binned_regions = pd.read_csv(
     "../scripts/preprocessing/method_results/binned_regions.csv", index_col=0)
@@ -288,12 +294,17 @@ CS = ax.contour(
     alpha=0.8
 )
 
+# to be shifted in postprocessing
+for ix, s in enumerate(levels):
+    label = f"{s:.1f}" +r"$\,$m$\,$s$^{-1}$"
+    ax.text(0+0.05*ix,0+0.05*ix,label, color="yellow", fontsize=7, transform=ax.transAxes)
+
 ax.set_facecolor('lightgrey')
 ax.set_ylabel("Meters above bottom")
 ax.set_xlabel("Longitude (°)")
 
 #fig.tight_layout()
-fig.savefig("./strain_shear_comparison.pdf")
+fig.savefig("./strain_shear_comparison.svg")
 
 #print(f"Largest deviations: {comparison_df.max(axis=None):.2e}, {comparison_df.min(axis=None):.2e}")
 print("done")

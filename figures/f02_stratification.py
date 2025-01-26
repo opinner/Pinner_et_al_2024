@@ -20,13 +20,16 @@ plt.rcParams.update({
 
 binned_neutral_density = pd.read_csv("../derived_data/binned_neutral_density.csv", index_col=0)
 binned_neutral_density.columns = binned_neutral_density.columns.astype("float") #convert column names from strings to floats
+binned_regions = pd.read_csv("../scripts/preprocessing/method_results/binned_regions.csv", index_col=0)
+binned_regions.columns = binned_regions.columns.astype("float") #convert column names from strings to floats
+binned_regions = binned_regions.iloc[0:600]
 
 fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.5*TWO_COLUMN_WIDTH*cm))
 mpp = ax.pcolormesh(
     binned_neutral_density.columns,
     binned_neutral_density.index,
     binned_neutral_density.values,
-    cmap=cmocean.cm.haline_r,
+    cmap=cmocean.cm.dense,
     vmin=27.8,
     rasterized=True  # optimize the drawing for vector graphics
 )
@@ -42,8 +45,17 @@ CS = ax.contour(
     binned_neutral_density.values,
     levels=water_mass_boundaries,
     linestyles=["dashed", "solid"],
-    colors="k",
+    colors="white",
     linewidths=3,
+)
+
+levels = [2.5, 3.5]  # Border between IL and BL
+ax.contour(
+    binned_regions.columns,
+    binned_regions.index,
+    binned_regions.values,
+    levels=levels,
+    colors="white",
 )
 
 # fmt = {}
@@ -65,7 +77,7 @@ CS = ax.contour(
 strs = ['WSDW', 'WSBW', "IL", "BL"]
 colors = ["black", "black", "black", "xkcd:charcoal"]
 for ix, (s, color) in enumerate(zip(strs, colors)):
-    ax.text(0.9, 0.9-0.05*ix,s, color=color, fontsize=8, transform=ax.transAxes)
+    ax.text(0.9, 0.9-0.05*ix,s, color="white", fontsize=8, transform=ax.transAxes)
 
 
 # ax.annotate('bottom\ncurrent', xy=(-51.69, 184), xytext=(-51.8, 230),
@@ -83,13 +95,13 @@ ax.plot(moorings_lons, moorings_mabs,
         "D",
         label="rotor current\nmeters",
         color="tab:red",
-        markersize=10,
+        markersize=8,
         markeredgecolor="k",
         zorder=6)
 
 ax.set_ylim(-10, 500)
 xlim = ax.get_xlim()
-ax.set_xlim((xlim[0] - 0.2, xlim[1] + 0.8))
+ax.set_xlim((xlim[0] - 0.2, xlim[1] + 0.1))
 ax.set_xlabel("Longitude (°)")
 ax.set_ylabel("Meters above Seafloor")
 cb.set_label(r"Neutral Density $\gamma^\text{n}\,$(kg$\,$m$^{-3}$)")
@@ -105,5 +117,5 @@ ax.fill_between(x, y1, y2, facecolor="xkcd:charcoal grey", zorder=5)  # , hatch=
 ax.legend(loc = "upper right")  #,facecolor='k', framealpha=0.8, edgecolor = "black", labelcolor = "white")
 fig.tight_layout()
 #fig.savefig("./stratification.pdf")
-# fig.savefig("./stratification.png", dpi = 400, bbox_inches = "tight")
+fig.savefig("./stratification.svg") #, dpi = 400, bbox_inches = "tight")
 plt.show()
