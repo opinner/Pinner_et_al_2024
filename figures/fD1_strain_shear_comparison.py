@@ -191,12 +191,11 @@ binned_thorpe_gamma_n_df = pd.concat(rows, sort=False).reset_index(drop=True)
 fig, ax = plt.subplots(1,
                        figsize=(TWO_COLUMN_WIDTH * cm, 0.5 * TWO_COLUMN_WIDTH * cm),
                        layout="constrained")
-ax.set_ylim(0, 800)
-ax.set_xlim(-53.2, -46.8)
+
 colormap_factor = 20
 
 mapp = ax.pcolormesh(
-    comparison_df.columns,
+    -comparison_df.columns,
     comparison_df.index,
     comparison_df,
     cmap=cmocean.cm.balance,
@@ -223,7 +222,7 @@ water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary, from Garabato et al 
 
 plot_gamma_n_df = binned_thorpe_gamma_n_df[binned_thorpe_gamma_n_df.index < 1050]
 CS = ax.contour(
-    plot_gamma_n_df.columns,
+    -plot_gamma_n_df.columns,
     plot_gamma_n_df.index,
     plot_gamma_n_df,
     levels=water_mass_boundaries,
@@ -262,7 +261,7 @@ binned_regions = binned_regions.iloc[0:600]
 levels = [2.5, 3.5]  # Border between IL and BL
 plt.rcParams['hatch.color'] = 'xkcd:charcoal'
 ax.contourf(
-    binned_regions.columns,
+    -binned_regions.columns,
     binned_regions.index,
     binned_regions.values,
     levels=levels,
@@ -271,7 +270,7 @@ ax.contourf(
     zorder=10
 )
 ax.contour(
-    binned_regions.columns,
+    -binned_regions.columns,
     binned_regions.index,
     binned_regions.values,
     levels=levels,
@@ -286,7 +285,7 @@ with np.load("./flowfield.npz") as data:
 
 levels = [0.1, 0.2]
 CS = ax.contour(
-    xi, yi, avrg_v,
+    -xi, yi, avrg_v,
     levels=levels,
     colors='yellow',
     linestyles=["dashed", "solid"],
@@ -301,8 +300,10 @@ for ix, s in enumerate(levels):
 
 ax.set_facecolor('lightgrey')
 ax.set_ylabel("Meters above bottom")
-ax.set_xlabel("Longitude (°)")
-
+ax.set_xlabel(r"Longitude (°$\,$W)")
+ax.set_ylim(0, 800)
+ax.set_xlim(46.8, 53.2)
+ax.invert_xaxis()
 #fig.tight_layout()
 fig.savefig("./strain_shear_comparison.svg")
 
