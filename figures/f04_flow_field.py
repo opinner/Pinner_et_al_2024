@@ -46,7 +46,7 @@ def add_neutral_density_lines(ax, binned_gamma_n_df):
     water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
     # gravity_current_boundary = [28.40]  # from Garabato et al 2002
     CS = ax.contour(
-        binned_gamma_n_df.columns,
+        -binned_gamma_n_df.columns,
         binned_gamma_n_df.index,
         binned_gamma_n_df,
         levels=water_mass_boundaries,
@@ -170,14 +170,16 @@ for nr, mooring in enumerate(list_of_moorings):
         #          alpha=0)
         # ax2.plot(mooring.location.lon, mab_of_measurement, "k.",
         #          alpha=0)  #, s= f"{max_velocity:.2f}", color = "white")
-        ax1.text(mooring.location.lon, mab_of_measurement,
-                 s=f"{max_velocity:.2f}",
-                 color="k",
-                 zorder=10,
-                 ha="center",
-                 va="center",
-                 fontsize = 7,
-                 bbox = dict(facecolor='white', alpha=0.8, boxstyle='round', pad=0.15)
+        ax1.text(
+            -mooring.location.lon,
+            mab_of_measurement,
+            s=f"{max_velocity:.2f}",
+            color="k",
+            zorder=10,
+            ha="center",
+            va="center",
+            fontsize=7,
+            bbox=dict(facecolor='white', alpha=0.8, boxstyle='round', pad=0.15)
                  )
         ax2.text(mooring.location.lon, mab_of_measurement,
                  s=f"{max_velocity:.2f}",
@@ -200,7 +202,7 @@ xi2, yi2, zi_max = vertical_then_horizontal_interpolation(lon_velos, mab_velos, 
 levels = np.arange(0, np.max(avrg_velos)+0.025, 0.025)
 #print(levels)
 mpp = ax1.contourf(
-    xi1,
+    -xi1,
     yi1,
     zi_avrg,
     levels=levels,
@@ -209,14 +211,14 @@ mpp = ax1.contourf(
 cb = fig1.colorbar(mpp, ax=ax1, aspect=10)
 cb.set_label(r'Mean Velocity (m$\,$s$^{-1}$)')
 
-ax2.contourf(xi2, yi2, zi_max,
+ax2.contourf(-xi2, yi2, zi_max,
              levels=15,
              cmap='viridis')
 
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
 # gravity_current_boundary = [28.40]  # from Garabato et al 2002
 CS = ax1.contour(
-    np.array(neutral_density.columns).astype(float),
+    -np.array(neutral_density.columns).astype(float),
     np.array(neutral_density.index).astype(float),
     neutral_density,
     levels=water_mass_boundaries,
@@ -248,7 +250,7 @@ for ix, (s, color) in enumerate(zip(strs, colors)):
 levels = [0.1, 0.2]
 linestyles = ["dashed", "solid"]
 CS = ax1.contour(
-    xi1, yi1, zi_avrg,
+    -xi1, yi1, zi_avrg,
     levels=levels,
     colors='yellow',
     linestyles=linestyles,
@@ -262,10 +264,10 @@ for level, linestyle in zip(levels, linestyles):
 # to be shifted in postprocessing
 for ix, s in enumerate(levels):
     label = f"{s:.1f}" +r"$\,$m$\,$s$^{-1}$"
-    ax1.text(0+0.05*ix,0+0.05*ix,label, color="yellow", fontsize=7, transform=ax1.transAxes)
+    ax1.text(0+0.05*ix, 0+0.05*ix,label, color="yellow", fontsize=7, transform=ax1.transAxes)
 
 for x, label in zip(np.unique(lon_velos), ["A", "B", "C", "D", "E", "F", "G"]):
-    ax1.text(x, 405,
+    ax1.text(-x, 405,
              s=label,
              color="k",
              zorder=10,
@@ -280,7 +282,7 @@ binned_regions.columns = binned_regions.columns.astype("float") #convert column 
 binned_regions = binned_regions.iloc[0:600]
 levels = [2.5,3.5]  # Border between IL and BL
 ax1.contour(
-    binned_regions.columns,
+    -1*binned_regions.columns,
     binned_regions.index,
     binned_regions.values,
     levels=levels,
@@ -291,11 +293,12 @@ ax1.contour(
 
 ax1.set_facecolor('lightgrey')
 ax1.set_ylabel("Meters above bottom")
-ax1.set_xlabel("Longitude (°)")
+ax1.set_xlabel(r"Longitude (°$\,$W)")
 ax1.set_ylim(-5, 380)
 ax2.set_ylim(-5, 380)
-ax1.set_xlim(-52.5, -47.3)
-ax2.set_xlim(-52.5, -47.3)
+ax1.set_xlim(47.3,52.5)
+ax2.set_xlim(47.3,52.5)
+ax1.invert_xaxis()
 #fig1.tight_layout()
 fig1.savefig("./flowfield.pdf")
 fig1.savefig("./flowfield.svg")

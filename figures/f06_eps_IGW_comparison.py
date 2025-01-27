@@ -39,7 +39,7 @@ fig,ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.8*TWO_COLUMN_WIDTH*cm),
 ########################################################################
 norm = mcolors.LogNorm(vmin=1e-10, vmax=1e-8)
 mpp = ax.pcolormesh(
-    eps_IGW_strain_df.columns.astype(float),
+    -eps_IGW_strain_df.columns.astype(float),
     eps_IGW_strain_df.index,
     eps_IGW_strain_df,
     cmap=cmap,
@@ -68,7 +68,7 @@ binned_regions = binned_regions.iloc[0:600]
 levels = [2.5, 3.5]  # Border between IL and BL
 plt.rcParams['hatch.color'] = 'xkcd:charcoal'
 ax.contourf(
-    binned_regions.columns,
+    -binned_regions.columns,
     binned_regions.index,
     binned_regions.values,
     levels=levels,
@@ -77,7 +77,7 @@ ax.contourf(
     zorder=10
 )
 ax.contour(
-    binned_regions.columns,
+    -binned_regions.columns,
     binned_regions.index,
     binned_regions.values,
     levels=levels,
@@ -86,7 +86,7 @@ ax.contour(
 )
 
 ax.scatter(
-    eps_IGW_IDEMIX_df["lon"],
+    -eps_IGW_IDEMIX_df["lon"],
     eps_IGW_IDEMIX_df["rounded mab"],
     c=eps_IGW_IDEMIX_df["eps_IGW"],
     cmap=cmap,
@@ -94,14 +94,14 @@ ax.scatter(
     edgecolor='darkgrey',
     marker=MarkerStyle("o"),
     s=275,
-    zorder=5
+    zorder=50
 )
 
 # ------------------------------------------------------------------------------------------
 # for the legend
 # eps_IGW IDEMIX icon
 ax.scatter(
-    eps_IGW_IDEMIX_df["lon"],
+    -eps_IGW_IDEMIX_df["lon"],
     eps_IGW_IDEMIX_df["rounded mab"],
     #c=energy_levels["eps"],
     color = "tab:gray",
@@ -114,9 +114,9 @@ ax.scatter(
 
 # artificial eps_IGW strain icon
 ax.scatter(
-    eps_IGW_IDEMIX_df["lon"],
+    -eps_IGW_IDEMIX_df["lon"],
     eps_IGW_IDEMIX_df["rounded mab"],
-    color = "tab:gray",
+    color="tab:gray",
     edgecolor="black",
     marker=MarkerStyle("s"),
     s=70,
@@ -128,7 +128,7 @@ ax.scatter(
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
 # gravity_current_boundary = [28.40]  # from Garabato et al 2002
 CS = ax.contour(
-    binned_neutral_density.columns,
+    -binned_neutral_density.columns,
     binned_neutral_density.index,
     binned_neutral_density,
     levels=water_mass_boundaries,
@@ -140,7 +140,7 @@ CS = ax.contour(
 
 # to be shifted in postprocessing
 strs = ['WSDW', 'WSBW', "IL", "BL"]
-colors=["white", "black", "black", "xkcd:charcoal"]
+colors = ["white", "black", "black", "xkcd:charcoal"]
 for ix, (s,color) in enumerate(zip(strs,colors)):
     ax.text(0.9, 0.9-0.05*ix,s, color=color, fontsize=8, transform=ax.transAxes)
 
@@ -167,7 +167,7 @@ with np.load("./flowfield.npz") as data:
 
 levels = [0.1, 0.2]
 CS = ax.contour(
-    xi, yi, avrg_v,
+    -xi, yi, avrg_v,
     levels=levels,
     colors='yellow',
     linestyles=["dashed", "solid"],
@@ -188,7 +188,8 @@ ax.legend(loc="upper left", ncol=3, columnspacing=1)
 
 ax.set_facecolor('lightgrey')
 ax.set_ylabel("Meters above bottom")
-ax.set_xlabel("Longitude (°)")
+ax.set_xlabel(r"Longitude (°$\,$W)")
+ax.invert_xaxis()
 #ax[0].set_title(r"Dissipation rate $\varepsilon$ across the slope")
 
 #fig.tight_layout()

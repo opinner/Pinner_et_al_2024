@@ -29,7 +29,7 @@ def main():
     fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH*cm, 0.5*TWO_COLUMN_WIDTH*cm), layout="constrained")
 
     ax.plot(
-        energy_levels["lon"],
+        -energy_levels["lon"],
         energy_levels["cats"],
         c="tab:blue",
         lw=3,
@@ -62,7 +62,7 @@ def main():
         if i == 0:
             label = "measured semidiurnal\ntidal energy"
         ax.scatter(
-            group["lon"] + xshift,
+            -group["lon"] - xshift,
             group["tidal"],
             marker=".", c="tab:gray", ls="None",
             s=200, edgecolor="k", zorder=5,
@@ -70,7 +70,7 @@ def main():
         )
 
     ax.plot(
-        energy_levels["lon"],
+        -energy_levels["lon"],
         energy_levels["barotropic"],
         lw=3,
         color="k",
@@ -80,15 +80,16 @@ def main():
     #ax.fill_between(energy_levels["lon"],  [0]*len(energy_levels["barotropic"]), energy_levels["barotropic"], label = "assumed barotropic energy", hatch= "//", facecolor = "none")
     ax.legend()
     ax.ticklabel_format(axis="y", scilimits=(0, 0), style="scientific", useMathText=True)
-    ax.yaxis.get_offset_text().set_x(-0.1)
+    ax.yaxis.get_offset_text().set_x(-0.05)
+    ax.invert_xaxis()
 
     mooring_label = ["A", "B", "C", "D", "E", "F", "G"]
-    for i, lon in enumerate(energy_levels["lon"].unique()):
+    for i, lon in enumerate(-energy_levels["lon"].unique()):
         ax.plot(lon, -0.05e-3, alpha=0)
         ax.text(x=lon, y=-0.1e-3, s=mooring_label[i], weight="bold")
 
     # ax.set_title("Energy at semidiurnal tidal frequencies")
-    ax.set_xlabel("Longitude (°)")
+    ax.set_xlabel(r"Longitude (°$\,$W)")
     ax.set_ylabel(r"Horizontal kinetic energy (m$^2\,$s$^{-2}$)")
     fig.savefig("./barotropic_tide.pdf")
     

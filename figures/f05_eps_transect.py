@@ -47,7 +47,7 @@ fig, ax = plt.subplots(1, figsize=(TWO_COLUMN_WIDTH * cm, 0.8 * TWO_COLUMN_WIDTH
 
 cmap = cmocean.cm.tempo
 mpp = ax.pcolormesh(
-    binned_thorpe_eps_df.columns,
+    -binned_thorpe_eps_df.columns,
     binned_thorpe_eps_df.index,
     binned_thorpe_eps_df.values,
     norm=mcolors.LogNorm(vmin=1e-10, vmax=1e-7),
@@ -63,7 +63,7 @@ cb.set_label(r"Dissipation rate $\varepsilon\,$(W$\,$kg$^{-1}$)")
 water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
 
 CS = ax.contour(
-    binned_thorpe_gamma_n_df.columns,
+    -binned_thorpe_gamma_n_df.columns,
     binned_thorpe_gamma_n_df.index,
     binned_thorpe_gamma_n_df,
     levels=water_mass_boundaries,
@@ -102,7 +102,7 @@ binned_regions.columns = binned_regions.columns.astype("float") #convert column 
 binned_regions = binned_regions.iloc[0:600]
 levels = [2.5,3.5]  # Border between IL and BL
 ax.contour(
-    binned_regions.columns,
+    -binned_regions.columns,
     binned_regions.index,
     binned_regions.values,
     levels=levels,
@@ -112,7 +112,7 @@ ax.contour(
 )
 
 ax.scatter(
-    eps_IGW_IDEMIX_df["lon"],
+    -eps_IGW_IDEMIX_df["lon"],
     eps_IGW_IDEMIX_df["rounded mab"],
     c=eps_IGW_IDEMIX_df["eps_IGW"],
     cmap=cmap,
@@ -126,7 +126,7 @@ ax.scatter(
 # for the legend
 # eps_IGW icon
 ax.scatter(
-    eps_IGW_IDEMIX_df["lon"],
+    -eps_IGW_IDEMIX_df["lon"],
     eps_IGW_IDEMIX_df["rounded mab"],
     #c=energy_levels["eps"],
     color="tab:gray",
@@ -139,7 +139,7 @@ ax.scatter(
 
 # artificial eps_total icon
 ax.scatter(
-    eps_IGW_IDEMIX_df["lon"],
+    -eps_IGW_IDEMIX_df["lon"],
     eps_IGW_IDEMIX_df["rounded mab"],
     color="tab:gray",
     edgecolor="black",
@@ -156,7 +156,7 @@ with np.load("./flowfield.npz") as data:
 
 levels = [0.1, 0.2]
 CS = ax.contour(
-    xi, yi, avrg_v,
+    -xi, yi, avrg_v,
     levels=levels,
     colors='yellow',
     linestyles=["dashed", "solid"],
@@ -186,10 +186,10 @@ for ix, s in enumerate(levels):
 
 ax.legend(loc="upper left", ncol=3, columnspacing=1).set_zorder(50)
 ax.set_ylim(-10, 500)
-#ax.xlim()
+ax.invert_xaxis()
 ax.set_facecolor('lightgrey')
 ax.set_ylabel("Meters above bottom")
-ax.set_xlabel("Longitude (°)")
+ax.set_xlabel(r"Longitude (°$\,$W)")
 
 fig.savefig("./eps_transect.pdf")
 fig.savefig("./eps_transect.svg")
