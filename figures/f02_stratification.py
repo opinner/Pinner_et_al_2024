@@ -122,6 +122,7 @@ cb.ax.invert_yaxis()
 # ax.fill_between(x, y1, y2, facecolor="xkcd:charcoal grey", zorder=5)  # , hatch="///")
 ax.legend(loc="lower left")  #,facecolor='k', framealpha=0.8, edgecolor = "black", labelcolor = "white")
 
+ax.grid()
 ax.invert_yaxis()
 ax.invert_xaxis()
 ax.set_facecolor("lightgrey")

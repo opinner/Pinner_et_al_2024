@@ -129,10 +129,10 @@ ax.plot(unique_coords_df["Longitude"], unique_coords_df["Latitude"],
         label="CTD profiles"
         )
 
-ax.legend(fontsize = "small")
+ax.legend(fontsize="small")
 
 
 # Show the plot
-plt.savefig(f"../results/transect_map.svg")
+plt.savefig(f"./f01a_transect.svg")
 # plt.savefig(f"../results/transect_map.png", dpi = 400, bbox_inches='tight')
 plt.show()

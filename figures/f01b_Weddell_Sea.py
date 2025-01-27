@@ -42,8 +42,10 @@ def setup_curved_map_shape(central_longitude):
     projection.threshold = 1e3
 
     #fig, ax = plt.subplots(1, 1, subplot_kw=dict(projection=projection))
-    fig, ax = plt.subplots(1, 1, figsize=(0.5 * TWO_COLUMN_WIDTH * cm, 0.5 * TWO_COLUMN_WIDTH * cm,),
-                           subplot_kw=dict(projection=projection)
+    fig, ax = plt.subplots(1, 1,
+                           figsize=(0.5 * TWO_COLUMN_WIDTH * cm, 0.5 * TWO_COLUMN_WIDTH * cm,),
+                           subplot_kw=dict(projection=projection),
+                           layout="constrained"
                            )
 
 
@@ -108,7 +110,14 @@ shade_only = shade_only.astype(float)  # Ensure float type
 shade = ls.hillshade(shade_only, vert_exag=0.1)
 
 # Plot the shaded relief using imshow
-ax.imshow(shade, extent=(left, right, bottom, top), transform=ccrs.PlateCarree(), origin='upper', cmap=cmocean.cm.gray, interpolation = 'none')
+ax.imshow(
+    shade,
+    extent=(left, right, bottom, top),
+    transform=ccrs.PlateCarree(),
+    origin='upper',
+    cmap=cmocean.cm.gray,
+    interpolation='none'
+)
 
 # Use imshow to plot the bathymetry (negative values)
 bathymetry = np.where(subset_data >= 0, np.nan, subset_data)
@@ -191,5 +200,5 @@ fig.patch.set_visible(False)
 ax.axis('off')
 
 # Show the plot
-plt.savefig(f"../results/overview.svg")
+plt.savefig(f"./f01b_WeddellSea.svg")
 plt.show()
