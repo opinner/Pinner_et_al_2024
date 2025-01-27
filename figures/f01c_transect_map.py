@@ -1,5 +1,7 @@
 import rioxarray
 import numpy as np
+import pandas as pd
+import gvpy
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -13,7 +15,13 @@ TWO_COLUMN_WIDTH = 12
 GOLDEN_RATIO = 1.61
 cm = 1/2.54  # centimeters in inches
 
-plt.style.use('./paper.mplstyle')
+plt.rcParams.update({
+    "figure.facecolor": "white",
+    "savefig.facecolor": "white",
+    "font.size": 8
+})
+
+#plt.style.use('./paper.mplstyle')
 
 # Open the raster data
 input_file = '../data/bathymetry/IBCSO_v2_ice-surface_WGS84.tif'
@@ -33,7 +41,7 @@ subset_data = subset[0, :, :]
 # Create the plot with a South Polar Stereographic projection
 fig, ax = plt.subplots(1, 1,
                        figsize=(0.5 * TWO_COLUMN_WIDTH * cm +0.5, 0.5 * TWO_COLUMN_WIDTH * cm +0.5),
-                       layout="tight",
+                       layout="constrained",
                        subplot_kw=dict(projection=ccrs.SouthPolarStereo(central_longitude=-50))
                        )
 ax.set_extent([-55, -46, -65, -63], crs=ccrs.PlateCarree())
@@ -67,8 +75,7 @@ im = ax.imshow(bathymetry,
                )
 
 # cbar_fig, cbar_ax = plt.subplots(1)
-cbar = plt.colorbar(im, ax = ax, location = "top")#, shrink = 0.4);
-cbar.set_label('Bathymetry (m)')
+
 
 # Prepare data for hill shading only below 0 with transparency
 shade_only = np.where(subset_data > 0, np.nan, subset_data)
@@ -93,7 +100,12 @@ lon_grid, lat_grid = np.meshgrid(lon, lat)
 levels = [-4000, -3000, -2000, -1000]
 contour = ax.contour(lon_grid, lat_grid, subset_data, transform=ccrs.PlateCarree(),
                      levels=levels, colors="lightgrey", linestyles="solid", linewidths=0.5)
+
+cbar = plt.colorbar(im, ax = ax, location = "top")#, shrink = 0.4);
+cbar.set_label('Bathymetry (m)') #, fontsize=8)
+cbar.set_ticks(ticks=levels, labels=-1*np.array(levels))
 cbar.add_lines(levels, colors=len(levels)*["lightgrey"], linewidths=1)
+cbar.ax.invert_xaxis()
 
 
 gl = ax.gridlines(xlocs=np.arange(min_lon, max_lon, 2), ylocs=np.arange(min_lat, max_lat, 1),
@@ -129,10 +141,13 @@ ax.plot(unique_coords_df["Longitude"], unique_coords_df["Latitude"],
         label="CTD profiles"
         )
 
-ax.legend(fontsize="small")
+ax.legend()#fontsize="small")
 
+#draw scale bar
+
+gvpy.maps.cartopy_scale_bar(ax, location = (0.1,0.76), length = 100)
 
 # Show the plot
-plt.savefig(f"./f01a_transect.svg")
+plt.savefig(f"./f01c_transect.svg")
 # plt.savefig(f"../results/transect_map.png", dpi = 400, bbox_inches='tight')
 plt.show()

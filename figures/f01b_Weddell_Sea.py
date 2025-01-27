@@ -1,5 +1,6 @@
 import rioxarray
 import numpy as np
+import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -12,7 +13,7 @@ TWO_COLUMN_WIDTH = 12
 plt.rcParams.update({
     "figure.facecolor": "white",
     "savefig.facecolor": "white",
-    "font.size": 9
+    "font.size": 7
 })
 
 def setup_curved_map_shape(central_longitude):
@@ -129,8 +130,8 @@ im = ax.imshow(bathymetry,
                cmap=cmocean.cm.ice,
                interpolation = 'none'
                )
-# cbar = plt.colorbar(im, ax = ax, orientation='vertical')#, shrink = 0.4);
-# cbar.set_label('Bathymetry (m)')
+               
+
 
 # Prepare data for hill shading only below 0 with transparency
 shade_only = np.where(subset_data > 0, np.nan, subset_data)
@@ -160,6 +161,10 @@ lon_grid, lat_grid = np.meshgrid(lon, lat)
 levels = [-4000, -3000, -2000, -1000]
 contour = ax.contour(lon_grid, lat_grid, subset_data, transform=ccrs.PlateCarree(),
                      levels=levels, colors="lightgrey", linestyles="solid", linewidths=0.5)
+
+
+# cbar = plt.colorbar(im, ax = ax, orientation='horizontal')#, shrink = 0.4);
+# cbar.set_label('Bathymetry (m)')
 # cbar.add_lines(levels, colors=len(levels)*["w"], linewidths=1)
 
 
@@ -174,6 +179,16 @@ gl = ax.gridlines(
     x_inline=False,
     y_inline=False
     )
+
+
+transect_coordinates = pd.read_csv("../derived_data/bin_coordinates.csv")
+ax.plot(
+    transect_coordinates["bin_lons"],
+    transect_coordinates["bin_lats"],
+    color = "tab:red",
+    transform=ccrs.PlateCarree(),
+    lw = 2
+)
 
 """
 # Configure gridlines for the map
