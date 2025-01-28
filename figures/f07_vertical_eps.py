@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
+import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
 
@@ -53,11 +54,11 @@ def plot_finestructure(ax, eps, mab, label, BL=None):
         assert spacing == 125
         upper = z + spacing / 2
         lower = z - spacing / 2
-        ax.vlines(x, lower, upper, lw=3, colors="tab:blue", label=label)
+        ax.vlines(x, lower, upper, lw=3, colors="tab:red", label=label)
         #label = None  # use only the label from the first plot instance
         ax.fill_betweenx(
             [lower, upper], x / 5, x * 5,
-            color="tab:blue", alpha=0.3,
+            color="tab:red", alpha=0.3,
             edgecolor=None)
         # draw in hatched BL
         if lower < 0 and BL is not None:
@@ -105,16 +106,22 @@ for ax, mooring_lon, closest_lon in zip(axis, desired_lons, closest_lons):
     axis2.append(ax2)
     ax.xaxis.tick_top()
     ax2.xaxis.tick_bottom()
-    ax2.set_xscale("log")
-    ax2.set_xlim(7e-11, 2e-6)
+    #ax2.set_xscale("log")
+    ax2.set_xlim(7e-11, 1e-6)
+    # nticks = 4
+    # maj_loc = mticker.LogLocator(numticks=nticks)
+    # min_loc = mticker.LogLocator(subs='all', numticks=nticks)
+    # ax2.xaxis.set_major_locator(maj_loc)
+    # ax2.xaxis.set_minor_locator(min_loc)
+    # ax2.xaxis.set_major_locator(mticker.LogLocator(base=10, numticks=3))
 
     label = "$\\langle\\varepsilon_{\\mathrm{total, Thorpe}}\\rangle$"
     thorpe_eps = binned_thorpe_dissipation[closest_lon]
-    ax2.plot(thorpe_eps, thorpe_eps.index, c="tab:red", label=label)
+    ax2.plot(thorpe_eps, thorpe_eps.index, c="tab:blue", label=label)
     ax2.fill_betweenx(
         thorpe_eps.index,
         thorpe_eps / 5, thorpe_eps * 5,
-        color="tab:red", edgecolor=None, alpha=0.5,
+        color="tab:blue", edgecolor=None, alpha=0.5,
     )
 
     try:
@@ -142,8 +149,8 @@ for ax, mooring_lon, closest_lon in zip(axis, desired_lons, closest_lons):
     # Plot multiplicative errors
     for IGW, IGW_error, mab in zip(current_mooring["eps_IGW"], current_mooring["eps_IGW_mult_error"],
                                    current_mooring["rounded mab"]):
-        ax2.plot([IGW / 5, IGW * 5], [mab, mab], lw=3, c="xkcd:dark grey", alpha=0.6)
-        ax2.plot([IGW / IGW_error, IGW * IGW_error], [mab, mab], lw=3, c="k", alpha=1)
+        ax2.plot([IGW / 5, IGW * 5], [mab, mab], lw=3, c="xkcd:dark grey", alpha=0.6, solid_capstyle="butt")
+        ax2.plot([IGW / IGW_error, IGW * IGW_error], [mab, mab], lw=3, c="k", alpha=1, solid_capstyle="butt")
 
 
 # from https://stackoverflow.com/questions/73915456/how-to-remove-duplicate-labels-in-subplot-legend
@@ -158,13 +165,13 @@ unique_lines = [legend_dict[x] for x in unique_labels]
 new_symbols = []
 for line, label in zip(unique_lines, unique_labels):
     if "Thorpe" in label:
-        error_symbol = mpatches.Patch(color="tab:red", edgecolor=None, alpha=0.5, label='Thorpe_error')
+        error_symbol = mpatches.Patch(color="tab:blue", edgecolor=None, alpha=0.5, label='Thorpe_error')
         new_symbols.append((error_symbol, line))
     if "IDEMIX" in label:
         error_symbol = mlines.Line2D([], [], color='k', lw=3, label='IDEMIX_error')
         new_symbols.append((error_symbol, line))
     if "fine" in label:
-        error_symbol = mpatches.Patch(color="tab:blue", alpha=0.3, edgecolor=None, label='fine_error')
+        error_symbol = mpatches.Patch(color="tab:red", alpha=0.3, edgecolor=None, label='fine_error')
         new_symbols.append((error_symbol, line))
 
 fig.legend(new_symbols, unique_labels, ncols=3, fontsize="7", columnspacing=1, loc="upper center")
@@ -185,6 +192,7 @@ fig.supxlabel("Dissipation rate $\\varepsilon\\,$(W kg$^{-1})$", fontsize="9")
 for ax in axis:
     ax.xaxis.tick_top()
     ax.xaxis.set_label_position('top')
+
 axis[1].set_xlabel(r"Neutral Density $\gamma^\text{n}\,$(kg$\,$m$^{-3}$)", fontsize="6")
 
 # make space for legend placement in postprocessing
@@ -196,7 +204,7 @@ legend_axis.tick_params(
     right=False,         # ticks along the top edge are off
     labelright=False
 )
-legend_axis.set_ylabel("test space", fontsize=18)
+legend_axis.set_ylabel("test space", fontsize=17)
 
 moorings = ["A", "B", "E"]
 for ax, mooring in zip(axis, moorings):
