@@ -42,14 +42,14 @@ mpp = ax.pcolormesh(
 #cb = plt.colorbar(mpp, ax=ax, extend="min", location="top")  # pad=0.02, aspect=12
 cb = fig.colorbar(mpp, extend="min", ax=ax, aspect=8)
 
-water_mass_boundaries = [28.26, 28.40]  # + 28.00 boundary
-# gravity_current_boundary = [28.40]  # from Garabato et al 2002
+# AASW/WDW, WDW/WSDW and WSDW/WSBW interfaces, from Garabato et al 2002
+water_mass_boundaries = [28.0, 28.26, 28.40]
 CS = ax.contour(
     -neutral_density.columns,
     neutral_density.index,
     neutral_density.values,
     levels=water_mass_boundaries,
-    linestyles=["dashed", "solid"],
+    linestyles=["dotted", "dashed", "solid"],
     colors="white",
     #linewidths=1,
 )
@@ -79,7 +79,7 @@ CS = ax.contour(
 # )
 
 # to be shifted in postprocessing
-strs = ['WSDW', 'WSBW',]
+strs = ['WDW', 'WSDW', 'WSBW',]
 for ix, s in enumerate(strs):
     ax.text(0.9, 0.9-0.05*ix,s, color="white", fontsize=8, transform=ax.transAxes)
 
@@ -110,8 +110,9 @@ ax.plot(-moorings_lons, moorings_depths,
 ax.set_xlabel("Longitude (° W)")
 ax.set_ylabel("Depth (m)")
 cb.set_label(r"Neutral Density $\gamma^\text{n}\,$(kg$\,$m$^{-3}$)")
-cb.ax.plot([0, 1], [water_mass_boundaries[0], water_mass_boundaries[0]], '--', color="white", lw=2)
-cb.ax.plot([0, 1], [water_mass_boundaries[1], water_mass_boundaries[1]], color="white",lw=2, ls="solid")
+cb.ax.plot([0, 1], [water_mass_boundaries[0], water_mass_boundaries[0]], ':', color="white", lw=2)
+cb.ax.plot([0, 1], [water_mass_boundaries[1], water_mass_boundaries[1]], '--', color="white", lw=2)
+cb.ax.plot([0, 1], [water_mass_boundaries[2], water_mass_boundaries[2]], ls="solid", color="white",lw=2, )
 cb.ax.invert_yaxis()
 
 # draw sea floor
@@ -122,7 +123,7 @@ cb.ax.invert_yaxis()
 # ax.fill_between(x, y1, y2, facecolor="xkcd:charcoal grey", zorder=5)  # , hatch="///")
 ax.legend(loc="lower left")  #,facecolor='k', framealpha=0.8, edgecolor = "black", labelcolor = "white")
 
-ax.grid()
+#ax.grid()
 ax.invert_yaxis()
 ax.invert_xaxis()
 ax.set_facecolor("lightgrey")
