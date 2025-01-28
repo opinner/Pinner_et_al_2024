@@ -98,7 +98,8 @@ ice_shelves = cfeature.NaturalEarthFeature(
         #edgecolor='lightgrey'
     )
 
-ax.add_feature(ocean, color="xkcd:sea blue")
+#ax.add_feature(ocean, color="xkcd:sea blue")
+ax.set_facecolor("xkcd:sea blue")
 ax.add_feature(land, color="xkcd:light grey")
 ax.add_feature(ice_shelves, color="white")
 
